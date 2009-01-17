@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resource version="2.3.0.1" xmlns="http://www.wxwidgets.org/wxxrc">
+    <object class="wxFrame" name="ID_CSV2OFX">
+        <style>wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU|wxCLOSE_BOX</style>
+        <size>400,300</size>
+        <title>csv2ofx</title>
+        <object class="wxBoxSizer">
+            <orient>wxVERTICAL</orient>
+            <object class="sizeritem">
+                <flag>wxGROW|wxALL</flag>
+                <border>5</border>
+                <option>1</option>
+                <object class="wxGrid" name="ID_GRID">
+                    <size>200,150</size>
+                </object>
+            </object>
+            <object class="sizeritem">
+                <flag>wxALIGN_RIGHT|wxALL</flag>
+                <border>5</border>
+                <object class="wxBoxSizer">
+                    <orient>wxHORIZONTAL</orient>
+                    <object class="sizeritem">
+                        <flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+                        <border>5</border>
+                        <object class="wxButton" name="ID_BTN_IMPORT">
+                            <label>Import</label>
+                        </object>
+                    </object>
+                    <object class="sizeritem">
+                        <flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+                        <border>5</border>
+                        <object class="wxButton" name="ID_BTN_EXPORT">
+                            <label>Export</label>
+                        </object>
+                    </object>
+                    <object class="sizeritem">
+                        <flag>wxALIGN_CENTER_VERTICAL|wxALL</flag>
+                        <border>5</border>
+                        <object class="wxButton" name="ID_BTN_CLOSE">
+                            <label>Close</label>
+                        </object>
+                    </object>
+                </object>
+            </object>
+        </object>
+    </object>
+    <object class="wxMenuBar" name="ID_MENUBAR">
+        <object class="wxMenu">
+            <label>File</label>
+            <object class="wxMenuItem" name="ID_MENU_IMPORT">
+                <label>Import</label>
+            </object>
+            <object class="wxMenuItem" name="ID_MENU_EXPORT">
+                <label>Export</label>
+            </object>
+            <object class="separator">
+            </object>
+            <object class="wxMenuItem" name="ID_MENU_CLOSE">
+                <label>Close</label>
+            </object>
+        </object>
+    </object>
+</resource>
