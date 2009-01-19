@@ -1,6 +1,7 @@
 
 import sys, os
 import csv
+from datetime import datetime
 
 import wx
 from wx import xrc
@@ -76,10 +77,8 @@ class csv2ofx(wx.App):
         self.Bind ( wx.EVT_BUTTON, self.OnExport, id=xrc.XRCID("ID_BTN_EXPORT"))
         
         # the grid
-        #self.grid=grd.Grid(self.frame)
-        #self.grid.EnableEditing(False)
-        #self.res.AttachUnknownControl ( "ID_GRID", self.grid )
         self.grid = xrc.XRCCTRL(self.frame,"ID_GRID")
+        self.grid.EnableEditing(False)
         
         # show the frame        
         self.SetTopWindow(self.frame)
@@ -130,8 +129,112 @@ class csv2ofx(wx.App):
                 "No CSV File loaded.",
                 wx.OK|wx.ICON_ERROR                
             ).ShowModal()
-        else:
-            print "Export"
+            return
+    
+        
+        # col_map
+        # results in a dictionary of column labels to numeric column location            
+        col_map=dict([(self.grid_table.GetColLabelValue(c),c) for c in range(self.grid_table.GetNumberCols())])
+        
+        def fromCSVCol(row,col_name):
+            """
+                Uses the current row and the name of the column to look up the value from the csv data.
+            """
+            return self.grid_table.GetValue(row,col_map[col_name])
+        
+        def yodlee_dscr(row):
+            " use user description for payee 1st, the original description"
+            d=fromCSVCol(row,'User Description')
+            return len(d)>0 and d or fromCSVCol(row,'Original Description')
+        
+        def yodlee_type(row):
+            a=float(fromCSVCol(row,'Amount'))
+            return a>0 and 'DEBIT' or 'CREDIT'
+            
+        def toOFXDate(date):
+            return datetime.strptime(date,'%m/%d/%y').strftime('%Y%m%d')
+            
+        
+        # mapping tells the next functions where to get the data for each row
+        yodlee = {
+            'BANKID':lambda row: 'YODLEE',
+            'ACCTID':lambda row: fromCSVCol(row,'Account Name'), 
+            #TRNTYPE
+            # required TRANSACTIONENUM
+            'TRNTYPE':lambda row: yodlee_type(row),
+            'DTPOSTED':lambda row: toOFXDate(fromCSVCol(row,'Date')),
+            # required
+            'TRNAMT':lambda row: fromCSVCol(row,'Amount'),
+            'FITID':lambda row: fromCSVCol(row,'Transaction Id'),
+            'PAYEE':lambda row: yodlee_dscr(row),
+            'MEMO':lambda row: fromCSVCol(row,'Memo'),
+            'CURDEF':lambda row: fromCSVCol(row,'Currency')
+        }
+        
+        
+        #dict of accounts
+        # accounts=dict(accountid->account data)
+        # accountdata=dict(acct info)
+        
+        mapping=yodlee
+        accounts={}
+        for row in range(self.grid_table.GetNumberRows()):
+            # which account
+            uacct="%s-%s" % (mapping['BANKID'](row), mapping['ACCTID'](row))
+            acct = accounts.setdefault(uacct,{})
+            acct['BANKID'] = mapping['BANKID'](row)
+            acct['ACCTID'] = mapping['ACCTID'](row)            
+            currency = acct.setdefault('CURDEF',mapping['CURDEF'](row)),
+            if currency != mapping['CURDEF'](row):                
+                print "Currency not the same."
+            trans=acct.setdefault('trans',[])
+            trans.append(dict([(k,mapping[k](row)) for k in ['TRNTYPE','DTPOSTED','TRNAMT','FITID','PAYEE','MEMO']]))
+            
+        # output
+        out=open('test.ofx','w')
+        
+        out.write ( '<OFX><BANKMSGSRV1><STMTTRNRS>\n')
+        for acct in accounts.values():
+            out.write(
+                """
+                <STMTRS>
+                    <CURDEF>%(CURDEF)s</CURDEF>
+                    <BANKACCTFROM>
+                        <BANKID>%(BANKID)s</BANKID>
+                        <ACCTID>%(ACCTID)s</ACCTID>
+                        <!-- accttype -->
+                    </BANKACCTFROM>
+                    <BANKTRANLIST>
+                        <!-- dtstart -->
+                        <!-- dtend -->
+                        
+                """ % acct
+            )
+            
+            for tran in acct['trans']:
+                out.write (
+                    """
+                            <STMTTRN>
+                                <TRNTYPE>%(TRNTYPE)s</TRNTYPE>
+                                <DTPOSTED>%(DTPOSTED)s</DTPOSTED>
+                                <TRNAMT>%(TRNAMT)s</TRNAMT>
+                                <FITID>%(FITID)s</FITID>
+                                <NAME>%(PAYEE)s</NAME>
+                                <MEMO>%(MEMO)s</MEMO>
+                            </STMTTRN>
+                    """ % tran
+                )
+            
+            out.write (
+                """
+                    </BANKTRANLIST
+                </STMTRS>
+                """
+            )
+            
+        out.write ( "</STMTTRNRS></BANKMSGSRV1></OFX>" )
+        out.close()
+        print "Exported"
         
         
         
