@@ -157,8 +157,8 @@ class csv2ofx(wx.App):
         
         # mapping tells the next functions where to get the data for each row
         yodlee = {
-            'BANKID':lambda row: 'YODLEE',
-            'ACCTID':lambda row: fromCSVCol(row,'Account Name'), 
+            'BANKID':lambda row: fromCSVCol(row,'Account Name').split(' - ')[0],
+            'ACCTID':lambda row: fromCSVCol(row,'Account Name').split(' - ')[-1], 
             #TRNTYPE
             # required TRANSACTIONENUM
             'TRNTYPE':lambda row: yodlee_type(row),
