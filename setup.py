@@ -4,6 +4,8 @@ setup(
  name='csv2ofx',
  version='0.1',
  packages=['csv2ofx'],
- package_dir={'csv2ofx':'src/csv2ofx'}
+ package_dir={'csv2ofx':'src/csv2ofx'},
+ scripts=['csv2ofx'],
+ package_data={'csv2ofx':['*.xrc']}
 )
 
