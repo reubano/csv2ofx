@@ -1,5 +1,5 @@
 
-import sys, os
+import sys, os, time
 
 import wx
 from wx import xrc
@@ -133,6 +133,7 @@ class csv2ofx(wx.App):
             # which account
             uacct="%s-%s" % (mapping['BANKID'](row,grid), mapping['ACCTID'](row,grid))
             acct = accounts.setdefault(uacct,{})
+            acct['TRNUID'] = int(time.mktime(time.localtime()))
             acct['BANKID'] = mapping['BANKID'](row,grid)
             acct['ACCTID'] = mapping['ACCTID'](row,grid)            
             currency = acct.setdefault('CURDEF',mapping['CURDEF'](row,grid))
@@ -147,11 +148,29 @@ class csv2ofx(wx.App):
         # output
         out=open(path,'w')
         
-        out.write ( '<OFX><BANKMSGSRV1><STMTTRNRS>\n')
+        out.write (
+            """
+            <OFX>
+                <SIGNONMSGSRSV1>
+		  <SONRS>
+				<STATUS>
+						<CODE>0</CODE>
+						<SEVERITY>INFO</SEVERITY>
+				</STATUS>
+		  		<DTSERVER>%(TRNUID)d</DTSERVER>
+				<LANGUAGE>ENG</LANGUAGE>
+		  </SONRS>
+		</SIGNONMSGSRSV1>
+                   <BANKMSGSRV1><STMTTRNRS>
+            """ % acct
+        )
+            
         for acct in accounts.values():
             out.write(
                 """
                 <STMTRS>
+                    <TRNUID>%(TRNUID)d</TRNUID>
+                    <STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>
                     <CURDEF>%(CURDEF)s</CURDEF>
                     <BANKACCTFROM>
                         <BANKID>%(BANKID)s</BANKID>
