@@ -44,11 +44,19 @@ class SimpleCSVGrid(PyGridTableBase):
         return self.col_map[col_name]
     
 
+
+def xmlize(dat):
+    """
+        Xml data can't contain &,<,>
+        replace with &amp; &lt; &gt;
+        Get newlines while we're at it.
+    """
+    return dat.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;').replace('\r\n',' ').replace('\n',' ')
     
 def fromCSVCol(row,grid,col_name):
     """
         Uses the current row and the name of the column to look up the value from the csv data.
     """
-    return grid.GetValue(row,grid.GetColPos(col_name))
+    return xmlize(grid.GetValue(row,grid.GetColPos(col_name)))
 
     

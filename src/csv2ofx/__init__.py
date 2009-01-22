@@ -127,15 +127,18 @@ class csv2ofx(wx.App):
             dlg.Destroy();
         
         mapping=self.mappings.GetClientData(self.mappings.GetSelection())
+        
         grid=self.grid_table
         accounts={}
+        today = datetime.now().strftime('%Y%m%d')
         for row in range(self.grid_table.GetNumberRows()):
             # which account
             uacct="%s-%s" % (mapping['BANKID'](row,grid), mapping['ACCTID'](row,grid))
             acct = accounts.setdefault(uacct,{})
             
             acct['BANKID'] = mapping['BANKID'](row,grid)
-            acct['ACCTID'] = mapping['ACCTID'](row,grid)            
+            acct['ACCTID'] = mapping['ACCTID'](row,grid)
+            acct['TODAY'] = today
             currency = acct.setdefault('CURDEF',mapping['CURDEF'](row,grid))
             if currency != mapping['CURDEF'](row,grid):
                 print "Currency not the same."
@@ -146,7 +149,7 @@ class csv2ofx(wx.App):
             
             
         # output
-        today = datetime.now().strftime('%Y%m%d')
+        
         out=open(path,'w')
         
         out.write (
@@ -181,8 +184,8 @@ class csv2ofx(wx.App):
                         <ACCTTYPE>CHECKING</ACCTTYPE>
                     </BANKACCTFROM>
                     <BANKTRANLIST>
-                        <DTSTART></DTSTART>
-                        <DTEND></DTEND>
+                        <DTSTART>%(TODAY)s</DTSTART>
+                        <DTEND>%(TODAY)s</DTEND>
                         
                 """ % acct
             )
