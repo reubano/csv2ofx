@@ -52,24 +52,65 @@ class csv2ofx(wx.App):
 
         
         # handle events
-        self.Bind ( wx.EVT_MENU, self.OnClose, id=xrc.XRCID("ID_MENU_CLOSE"))
-        self.Bind ( wx.EVT_BUTTON, self.OnClose, id=xrc.XRCID("ID_BTN_CLOSE"))
+        self.Bind ( wx.EVT_MENU, self.OnCloseBtn, id=xrc.XRCID("ID_MENU_CLOSE"))
+        self.Bind ( wx.EVT_BUTTON, self.OnCloseBtn, id=xrc.XRCID("ID_BTN_CLOSE"))
         self.Bind ( wx.EVT_MENU, self.OnImport, id=xrc.XRCID("ID_MENU_IMPORT"))
         self.Bind ( wx.EVT_BUTTON, self.OnImport, id=xrc.XRCID("ID_BTN_IMPORT"))
         self.Bind ( wx.EVT_MENU, self.OnExport, id=xrc.XRCID("ID_MENU_EXPORT"))
         self.Bind ( wx.EVT_BUTTON, self.OnExport, id=xrc.XRCID("ID_BTN_EXPORT"))
+        self.frame.Bind ( wx.EVT_CLOSE, self.OnClose )
+        self.frame.Bind ( wx.EVT_MOVE, self.OnMove )
+        self.frame.Bind ( wx.EVT_SIZE, self.OnSize )
         
+        
+        # app preferences
+        self.config = wx.Config ( "csv2ofx" )
+
+        x=self.config.ReadInt("screenx",100)
+        y=self.config.ReadInt("screeny",100)
+        w=self.config.ReadInt("screenw",600)
+        h=self.config.ReadInt("screenh",550)
+
         
         # show the frame        
         self.SetTopWindow(self.frame)
+        
+        self.frame.SetPosition( (x,y) )
+        self.frame.SetSize( (w,h) )
         self.frame.Show()
         return True
         
-    def OnClose(self,evt):
+    def OnCloseBtn(self,evt):
         """
             Close the application.
         """
         self.frame.Close()
+        
+    def OnClose(self,evt):
+        """
+            Appliction Closing
+        """
+        print "GoodBye"
+        self.config.Flush()
+        evt.Skip()
+        
+    def OnMove(self,evt):
+        """
+            Application Screen Position Changed
+        """
+        x,y = evt.GetPosition()
+        self.config.WriteInt("screenx",x)
+        self.config.WriteInt("screeny",y)
+        evt.Skip()
+        
+    def OnSize(self,evt):
+        """
+            Application Size Changed
+        """
+        w,h = evt.GetSize()
+        self.config.WriteInt("screenw",w)
+        self.config.WriteInt("screenh",h)
+        evt.Skip()
         
     def OnImport(self,evt):
         """
