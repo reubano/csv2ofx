@@ -133,7 +133,7 @@ class csv2ofx(wx.App):
             # which account
             uacct="%s-%s" % (mapping['BANKID'](row,grid), mapping['ACCTID'](row,grid))
             acct = accounts.setdefault(uacct,{})
-            acct['TRNUID'] = int(time.mktime(time.localtime()))
+            
             acct['BANKID'] = mapping['BANKID'](row,grid)
             acct['ACCTID'] = mapping['ACCTID'](row,grid)            
             currency = acct.setdefault('CURDEF',mapping['CURDEF'](row,grid))
@@ -146,40 +146,43 @@ class csv2ofx(wx.App):
             
             
         # output
+        today = datetime.now().strftime('%Y%m%d')
         out=open(path,'w')
         
         out.write (
             """
             <OFX>
                 <SIGNONMSGSRSV1>
-		  <SONRS>
-				<STATUS>
-						<CODE>0</CODE>
-						<SEVERITY>INFO</SEVERITY>
-				</STATUS>
-		  		<DTSERVER>%(TRNUID)d</DTSERVER>
-				<LANGUAGE>ENG</LANGUAGE>
-		  </SONRS>
-		</SIGNONMSGSRSV1>
-                   <BANKMSGSRV1><STMTTRNRS>
-            """ % acct
+                   <SONRS>
+                    <STATUS>
+                        <CODE>0</CODE>
+                            <SEVERITY>INFO</SEVERITY>
+                        </STATUS>
+                        <DTSERVER>%(DTSERVER)s</DTSERVER>
+                    <LANGUAGE>ENG</LANGUAGE>
+                </SONRS>
+                </SIGNONMSGSRSV1>
+                <BANKMSGSRSV1><STMTTRNRS>
+                    <TRNUID>%(TRNUID)d</TRNUID>
+                    <STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>
+                    
+            """ % {'DTSERVER':today,
+                  'TRNUID':int(time.mktime(time.localtime()))}
         )
             
         for acct in accounts.values():
             out.write(
                 """
                 <STMTRS>
-                    <TRNUID>%(TRNUID)d</TRNUID>
-                    <STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>
                     <CURDEF>%(CURDEF)s</CURDEF>
                     <BANKACCTFROM>
                         <BANKID>%(BANKID)s</BANKID>
                         <ACCTID>%(ACCTID)s</ACCTID>
-                        <!-- accttype -->
+                        <ACCTTYPE>CHECKING</ACCTTYPE>
                     </BANKACCTFROM>
                     <BANKTRANLIST>
-                        <!-- dtstart -->
-                        <!-- dtend -->
+                        <DTSTART></DTSTART>
+                        <DTEND></DTEND>
                         
                 """ % acct
             )
@@ -216,11 +219,15 @@ class csv2ofx(wx.App):
             out.write (
                 """
                     </BANKTRANLIST>
+                    <LEDGERBAL>
+                        <BALAMT>0</BALAMT>
+                        <DTASOF>%s</DTASOF>
+                    </LEDGERBAL>
                 </STMTRS>
-                """
+                """ % today
             )
             
-        out.write ( "</STMTTRNRS></BANKMSGSRV1></OFX>" )
+        out.write ( "</STMTTRNRS></BANKMSGSRSV1></OFX>" )
         out.close()
         print "Exported %s" % path
         
