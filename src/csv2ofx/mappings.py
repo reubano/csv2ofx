@@ -40,7 +40,7 @@ yodlee = {
     'PAYEE':lambda row,grid: yodlee_dscr(row,grid),
     'MEMO':lambda row,grid: yodlee_memo(row,grid),
     'CURDEF':lambda row,grid: fromCSVCol(row,grid,'Currency'),
-    'CHECKNUM':lambda row,grid: None
+    'CHECKNUM':lambda row,grid: fromCSVCol(row,grid,'Transaction Id') 
 }
 
 cu = {
