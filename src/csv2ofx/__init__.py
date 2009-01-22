@@ -196,7 +196,7 @@ class csv2ofx(wx.App):
             
             out.write (
                 """
-                    </BANKTRANLIST
+                    </BANKTRANLIST>
                 </STMTRS>
                 """
             )
