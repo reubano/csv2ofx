@@ -32,6 +32,7 @@ def toOFXDate(date):
     return datetime.strptime(date,'%m/%d/%y').strftime('%Y%m%d')
 
 yodlee = {
+    'skip':lambda row,grid: fromCSVCol(row,grid,'Split Type') == 'Split',
     'BANKID':lambda row,grid: fromCSVCol(row,grid,'Account Name').split(' - ')[0],
     'ACCTID':lambda row,grid: fromCSVCol(row,grid,'Account Name').split(' - ')[-1], 
     'DTPOSTED':lambda row,grid: toOFXDate(fromCSVCol(row,grid,'Date')),
@@ -44,6 +45,7 @@ yodlee = {
 }
 
 cu = {
+    'skip':lambda row,grid: False,
     'BANKID':lambda row,grid: 'Credit Union',
     'ACCTID':lambda row,grid: 'My Account',
     'DTPOSTED':lambda row,grid: toOFXDate(fromCSVCol(row,grid,'Date')),

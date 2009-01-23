@@ -173,7 +173,9 @@ class csv2ofx(wx.App):
         accounts={}
         today = datetime.now().strftime('%Y%m%d')
         for row in range(self.grid_table.GetNumberRows()):
-            # which account
+            # which account            
+            if mapping['skip'](row,grid): continue
+            
             uacct="%s-%s" % (mapping['BANKID'](row,grid), mapping['ACCTID'](row,grid))
             acct = accounts.setdefault(uacct,{})
             
