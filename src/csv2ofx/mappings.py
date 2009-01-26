@@ -29,7 +29,8 @@ def yodlee_memo(row,grid):
     return "%s - %s" % ( cat, cls )
 
 def toOFXDate(date):
-    return datetime.strptime(date,'%m/%d/%y').strftime('%Y%m%d')
+    yearlen=len(date.split('/')[-1])
+    return datetime.strptime(date,yearlen==2 and '%m/%d/%y' or '%m/%d/%Y').strftime('%Y%m%d')
 
 yodlee = {
     'skip':lambda row,grid: fromCSVCol(row,grid,'Split Type') == 'Split',
