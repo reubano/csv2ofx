@@ -33,29 +33,58 @@ def toOFXDate(date):
     return datetime.strptime(date,yearlen==2 and '%m/%d/%y' or '%m/%d/%Y').strftime('%Y%m%d')
 
 yodlee = {
-    'skip':lambda row,grid: fromCSVCol(row,grid,'Split Type') == 'Split',
-    'BANKID':lambda row,grid: fromCSVCol(row,grid,'Account Name').split(' - ')[0],
-    'ACCTID':lambda row,grid: fromCSVCol(row,grid,'Account Name').split(' - ')[-1], 
-    'DTPOSTED':lambda row,grid: toOFXDate(fromCSVCol(row,grid,'Date')),
-    'TRNAMT':lambda row,grid: fromCSVCol(row,grid,'Amount'),
-    'FITID':lambda row,grid: fromCSVCol(row,grid,'Transaction Id'),
-    'PAYEE':lambda row,grid: yodlee_dscr(row,grid),
-    'MEMO':lambda row,grid: yodlee_memo(row,grid),
-    'CURDEF':lambda row,grid: fromCSVCol(row,grid,'Currency'),
-    'CHECKNUM':lambda row,grid: fromCSVCol(row,grid,'Transaction Id') 
+
+    'OFX':{
+        'skip':lambda row,grid: fromCSVCol(row,grid,'Split Type') == 'Split',
+        'BANKID':lambda row,grid: fromCSVCol(row,grid,'Account Name').split(' - ')[0],
+        'ACCTID':lambda row,grid: fromCSVCol(row,grid,'Account Name').split(' - ')[-1], 
+        'DTPOSTED':lambda row,grid: toOFXDate(fromCSVCol(row,grid,'Date')),
+        'TRNAMT':lambda row,grid: fromCSVCol(row,grid,'Amount'),
+        'FITID':lambda row,grid: fromCSVCol(row,grid,'Transaction Id'),
+        'PAYEE':lambda row,grid: yodlee_dscr(row,grid),
+        'MEMO':lambda row,grid: yodlee_memo(row,grid),
+        'CURDEF':lambda row,grid: fromCSVCol(row,grid,'Currency'),
+        'CHECKNUM':lambda row,grid: fromCSVCol(row,grid,'Transaction Id') 
+    },
+    'QIF':{
+        'split':lambda row,grid: fromCSVCol(row,grid,'Split Type') == 'Split',
+        'Account':lambda row,grid: fromCSVCol(row,grid,'Account Name'),
+        'AccountDscr':lambda row,grid: ' '.join(fromCSVCol(row,grid,'Account Name').split('-')[1:]),
+        'Date':lambda row,grid: fromCSVCol(row,grid,'Date'),
+        'Payee':lambda row,grid: fromCSVCol(row,grid,'Original Description'),
+        'Memo':lambda row,grid: fromCSVCol(row,grid,'User Description') + ' ' + fromCSVCol(row,grid,'Memo'),
+        'Category':lambda row,grid: fromCSVCol(row,grid,'Category')+'-'+fromCSVCol(row,grid,'Classification'),
+        'Class':lambda row,grid: '', 
+        'Amount':lambda row,grid: fromCSVCol(row,grid,'Amount'),
+        'Number':lambda row,grid: fromCSVCol(row,grid,'Transaction Id')
+    }
 }
 
 cu = {
-    'skip':lambda row,grid: False,
-    'BANKID':lambda row,grid: 'Credit Union',
-    'ACCTID':lambda row,grid: 'My Account',
-    'DTPOSTED':lambda row,grid: toOFXDate(fromCSVCol(row,grid,'Date')),
-    'TRNAMT':lambda row,grid: fromCSVCol(row,grid,'Amount').replace('$',''),
-    'FITID':lambda row,grid: row,
-    'PAYEE':lambda row,grid: fromCSVCol(row,grid,'Description'),
-    'MEMO':lambda row,grid: fromCSVCol(row,grid,'Comments'),
-    'CURDEF':lambda row,grid: 'USD',
-    'CHECKNUM':lambda row,grid: fromCSVCol(row,grid,'Check Number')
+    'OFX':{
+        'skip':lambda row,grid: False,
+        'BANKID':lambda row,grid: 'Credit Union',
+        'ACCTID':lambda row,grid: 'My Account',
+        'DTPOSTED':lambda row,grid: toOFXDate(fromCSVCol(row,grid,'Date')),
+        'TRNAMT':lambda row,grid: fromCSVCol(row,grid,'Amount').replace('$',''),
+        'FITID':lambda row,grid: row,
+        'PAYEE':lambda row,grid: fromCSVCol(row,grid,'Description'),
+        'MEMO':lambda row,grid: fromCSVCol(row,grid,'Comments'),
+        'CURDEF':lambda row,grid: 'USD',
+        'CHECKNUM':lambda row,grid: fromCSVCol(row,grid,'Check Number')
+    },
+    'QIF':{
+        'split':lambda row,grid:False,
+        'Account':lambda row,grid: 'Credit Union',
+        'AccountDscr':lambda row,grid: 'Credit Union Account',
+        'Date':lambda row,grid: fromCSVCol(row,grid,'Date'),
+        'Payee':lambda row,grid: fromCSVCol(row,grid,'Description'),
+        'Memo':lambda row,grid: fromCSVCol(row,grid,'Comments'),
+        'Category':lambda row,grid:'Unclassified',
+        'Class':lambda row,grid:'',
+        'Amount':lambda row,grid:fromCSVCol(row,grid,'Amount'),
+        'Number':lambda row,grid:fromCSVCol(row,grid,'Check Number')        
+    }
 }
 
 

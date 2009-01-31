@@ -7,6 +7,7 @@ import wx.grid as grd
 
 from csvutils import *
 from mappings import *
+import ofx, qif
 
 
         
@@ -50,6 +51,8 @@ class csv2ofx(wx.App):
             self.mappings.Append ( mapping, mappings.all_mappings[mapping] )
         self.mappings.SetSelection(0)
 
+        # output formats
+        self.exports = xrc.XRCCTRL(self.frame,"ID_EXPORT")
         
         # handle events
         self.Bind ( wx.EVT_MENU, self.OnCloseBtn, id=xrc.XRCID("ID_MENU_CLOSE"))
@@ -152,10 +155,11 @@ class csv2ofx(wx.App):
             ).ShowModal()
             return
         
+        format = self.exports.GetStringSelection()
         dlg = wx.FileDialog(
             self.frame,
-            message='Export OFX File',
-            wildcard="OFX Files (*.ofx)|*.ofx",
+            message='Export %s File' % format,
+            wildcard="%(name)s Files (*.%(ext)s)|*.%(ext)s" % {'name':format,'ext':format.lower()},
             style=wx.SAVE|wx.CHANGE_DIR            
         )
         path=None
@@ -167,9 +171,21 @@ class csv2ofx(wx.App):
         finally:
             dlg.Destroy();
         
-        mapping=self.mappings.GetClientData(self.mappings.GetSelection())
+        mapping=self.mappings.GetClientData(self.mappings.GetSelection())[format]
         grid=self.grid_table
-        from ofx import export
-        export(path,mapping,grid)
+        
+        if format == 'OFX':
+            csv2ofx_export = ofx.export
+        elif format == 'QIF':
+            csv2ofx_export = qif.export
+        else:
+            raise Exception ( "Unhandled export format: %s" % format )
+        csv2ofx_export(path,mapping,grid)
+        wx.MessageDialog (
+            self.frame,
+            "%s file saved at:\n%s" % ( format, path ),
+            "Export Complete",
+            wx.OK|wx.ICON_INFORMATION
+        ).ShowModal()
 
 
