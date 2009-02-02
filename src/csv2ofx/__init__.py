@@ -144,6 +144,7 @@ class csv2ofx(wx.App):
                       
         self.grid_table = SimpleCSVGrid(path)        
         self.grid.SetTable(self.grid_table)
+	self.opened_path = path
         
     def OnExport(self,evt):
         if not hasattr(self,'grid_table'):
@@ -158,10 +159,13 @@ class csv2ofx(wx.App):
         format = self.exports.GetStringSelection()
         dlg = wx.FileDialog(
             self.frame,
-            message='Export %s File' % format,
-            wildcard="%(name)s Files (*.%(ext)s)|*.%(ext)s" % {'name':format,'ext':format.lower()},
-            style=wx.SAVE|wx.CHANGE_DIR            
+            message='Export File',
+            wildcard="QIF Files (*.qif)|*.qif|OFX Files (*.ofx)|*.ofx|All Files (*.*)|*.*", 
+            style=wx.SAVE|wx.CHANGE_DIR,
+	    defaultDir=os.path.dirname(self.opened_path),
+            defaultFile=os.path.basename(self.opened_path).replace('csv',format.lower()) 
         )
+	dlg.SetFilterIndex( format=="OFX" and 1 or 0 )
         path=None
         try:
             if dlg.ShowModal() == wx.ID_OK:
