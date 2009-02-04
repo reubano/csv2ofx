@@ -56,7 +56,7 @@ yodlee = {
         'Category':lambda row,grid: fromCSVCol(row,grid,'Category')+'-'+fromCSVCol(row,grid,'Classification'),
         'Class':lambda row,grid: '', 
         'Amount':lambda row,grid: fromCSVCol(row,grid,'Amount'),
-        'Number':lambda row,grid: ''
+        'Number':lambda row,grid: fromCSVCol(row,grid,'Transaction Id')
     }
 }
 
