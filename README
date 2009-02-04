@@ -1,0 +1,26 @@
+csv2ofx
+
+Installation:
+
+To install the program in your site packages, you can use
+python to execute the install function:
+
+> python setup.py install
+
+This should work on both Windows and Linux.
+
+Runtime dependencies:
+
+  wxPython.
+
+
+Custom Mappings:
+
+    csv2ofx gives preference to custom mappings over the built in mappings.
+The builtin mappings (src/csv2ofx/mappings.py can be used as a template
+for custom mappings.  You may copy the mappings.py file to your home
+directory as csv2ofx_custom.py.  After this, add or change the mappings
+to suite your needs.  See mappings.py for mapping documentation.
+
+Enjoy!
+

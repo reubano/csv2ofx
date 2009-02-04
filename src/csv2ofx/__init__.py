@@ -1,12 +1,12 @@
 
 import sys, os, time
+from traceback import print_exc
 
 import wx
 from wx import xrc
 import wx.grid as grd
 
 from csvutils import *
-from mappings import *
 import ofx, qif
 
 
@@ -47,8 +47,22 @@ class csv2ofx(wx.App):
         
         # the mappings
         self.mappings = xrc.XRCCTRL(self.frame,"ID_MAPPINGS")
-        for mapping in mappings.all_mappings:
-            self.mappings.Append ( mapping, mappings.all_mappings[mapping] )
+
+        try:
+            homepath=os.path.expanduser('~')
+            cust_mappings = "%s/csv2ofx_custom.py" % homepath
+            if os.path.isfile( cust_mappings ): 
+                execfile ( cust_mappings, globals() ) 
+                for mapping in all_mappings:
+                    self.mappings.Append ( mapping, all_mappings[mapping] )
+        except: 
+            print_exc()
+            # Use built in mappings as default/backup
+        if self.mappings.IsEmpty():
+            print "Using Default Mappings"
+            import mappings
+            for mapping in mappings.all_mappings:
+                self.mappings.Append ( mapping, mappings.all_mappings[mapping] )
         self.mappings.SetSelection(0)
 
         # output formats
