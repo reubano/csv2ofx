@@ -40,11 +40,11 @@ yodlee = {
         'ACCTID':lambda row,grid: fromCSVCol(row,grid,'Account Name').split(' - ')[-1], 
         'DTPOSTED':lambda row,grid: toOFXDate(fromCSVCol(row,grid,'Date')),
         'TRNAMT':lambda row,grid: fromCSVCol(row,grid,'Amount'),
-        'FITID':lambda row,grid: toOFXDate(fromCSVCol(row,grid,'Date'))+str(row),
+        'FITID':lambda row,grid: fromCSVCol(row,grid,'Transaction Id'),
         'PAYEE':lambda row,grid: yodlee_dscr(row,grid),
         'MEMO':lambda row,grid: yodlee_memo(row,grid),
         'CURDEF':lambda row,grid: fromCSVCol(row,grid,'Currency'),
-        'CHECKNUM':lambda row,grid: '' 
+        'CHECKNUM':lambda row,grid: fromCSVCol(row,grid,'Transaction Id') 
     },
     'QIF':{
         'split':lambda row,grid: fromCSVCol(row,grid,'Split Type') == 'Split',
