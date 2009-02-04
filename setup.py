@@ -2,7 +2,8 @@ from distutils.core import setup
 
 setup(
  name='csv2ofx',
- version='0.1',
+ author = "Dennis Muhlestein",
+ version='0.2',
  packages=['csv2ofx'],
  package_dir={'csv2ofx':'src/csv2ofx'},
  scripts=['csv2ofx'],
