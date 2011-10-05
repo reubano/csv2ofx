@@ -54,6 +54,82 @@ class General {
 	} //<-- end function -->
 
 	/************************************************************************** 
+	 * Recursively searches an array for the nth occurance of a given value 
+	 * type and returns the corresponding key if successful. If passed a 
+	 * multi-dimensional array, it will returns an array of keys.  
+ 	 *
+ 	 * @param 	array 	$haystack 	the array to search
+ 	 * @param 	string 	$needle 	the type of element to find (i.e. 'numeric' 
+ 	 *								or 'string')
+	 * @param 	int 	$n 			the nth element to find   
+	 * @return 	mixed	the key (or array of keys) of the found element(s) 
+	 * @throws 	Exception if it can't find enough elements
+	 * @throws 	Exception if passed an invaled needle
+	 *************************************************************************/
+	function arraySearchType($needle, $haystack,  $n = 1) {
+		try {
+			$i = 0; // needle element counter
+			
+			foreach ($haystack as $key => $value) {
+				// check to make sure I haven't found too many elements
+				if ($i < $n) {
+					// It's not an array, so look for needle elements
+					if (!is_array($value)) { 
+						switch ($needle){
+							case 'numeric':
+								if (is_numeric($value)) {
+									$needleKeys[] = $key;
+									$i++;
+								} //<-- end if -->
+								
+								break;
+								
+							case 'string':
+								if (!is_numeric($value)) {
+									$needleKeys[] = $key;
+									$i++;
+								} //<-- end if -->
+								
+								break;
+								
+							default:
+								throw new Exception('Wrong search type entered.'. 
+									'Please type \'numeric\' or \'string\'.'
+								);
+						} //<-- end switch -->
+					} else { // it IS an array, so recurse
+						$needleKeys[] = general::arraySearchType($needle, $value, $n);
+					} //<-- end if !is_array -->
+				} //<-- end if $i < $n -->
+			} //<-- end foreach -->
+			
+			// check to see if I recursed
+			if (count($needleKeys) > 1 
+				&& count(array_unique($needleKeys)) == 1) 
+			{
+				// I recursed so return entire array of last keys
+				return $needleKeys;
+			} else { // I didn't recurse
+				// check to make sure I found enough elements
+				if (count($needleKeys) >= $n) {
+					// I only want the last key found
+					$lastKey = array_pop($needleKeys);
+					return $lastKey;
+				} else {
+					throw new Exception('Array does not contain '.$n.
+						' '.$needle.' elements'
+					);
+				} //<-- end if -->
+			} //<-- end if -->
+			
+		} catch (Exception $e) { 
+			throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
+				__FUNCTION__.'() line '.__LINE__
+			);
+		} //<-- end try -->
+	} //<-- end function -->
+	
+	/************************************************************************** 
 	 * This method gets writes data to a file 
  	 * 
  	 * @return boolean regarding success/failure
