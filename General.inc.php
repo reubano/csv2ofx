@@ -49,7 +49,7 @@ class General {
 				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
 					__FUNCTION__.'() line '.__LINE__
 				);
-			} //<-- end try -->;
+			} //<-- end try -->
 		} //<-- end if -->
 	} //<-- end function -->
 
@@ -180,7 +180,7 @@ class General {
 			try {
 				/*
 				$perl = Perl::getInstance();
-				$arrContent = $perl->eval('
+				$content = $perl->eval('
 					use Text::xSV;
 					
 					my $csv = new Text::xSV;
@@ -202,12 +202,12 @@ class General {
 				
 			    while (($data = fgetcsv($handle, 1000, $fieldDelimiter)) 
 			    		!== FALSE) {
-					$arrContent[] = $data;
+					$content[] = $data;
 			    } //<-- end while -->
 				
 				fclose($handle);
 				unlink($tempFile);
-				return $arrContent;
+				return $content;
 				
 			} catch (Exception $e) { 
 				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
@@ -248,12 +248,12 @@ class General {
 
 	/************************************************************************** 
 	 * This method expects an array of the following form:
- 	 * $arrContent = array(array('key 1', 'key 2', 'key 3'), 
+ 	 * $content = array(array('key 1', 'key 2', 'key 3'), 
  	 *						array('value 1', 'value 2', 'value 3'),
  	 *						array('value 4', 'value 5', 'value 6'))
  	 *
 	 * and returns it in the following form:
-	 * $arrContent = array(array('key 1' => 'key 1', 
+	 * $content = array(array('key 1' => 'key 1', 
 	 *							'key 2' => 'key 2', 
 	 *							'key 3' => 'key 3'),
 	 * 						array('key 1' => 'value 1', 
@@ -266,32 +266,32 @@ class General {
 	 * @return array of csv data 
 	 * @throws Exception if the CSV file does not exist  
 	 *************************************************************************/ 
-	function arrayInsertKey($arrContent) {	
-		if (!is_array($arrContent[0])) {
+	function arrayInsertKey($content) {	
+		if (!is_array($content[0])) {
 			throw new Exception('Please use a multi-dimensional array from '.
 				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
 			try {				
-				$maxElements = count($arrContent);
-				$maxValues = count($arrContent[0]);
+				$maxElements = count($content);
+				$maxValues = count($content[0]);
 				
 				// loop through each array
-				foreach ($arrContent as $arrValues) {				
+				foreach ($content as $values) {				
 					// check that arrays are same size
-					if (count($arrValues) != $maxValues) { 
+					if (count($values) != $maxValues) { 
 						throw new Exception('Arrays are not of same size');
 					} //<-- end if -->
 				} //<-- end for -->
 				
-				$arrKeys = $arrContent[0]; // get key names
+				$keys = $content[0]; // get key names
 				
 				// loop through each array
-				foreach ($arrContent as $arrValues) { 
-					$arrNewContent[] = array_combine($arrKeys, $arrValues);
+				foreach ($content as $values) { 
+					$newContent[] = array_combine($keys, $values);
 				} //<-- end for loop through each array -->
 				
-				return $arrNewContent;
+				return $newContent;
 			} catch (Exception $e) { 
 				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
 					__FUNCTION__.'() line '.__LINE__
@@ -399,7 +399,7 @@ class General {
 
 	/************************************************************************** 
 	 * This takes an array of the following form:
-	 * $arrContent = array(array('key 1' => 'value 1', 
+	 * $content = array(array('key 1' => 'value 1', 
 	 *							'key 2' => 'value 2', 
 	 *							'key 3' => 'value 3'),
 	 *						array('key 1' => 'value 4', 
@@ -413,17 +413,17 @@ class General {
 	 * @return formatted array
 	 * @throws Exception if the wrong format is entered
 	 *************************************************************************/
-	function formatArray($arrContent, $key, $format) {
+	function formatArray($content, $key, $format) {
 		try {
 			$i = 0;
 			
 			switch ($format){
 				case 'number':
-					foreach ($arrContent as $row) {
+					foreach ($content as $row) {
 						$number = $row[$key];
 						$number = str_replace(',', '', $number);
 						$number = $number + 0;
-						$arrFormattedRow[] = number_format($number, 2, '.',
+						$formattedRow[] = number_format($number, 2, '.',
 							''
 						);
 					} //<-- end foreach -->
@@ -431,11 +431,11 @@ class General {
 					break;
 					
 				case 'date':
-					foreach ($arrContent as $row) {
+					foreach ($content as $row) {
 						$date = $row[$key];
 						
 						// format to yyyy-mm-dd
-						$arrFormattedRow[] = date("Y-m-d", strtotime($date));
+						$formattedRow[] = date("Y-m-d", strtotime($date));
 					} //<-- end foreach -->
 					
 					break;
@@ -446,12 +446,12 @@ class General {
 					);
 			} //<-- end switch -->
 
-			foreach ($arrFormattedRow as $row) {
-				$arrContent[$i][$key] = $row;
+			foreach ($formattedRow as $row) {
+				$content[$i][$key] = $row;
 				$i++;
 			} //<-- end foreach -->
 					
-			return $arrContent;
+			return $content;
 			} catch (Exception $e) { 
 				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
 					__FUNCTION__.'() line '.__LINE__
@@ -491,7 +491,7 @@ class General {
 	 * @return TRUE 
 	 * @throws Exception if the CSV file already exists
 	 *************************************************************************/ 
-	function overwriteCSV($arrContent, $csvFile, $fieldDelimiter = ',') {	
+	function overwriteCSV($content, $csvFile, $fieldDelimiter = ',') {	
 		if (!file_exists($csvFile)) {
 			throw new Exception('File .'.$csvFile.' does not exsit from '.
 				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
@@ -500,7 +500,7 @@ class General {
 			try {
 				$tempFile = general::makeLFLineEndings($csvFile);
 				$handle = fopen($tempFile, 'r');
-				general::array2CSV($arrContent, $tempFile, $fieldDelimiter);
+				general::array2CSV($content, $tempFile, $fieldDelimiter);
 				copy($tempFile, $csvFile);				
 				fclose($handle);
 				unlink($tempFile);
@@ -519,7 +519,7 @@ class General {
 	 * @return TRUE 
 	 * @throws Exception if the CSV file does not exist  
 	 *************************************************************************/ 
-	function array2CSV($arrContent, $csvFile, $fieldDelimiter = ',') {	
+	function array2CSV($content, $csvFile, $fieldDelimiter = ',') {	
 		if (file_exists($csvFile) && filesize($csvFile) != 0) {
 			throw new Exception('File .'.$csvFile.' already exsits from '.
 				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
@@ -527,7 +527,7 @@ class General {
 		} else {
 			try {	
 				$handle = fopen($csvFile, 'w');
-				foreach ($arrContent as $fields) {
+				foreach ($content as $fields) {
 				    $length = fputcsv($handle, $fields, $fieldDelimiter);
 				} //<-- end foreach -->
 				
