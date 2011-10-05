@@ -323,7 +323,7 @@ class General {
 				foreach ($definedVars as $key => $val) {
 					if (!in_array($key,$ignoreList) && !empty($val)) {
 						if (is_array($val)) {
-							$message[$key] = general::printVars($val);
+							$message[$key] = general::getVars($val);
 						} elseif (is_string($val)) { 
 							$message[$key] = $val;
 						} //<-- end if -->
