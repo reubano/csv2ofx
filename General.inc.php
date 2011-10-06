@@ -5,10 +5,10 @@
 
 //<-- begin class -->
 class General {
-	var $className = __CLASS__;	// class name
-	var $verbose;
-	var $fileIgnoreList = array('.', '..', '.DS_Store','.svn','.git*');
-	var $varIgnoreList = array('HTTP_POST_VARS', 'HTTP_GET_VARS', 
+	protected $className = __CLASS__;	// class name
+	protected $verbose;
+	protected $fileIgnoreList = array('.', '..', '.DS_Store','.svn','.git*');
+	protected $varIgnoreList = array('HTTP_POST_VARS', 'HTTP_GET_VARS', 
 		'HTTP_COOKIE_VARS', 'HTTP_SERVER_VARS', 'HTTP_ENV_VARS', 
 		'HTTP_SESSION_VARS', '_ENV', 'PHPSESSID','SESS_DBUSER', 
 		'SESS_DBPASS','HTTP_COOKIE', 'GLOBALS', '_ENV', 'HTTP_ENV_VARS', 'argv', 
@@ -22,7 +22,7 @@ class General {
  	 * 
 	 * @return TRUE
 	 *************************************************************************/
-	function general($verbose = FALSE) {
+	function __construct($verbose = FALSE) {
 		$this->verbose = $verbose;
 		if ($this->verbose) {
 			fwrite(STDOUT, "$this->className class constructor set.\n");
@@ -36,7 +36,7 @@ class General {
 	 * @return extension
 	 * @throws Exception if passed an empty string
 	 *************************************************************************/
-	function getExtension($file) {
+	public function getExtension($file) {
 		if (empty($file)) {
 			throw new Exception('Empty file passed from '.__CLASS__.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -66,7 +66,7 @@ class General {
 	 * @throws 	Exception if it can't find enough elements
 	 * @throws 	Exception if passed an invaled needle
 	 *************************************************************************/
-	function arraySearchType($needle, $haystack,  $n = 1) {
+	public function arraySearchType($needle, $haystack,  $n = 1) {
 		try {
 			$i = 0; // needle element counter
 			
@@ -98,7 +98,7 @@ class General {
 								);
 						} //<-- end switch -->
 					} else { // it IS an array, so recurse
-						$needleKeys[] = general::arraySearchType($needle, $value, $n);
+						$needleKeys[] = self::arraySearchType($needle, $value, $n);
 					} //<-- end if !is_array -->
 				} //<-- end if $i < $n -->
 			} //<-- end foreach -->
@@ -136,7 +136,7 @@ class General {
 	 * @throws Exception if passed an empty string
 	 * @throws Exception if file already exists
 	 *************************************************************************/
-	function write2File($content, $file) {
+	public function write2File($content, $file) {
 		//need to add check that makes sure path exists
 		if (empty($content)) { // check to make sure $content isn't empty
 			throw new Exception('Empty content passedfrom '.__CLASS__.'->'.
@@ -171,7 +171,7 @@ class General {
 	 * @return array of csv data 
 	 * @throws Exception if the CSV file does not exist  
 	 *************************************************************************/ 
-	function csv2Array($csvFile, $fieldDelimiter = ',') {		
+	public function csv2Array($csvFile, $fieldDelimiter = ',') {		
 		if (!file_exists($csvFile)) {
 			throw new Exception('File '.$csvFile.' does not exist from '.
 				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
@@ -197,7 +197,7 @@ class General {
 				'); //<-- end perl -->
 				*/			
 				
-				$tempFile = general::makeLFLineEndings($csvFile);
+				$tempFile = self::makeLFLineEndings($csvFile);
 				$handle = fopen($tempFile, 'r');
 				
 			    while (($data = fgetcsv($handle, 1000, $fieldDelimiter)) 
@@ -223,7 +223,7 @@ class General {
 	 * @return string of inputted data 
 	 * @throws Exception if there is no input  
 	 *************************************************************************/ 
-	function readSTDIN() {
+	public function readSTDIN() {
 		try {
 			$string = NULL;
 			$handle = fopen('php://stdin', 'r');
@@ -266,7 +266,7 @@ class General {
 	 * @return array of csv data 
 	 * @throws Exception if the CSV file does not exist  
 	 *************************************************************************/ 
-	function arrayInsertKey($content) {	
+	public function arrayInsertKey($content) {	
 		if (!is_array($content[0])) {
 			throw new Exception('Please use a multi-dimensional array from '.
 				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
@@ -307,7 +307,7 @@ class General {
 	 * @return array of all defined variables
 	 * @throws Exception if an empty value is passed 
 	 *************************************************************************/ 
-	function getVars($definedVars, $ignoreList = NULL) {
+	public function getVars($definedVars, $ignoreList = NULL) {
 		if (empty($definedVars)) {
 			throw new Exception('Empty content passed from '.__CLASS__.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -323,7 +323,7 @@ class General {
 				foreach ($definedVars as $key => $val) {
 					if (!in_array($key,$ignoreList) && !empty($val)) {
 						if (is_array($val)) {
-							$message[$key] = general::getVars($val);
+							$message[$key] = self::getVars($val);
 						} elseif (is_string($val)) { 
 							$message[$key] = $val;
 						} //<-- end if -->
@@ -345,7 +345,7 @@ class General {
 	 * @return string
 	 * @throws Exception if an empty value is passed
 	 *************************************************************************/ 
-	function getBase($file) {
+	public function getBase($file) {
 		if (empty($file)) {
 			throw new Exception('Empty file passed from '.__CLASS__.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -368,7 +368,7 @@ class General {
  	 *
 	 * @return filename of normalized file
 	 *************************************************************************/ 
-	function makeLFLineEndings($file) {
+	public function makeLFLineEndings($file) {
 		if (!file_exists($file)) {
 			throw new Exception('File '.$file.' does not exist from '.
 				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
@@ -387,7 +387,7 @@ class General {
 				} //<-- end while -->
 				
 				fclose($handle);
-				general::write2File($string, $tempFile);
+				self::write2File($string, $tempFile);
 				return $tempFile;
 			} catch (Exception $e) { 
 				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
@@ -413,7 +413,7 @@ class General {
 	 * @return formatted array
 	 * @throws Exception if the wrong format is entered
 	 *************************************************************************/
-	function formatArray($content, $key, $format) {
+	public function formatArray($content, $key, $format) {
 		try {
 			$i = 0;
 			
@@ -465,13 +465,13 @@ class General {
  	 *
 	 * @return sanitized array 
 	 *************************************************************************/ 
-	function arraySubstitute($array, $find, $replacement) {
+	public function arraySubstitute($array, $find, $replacement) {
 		try {
 			foreach ($array as $data) {
 				if (!is_array($data)) { // If it's not an array, sanitize it
 					$cleanArray[] = str_replace($find, $replacement, $data);
 				} else { // it IS an array, so recurse
-					$cleanArray[] = general::arraySubstitute($data, 
+					$cleanArray[] = self::arraySubstitute($data, 
 						$find, $replacement
 					);
 				} //<-- end if -->
@@ -491,16 +491,16 @@ class General {
 	 * @return TRUE 
 	 * @throws Exception if the CSV file already exists
 	 *************************************************************************/ 
-	function overwriteCSV($content, $csvFile, $fieldDelimiter = ',') {	
+	public function overwriteCSV($content, $csvFile, $fieldDelimiter = ',') {	
 		if (!file_exists($csvFile)) {
 			throw new Exception('File .'.$csvFile.' does not exsit from '.
 				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
 			try {
-				$tempFile = general::makeLFLineEndings($csvFile);
+				$tempFile = self::makeLFLineEndings($csvFile);
 				$handle = fopen($tempFile, 'r');
-				general::array2CSV($content, $tempFile, $fieldDelimiter);
+				self::array2CSV($content, $tempFile, $fieldDelimiter);
 				copy($tempFile, $csvFile);				
 				fclose($handle);
 				unlink($tempFile);
@@ -519,7 +519,7 @@ class General {
 	 * @return TRUE 
 	 * @throws Exception if the CSV file does not exist  
 	 *************************************************************************/ 
-	function array2CSV($content, $csvFile, $fieldDelimiter = ',') {	
+	public function array2CSV($content, $csvFile, $fieldDelimiter = ',') {	
 		if (file_exists($csvFile) && filesize($csvFile) != 0) {
 			throw new Exception('File .'.$csvFile.' already exsits from '.
 				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
