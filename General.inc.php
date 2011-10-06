@@ -137,7 +137,6 @@ class General {
 	 * @throws Exception if file already exists
 	 *************************************************************************/
 	public function write2File($content, $file) {
-		//need to add check that makes sure path exists
 		if (empty($content)) { // check to make sure $content isn't empty
 			throw new Exception('Empty content passedfrom '.__CLASS__.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -178,25 +177,6 @@ class General {
 			);
 		} else {
 			try {
-				/*
-				$perl = Perl::getInstance();
-				$content = $perl->eval('
-					use Text::xSV;
-					
-					my $csv = new Text::xSV;
-					my @file;
-					$csv->set_sep($fieldDelimiter);
-					$csv->open_file($csvFile);
-					while (my $row = $csv->get_row()) {
-						foreach (@$row) { 
-							$_ = "" unless defined $_;
-						}; //<-- end foreach -->
-						
-						push(@file, $row);
-					} //<-- end while -->
-				'); //<-- end perl -->
-				*/			
-				
 				$tempFile = self::makeLFLineEndings($csvFile);
 				$handle = fopen($tempFile, 'r');
 				
