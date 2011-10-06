@@ -19,7 +19,7 @@ class General {
 
 	/************************************************************************** 
 	 * This method is the class constructor 
- 	 * 
+	 * 
 	 * @return TRUE
 	 *************************************************************************/
 	function __construct($verbose = FALSE) {
@@ -31,10 +31,11 @@ class General {
 	} //<-- end function -->
 
 	/************************************************************************** 
-	 * This method gets the get file or filename extension 
- 	 * 
-	 * @return extension
-	 * @throws Exception if passed an empty string
+	 * Returns the extension of a file or filename  
+	 *
+	 * @param 	string 	$file 		a filename or the path to a file
+	 * @return 	string	$ext		the file extension
+	 * @throws 	Exception if passed an empty string
 	 *************************************************************************/
 	public function getExtension($file) {
 		if (empty($file)) {
@@ -57,10 +58,10 @@ class General {
 	 * Recursively searches an array for the nth occurance of a given value 
 	 * type and returns the corresponding key if successful. If passed a 
 	 * multi-dimensional array, it will returns an array of keys.  
- 	 *
- 	 * @param 	array 	$haystack 	the array to search
- 	 * @param 	string 	$needle 	the type of element to find (i.e. 'numeric' 
- 	 *								or 'string')
+	 *
+	 * @param 	array 	$haystack 	the array to search
+	 * @param 	string 	$needle 	the type of element to find (i.e. 'numeric' 
+	 *								or 'string')
 	 * @param 	int 	$n 			the nth element to find   
 	 * @return 	mixed	the key (or array of keys) of the found element(s) 
 	 * @throws 	Exception if it can't find enough elements
@@ -130,11 +131,12 @@ class General {
 	} //<-- end function -->
 	
 	/************************************************************************** 
-	 * This method gets writes data to a file 
- 	 * 
- 	 * @return boolean regarding success/failure
-	 * @throws Exception if passed an empty string
-	 * @throws Exception if file already exists
+	 * Writes data to a file 
+	 * 
+	 * @param 	string 	$content 	the data to write to the file 
+	 * @param 	string 	$file 		the path to an empty file 
+	 * @return 	TRUE
+	 * @throws 	Exception if passed an empty string
 	 *************************************************************************/
 	public function write2File($content, $file) {
 		if (empty($content)) { // check to make sure $content isn't empty
@@ -165,10 +167,12 @@ class General {
 	} //<-- end function -->
 
 	/************************************************************************** 
-	 * This method gets csv data 
- 	 *
-	 * @return array of csv data 
-	 * @throws Exception if the CSV file does not exist  
+	 * Returns csv data as an array
+	 *
+	 * @param 	string 	$csvFile		the path to a csv file 
+	 * @param 	string 	$fieldDelimiter the csv field delimiter 
+	 * @return 	array	$content		array of csv data
+	 * @throws 	Exception if the CSV file does not exist
 	 *************************************************************************/ 
 	public function csv2Array($csvFile, $fieldDelimiter = ',') {		
 		if (!file_exists($csvFile)) {
@@ -198,10 +202,10 @@ class General {
 	} //<-- end function -->
 
 	/************************************************************************** 
-	 * This method reads input from STDIN
- 	 *
-	 * @return string of inputted data 
-	 * @throws Exception if there is no input  
+	 * Reads input from STDIN
+	 *
+	 * @return 	string	$string	data read from STDIN
+	 * @throws 	Exception if there is no input
 	 *************************************************************************/ 
 	public function readSTDIN() {
 		try {
@@ -227,24 +231,28 @@ class General {
 	} //<-- end function -->
 
 	/************************************************************************** 
-	 * This method expects an array of the following form:
- 	 * $content = array(array('key 1', 'key 2', 'key 3'), 
- 	 *						array('value 1', 'value 2', 'value 3'),
- 	 *						array('value 4', 'value 5', 'value 6'))
- 	 *
-	 * and returns it in the following form:
-	 * $content = array(array('key 1' => 'key 1', 
-	 *							'key 2' => 'key 2', 
-	 *							'key 3' => 'key 3'),
-	 * 						array('key 1' => 'value 1', 
-	 *							'key 2' => 'value 2', 
-	 *							'key 3' => 'value 3'),
-	 *						array('key 1' => 'value 4', 
-	 *							'key 2' => 'value 5', 
-	 *							'key 3' => 'value 6'))
+	 * Performs array_combine() on a multidimensional array using the first 
+	 * element for the keys and the remaining elements as the values
 	 *
-	 * @return array of csv data 
-	 * @throws Exception if the CSV file does not exist  
+	 * @param 	array 	$content	of the following form:
+	 * 								$content = array(
+	 *									array('key 1', 'key 2', 'key 3'), 
+	 *									array('value 1', 'value 2', 'value 3'),
+	 *									array('value 4', 'value 5', 'value 6'))
+	 *
+	 * @return 	array	$newContent	of the following form:	
+	 * 								$content = array(
+	 *								array('key 1' => 'key 1', 
+	 *									'key 2' => 'key 2', 
+	 *									'key 3' => 'key 3'),
+	 * 								array('key 1' => 'value 1', 
+	 *									'key 2' => 'value 2', 
+	 *									'key 3' => 'value 3'),
+	 *								array('key 1' => 'value 4', 
+	 *									'key 2' => 'value 5', 
+	 *									'key 3' => 'value 6'))
+	 *
+	 * @throws 	Exception if the CSV file does not exist
 	 *************************************************************************/ 
 	public function arrayInsertKey($content) {	
 		if (!is_array($content[0])) {
@@ -283,7 +291,7 @@ class General {
 	/************************************************************************** 
 	 * This method recursively returns an array of all defined  
 	 * variables
- 	 *
+	 *
 	 * @return array of all defined variables
 	 * @throws Exception if an empty value is passed 
 	 *************************************************************************/ 
@@ -321,7 +329,7 @@ class General {
 	
 	/************************************************************************** 
 	 * This method gets the file or filename base (filename without extension)  
- 	 *
+	 *
 	 * @return string
 	 * @throws Exception if an empty value is passed
 	 *************************************************************************/ 
@@ -345,7 +353,7 @@ class General {
 	/************************************************************************** 
 	 * This method changes the line endings of a text file to LF
 	 * 
- 	 *
+	 *
 	 * @return filename of normalized file
 	 *************************************************************************/ 
 	public function makeLFLineEndings($file) {
@@ -389,7 +397,7 @@ class General {
 	 * and formats the given to key to a number or date suitable for import 
 	 * into a sqlite database
 	 * 
- 	 *
+	 *
 	 * @return formatted array
 	 * @throws Exception if the wrong format is entered
 	 *************************************************************************/
@@ -442,7 +450,7 @@ class General {
 	/************************************************************************** 
 	 * This method recursively performs a string replace on array values
 	 * 
- 	 *
+	 *
 	 * @return sanitized array 
 	 *************************************************************************/ 
 	public function arraySubstitute($array, $find, $replacement) {
@@ -467,7 +475,7 @@ class General {
 
 	/************************************************************************** 
 	 * This method writes an array to a pre-existing csv file 
- 	 *
+	 *
 	 * @return TRUE 
 	 * @throws Exception if the CSV file already exists
 	 *************************************************************************/ 
@@ -495,7 +503,7 @@ class General {
 			
 	/************************************************************************** 
 	 * This method writes an array to a csv file 
- 	 *
+	 *
 	 * @return TRUE 
 	 * @throws Exception if the CSV file does not exist  
 	 *************************************************************************/ 
