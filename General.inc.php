@@ -18,24 +18,23 @@ class General {
 	);
 
 	/************************************************************************** 
-	 * This method is the class constructor 
-	 * 
-	 * @return TRUE
+	 * The class constructor
+	 *
+	 * @param 	boolean $verbose	enable verbose comments
 	 *************************************************************************/
 	function __construct($verbose = FALSE) {
 		$this->verbose = $verbose;
 		if ($this->verbose) {
 			fwrite(STDOUT, "$this->className class constructor set.\n");
 		} //<-- end if -->
-		return TRUE;
 	} //<-- end function -->
 
 	/************************************************************************** 
-	 * Returns the extension of a file or filename  
+	 * Returns the extension of a file
 	 *
 	 * @param 	string 	$file 		a filename or the path to a file
 	 * @return 	string	$ext		the file extension
-	 * @throws 	Exception if passed an empty string
+	 * @throws 	Exception if $file is empty
 	 *************************************************************************/
 	public function getExtension($file) {
 		if (empty($file)) {
@@ -65,7 +64,7 @@ class General {
 	 * @param 	int 	$n 			the nth element to find   
 	 * @return 	mixed	the key (or array of keys) of the found element(s) 
 	 * @throws 	Exception if it can't find enough elements
-	 * @throws 	Exception if passed an invaled needle
+	 * @throws 	Exception if $needle is invalid
 	 *************************************************************************/
 	public function arraySearchType($needle, $haystack,  $n = 1) {
 		try {
@@ -134,9 +133,10 @@ class General {
 	 * Writes data to a file 
 	 * 
 	 * @param 	string 	$content 	the data to write to the file 
-	 * @param 	string 	$file 		the path to an empty file 
-	 * @return 	TRUE
-	 * @throws 	Exception if passed an empty string
+	 * @param 	string 	$file 		the path to an empty or non existing file
+	 * @return 	boolean	TRUE
+	 * @throws 	Exception if $content is empty
+	 * @throws 	Exception if $file exists as a non-empty file
 	 *************************************************************************/
 	public function write2File($content, $file) {
 		if (empty($content)) { // check to make sure $content isn't empty
@@ -144,7 +144,7 @@ class General {
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} elseif (file_exists($file) && filesize($file) != 0) {
-			throw new Exception('File .'.$file.' already exsits from '.
+			throw new Exception('File .'.$file.' already exists from '.
 				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
@@ -172,7 +172,7 @@ class General {
 	 * @param 	string 	$csvFile		the path to a csv file 
 	 * @param 	string 	$fieldDelimiter the csv field delimiter 
 	 * @return 	array	$content		array of csv data
-	 * @throws 	Exception if the CSV file does not exist
+	 * @throws 	Exception if $csvFile does not exist
 	 *************************************************************************/ 
 	public function csv2Array($csvFile, $fieldDelimiter = ',') {		
 		if (!file_exists($csvFile)) {
@@ -231,7 +231,7 @@ class General {
 	} //<-- end function -->
 
 	/************************************************************************** 
-	 * Performs array_combine() on a multidimensional array using the first 
+	 * Performs array_combine() on a multi-dimensional array using the first 
 	 * element for the keys and the remaining elements as the values
 	 *
 	 * @param 	array 	$content	of the following form:
@@ -252,7 +252,7 @@ class General {
 	 *									'key 2' => 'value 5', 
 	 *									'key 3' => 'value 6'))
 	 *
-	 * @throws 	Exception if the CSV file does not exist
+	 * @throws 	Exception if $content is not a multi-dimensional array
 	 *************************************************************************/ 
 	public function arrayInsertKey($content) {	
 		if (!is_array($content[0])) {
@@ -289,11 +289,10 @@ class General {
 	} //<-- end function -->
 	
 	/************************************************************************** 
-	 * This method recursively returns an array of all defined  
-	 * variables
+	 * Recursively returns all defined variables
 	 *
-	 * @return array of all defined variables
-	 * @throws Exception if an empty value is passed 
+	 * @param 	array 	$ignoreList 	the variables to ignore 
+	 * @return 	array 	$definedVars	defined variables not in the ignore list
 	 *************************************************************************/ 
 	public function getVars($ignoreList = NULL) {
 		try {
@@ -322,10 +321,11 @@ class General {
 	} //<-- end function -->
 	
 	/************************************************************************** 
-	 * This method gets the file or filename base (filename without extension)  
+	 * Returns the filename without extension of a file
 	 *
-	 * @return string
-	 * @throws Exception if an empty value is passed
+	 * @param 	string 	$file 		a filename or the path to a file
+	 * @return 	string	$base		filename without extension
+	 * @throws 	Exception if an empty value is passed
 	 *************************************************************************/ 
 	public function getBase($file) {
 		if (empty($file)) {
@@ -345,10 +345,11 @@ class General {
 	} //<-- end function -->
 
 	/************************************************************************** 
-	 * This method changes the line endings of a text file to LF
+	 * Writes a contents of a given file to a new file with LF line endings
 	 * 
-	 *
-	 * @return filename of normalized file
+	 * @param 	string 	$file 		a filename or the path to a file
+	 * @return 	string	$tempFile	path to the temporary file created
+	 * @throws 	Exception if $file does not exist
 	 *************************************************************************/ 
 	public function makeLFLineEndings($file) {
 		if (!file_exists($file)) {
@@ -380,86 +381,107 @@ class General {
 	} //<-- end function -->
 
 	/************************************************************************** 
-	 * This takes an array of the following form:
-	 * $content = array(array('key 1' => 'value 1', 
-	 *							'key 2' => 'value 2', 
-	 *							'key 3' => 'value 3'),
-	 *						array('key 1' => 'value 4', 
-	 *							'key 2' => 'value 5', 
-	 *							'key 3' => 'value 6'))
+	 * Performs a number or date format on the elements of a given key in a 
+	 * multi-dimensional array suitable for import into a sqlite database
+	 *	 
+	 * @param 	array 	$content	of the following form:
+	 * 								$content = array(
+	 *									array('key 1' => 'value 1', 
+	 *										'key 2' => 'value 2', 
+	 *										'key 3' => 'value 3'),
+	 *									array('key 1' => 'value 4', 
+	 *										'key 2' => 'value 5', 
+	 *										'key 3' => 'value 6'))
 	 *
-	 * and formats the given to key to a number or date suitable for import 
-	 * into a sqlite database
-	 * 
-	 *
-	 * @return formatted array
-	 * @throws Exception if the wrong format is entered
+	 * @param 	string 	$key		the key whose values you want to format
+	 * @param 	string 	$format		the type of format to apply the (i.e. 
+	 *								'number' or 'date')
+	 *								
+	 * @return 	array	$newContent	new array with formatted values	
+	 * @throws 	Exception if $content is not a multi-dimensional array
+	 * @throws 	Exception if $format is invalid
 	 *************************************************************************/
 	public function formatArray($content, $key, $format) {
-		try {
-			$i = 0;
-			
-			switch ($format){
-				case 'number':
-					foreach ($content as $row) {
-						$number = $row[$key];
-						$number = str_replace(',', '', $number);
-						$number = $number + 0;
-						$formattedRow[] = number_format($number, 2, '.',
-							''
-						);
-					} //<-- end foreach -->
+		if (!is_array($content[0])) {
+			throw new Exception('Please use a multi-dimensional array from '.
+				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} else {
+			try {
+				$i = 0;
 				
-					break;
+				switch ($format){
+					case 'number':
+						foreach ($content as $row) {
+							$number = $row[$key];
+							$number = str_replace(',', '', $number);
+							$number = $number + 0;
+							$formattedRow[] = number_format($number, 2, '.',
+								''
+							);
+						} //<-- end foreach -->
 					
-				case 'date':
-					foreach ($content as $row) {
-						$date = $row[$key];
+						break;
 						
-						// format to yyyy-mm-dd
-						$formattedRow[] = date("Y-m-d", strtotime($date));
-					} //<-- end foreach -->
-					
-					break;
-					
-				default:
-					throw new Exception('Wrong format entered. Please type'.
-						' \'number\' or \'date\'.'
+					case 'date':
+						foreach ($content as $row) {
+							$date = $row[$key];
+							
+							// format to yyyy-mm-dd
+							$formattedRow[] = date("Y-m-d", strtotime($date));
+						} //<-- end foreach -->
+						
+						break;
+						
+					default:
+						throw new Exception('Wrong format entered. Please type'.
+							' \'number\' or \'date\'.'
+						);
+				} //<-- end switch -->
+	
+				foreach ($formattedRow as $row) {
+					$newContent[$i][$key] = $row;
+					$i++;
+				} //<-- end foreach -->
+						
+				return $newContent;
+				} catch (Exception $e) { 
+					throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
+						__FUNCTION__.'() line '.__LINE__
 					);
-			} //<-- end switch -->
-
-			foreach ($formattedRow as $row) {
-				$content[$i][$key] = $row;
-				$i++;
-			} //<-- end foreach -->
-					
-			return $content;
-			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
-					__FUNCTION__.'() line '.__LINE__
-				);
-			} //<-- end try -->
+				} //<-- end try -->
+			} //<-- end if -->
 		} //<-- end function -->
 			
 	/************************************************************************** 
-	 * This method recursively performs a string replace on array values
+	 * Recursively replaces all occurrences of $needle with $replace on 
+	 * elements in an array
 	 * 
+	 * @param 	array 	$content	the array to perform the replacement on
 	 *
-	 * @return sanitized array 
+	 * @param 	string 	$needle		the value being searched for (an array may 
+	 *								be used to designate multiple needles)
+	 * @param 	string 	$replace	the replacement value that replaces $needle 
+	 *								(an array may be used to designate multiple 
+	 *								replacements)
+	 *								
+	 * @return 	array	$newContent	new array with replaced values	
 	 *************************************************************************/ 
-	public function arraySubstitute($array, $find, $replacement) {
+	public function arraySubstitute($content, $needle, $replace) {
 		try {
-			foreach ($array as $data) {
-				if (!is_array($data)) { // If it's not an array, sanitize it
-					$cleanArray[] = str_replace($find, $replacement, $data);
+			foreach ($content as $haystack) {
+				if (!is_array($haystack)) { // If it's not an array, sanitize it
+					$newContent[] = str_replace($needle, $replace, $haystack);
 				} else { // it IS an array, so recurse
-					$cleanArray[] = self::arraySubstitute($data, 
-						$find, $replacement
+					$newContent[] = self::arraySubstitute($haystack, 
+						$needle, $replace
 					);
 				} //<-- end if -->
 			} //<-- end foreach -->		
 			
-			return $cleanArray;
+			// I think all I have to do is the following:
+			// $newContent = str_replace($needle, $replace, $content);
+			return $newContent;
 		} catch (Exception $e) { 
 			throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -468,10 +490,13 @@ class General {
 	} //<-- end function -->
 
 	/************************************************************************** 
-	 * This method writes an array to a pre-existing csv file 
-	 *
-	 * @return TRUE 
-	 * @throws Exception if the CSV file already exists
+	 * Overwrites an array to a pre-existing csv file
+	 * 
+	 * @param 	string 	$content 		the data to write to the file 
+	 * @param 	string 	$csvFile 		the path to a csv file 
+	 * @param 	string 	$fieldDelimiter the csv field delimiter 
+	 * @return 	boolean	TRUE
+	 * @throws 	Exception if $csvFile does not exist
 	 *************************************************************************/ 
 	public function overwriteCSV($content, $csvFile, $fieldDelimiter = ',') {	
 		if (!file_exists($csvFile)) {
@@ -496,14 +521,18 @@ class General {
 	} //<-- end function -->
 			
 	/************************************************************************** 
-	 * This method writes an array to a csv file 
+	 * Writes an array to a csv file 
 	 *
-	 * @return TRUE 
-	 * @throws Exception if the CSV file does not exist  
+	 * @param 	string 	$content 		the data to write to the file 
+	 * @param 	string 	$csvFile 		the path to an empty or non existing 
+	 *									csv file
+	 * @param 	string 	$fieldDelimiter the csv field delimiter 
+	 * @return 	boolean	TRUE
+	 * @throws 	Exception if $csvFile exists or is non-empty 
 	 *************************************************************************/ 
 	public function array2CSV($content, $csvFile, $fieldDelimiter = ',') {	
 		if (file_exists($csvFile) && filesize($csvFile) != 0) {
-			throw new Exception('File .'.$csvFile.' already exsits from '.
+			throw new Exception('File .'.$csvFile.' already exists from '.
 				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
