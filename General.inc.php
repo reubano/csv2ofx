@@ -295,36 +295,30 @@ class General {
 	 * @return array of all defined variables
 	 * @throws Exception if an empty value is passed 
 	 *************************************************************************/ 
-	public function getVars($definedVars, $ignoreList = NULL) {
-		if (empty($definedVars)) {
-			throw new Exception('Empty content passed from '.__CLASS__.'->'.
+	public function getVars($ignoreList = NULL) {
+		try {
+			protected $vars = get_defined_vars();
+			
+			if (empty($ignoreList)) {
+				$ignoreList = $this->varIgnoreList;
+			} //<-- end if -->
+			
+			foreach ($vars as $key => $val) {
+				if (!in_array($key,$ignoreList) && !empty($val)) {
+					if (is_array($val)) {
+						$definedVars[$key] = self::getVars($val);
+					} elseif (is_string($val)) { 
+						$definedVars[$key] = $val;
+					} //<-- end if -->
+				} //<-- end if --> 
+			} //<-- end foreach -->
+			
+			return $definedVars;
+		} catch (Exception $e) { 
+			throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
-		} else {
-			try {
-				if (empty($ignoreList)) {
-					$ignoreList = $this->varIgnoreList;
-				} //<-- end if -->
-				
-				//$message['Variables:'] = array();
-				
-				foreach ($definedVars as $key => $val) {
-					if (!in_array($key,$ignoreList) && !empty($val)) {
-						if (is_array($val)) {
-							$message[$key] = self::getVars($val);
-						} elseif (is_string($val)) { 
-							$message[$key] = $val;
-						} //<-- end if -->
-					} //<-- end if --> 
-				} //<-- end foreach -->
-				
-				return $message;
-			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
-					__FUNCTION__.'() line '.__LINE__
-				);
-			} //<-- end try -->
-		} //<-- end if -->
+		} //<-- end try -->
 	} //<-- end function -->
 	
 	/************************************************************************** 
