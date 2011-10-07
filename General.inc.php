@@ -236,21 +236,21 @@ class General {
 	 *
 	 * @param 	array 	$content	of the following form:
 	 * 								$content = array(
-	 *									array('key 1', 'key 2', 'key 3'), 
-	 *									array('value 1', 'value 2', 'value 3'),
-	 *									array('value 4', 'value 5', 'value 6'))
+	 *									array($key1, $key2, $key3), 
+	 *									array($value1, $value2, $value3),
+	 *									array($value4, $value5, $value6))
 	 *
 	 * @return 	array	$newContent	of the following form:	
 	 * 								$content = array(
-	 *								array('key 1' => 'key 1', 
-	 *									'key 2' => 'key 2', 
-	 *									'key 3' => 'key 3'),
-	 * 								array('key 1' => 'value 1', 
-	 *									'key 2' => 'value 2', 
-	 *									'key 3' => 'value 3'),
-	 *								array('key 1' => 'value 4', 
-	 *									'key 2' => 'value 5', 
-	 *									'key 3' => 'value 6'))
+	 *								array($key1 => $key1, 
+	 *									$key2 => $key2, 
+	 *									$key3 => $key3),
+	 * 								array($key1 => $value1, 
+	 *									$key2 => $value2, 
+	 *									$key3 => $value3),
+	 *								array($key1 => $value4, 
+	 *									$key2 => $value5, 
+	 *									$key3 => $value6))
 	 *
 	 * @throws 	Exception if $content is not a multi-dimensional array
 	 *************************************************************************/ 
@@ -296,7 +296,7 @@ class General {
 	 *************************************************************************/ 
 	public function getVars($ignoreList = NULL) {
 		try {
-			protected $vars = get_defined_vars();
+			$vars = get_defined_vars();
 			
 			if (empty($ignoreList)) {
 				$ignoreList = $this->varIgnoreList;
@@ -386,12 +386,12 @@ class General {
 	 *	 
 	 * @param 	array 	$content	of the following form:
 	 * 								$content = array(
-	 *									array('key 1' => 'value 1', 
-	 *										'key 2' => 'value 2', 
-	 *										'key 3' => 'value 3'),
-	 *									array('key 1' => 'value 4', 
-	 *										'key 2' => 'value 5', 
-	 *										'key 3' => 'value 6'))
+	 *									array($key1 => $value1, 
+	 *										$key2 => $value2, 
+	 *										$key3 => $value3),
+	 *									array($key1 => $value4, 
+	 *										$key2 => $value5, 
+	 *										$key3 => $value6))
 	 *
 	 * @param 	string 	$key		the key whose values you want to format
 	 * @param 	string 	$format		the type of format to apply the (i.e. 
