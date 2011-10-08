@@ -294,16 +294,14 @@ class General {
 	 * @param 	array 	$ignoreList 	the variables to ignore 
 	 * @return 	array 	$definedVars	defined variables not in the ignore list
 	 *************************************************************************/ 
-	public function getVars($ignoreList = NULL) {
+	public function getVars($vars, $ignoreList = NULL) {
 		try {
-			$vars = get_defined_vars();
-			
 			if (empty($ignoreList)) {
 				$ignoreList = $this->varIgnoreList;
 			} //<-- end if -->
 			
 			foreach ($vars as $key => $val) {
-				if (!in_array($key,$ignoreList) && !empty($val)) {
+				if (!in_array($key, $ignoreList) && !empty($val)) {
 					if (is_array($val)) {
 						$definedVars[$key] = self::getVars($val);
 					} elseif (is_string($val)) { 
