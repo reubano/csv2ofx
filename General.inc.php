@@ -54,19 +54,46 @@ class General {
 	} //<-- end function -->
 
 	/************************************************************************** 
+	 * Returns the ordinal suffix of a num, e.g., 1st, 2nd, 3rd.
+	 *
+	 * @param 	integer	$num a number
+	 * @return 	string	$ext a number with the ordinal suffix
+	 * @throws 	Exception if $file is empty
+	 *************************************************************************/
+	public function addOrdinal($num) {
+		try {
+			if (!in_array(($num % 100), array(11, 12, 13))){
+				switch ($num % 10) {
+					// Handle 1st, 2nd, 3rd
+					case 1: return $num.'st';
+					case 2: return $num.'nd';
+					case 3: return $num.'rd';
+				}
+			}
+			
+			return $num.'th';
+			
+			} catch (Exception $e) { 
+				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
+					__FUNCTION__.'() line '.__LINE__
+				);
+			} //<-- end try -->
+	} //<-- end function -->
+
+	/************************************************************************** 
 	 * Recursively searches an array for the nth occurance of a given value 
 	 * type and returns the corresponding key if successful. If passed a 
-	 * multi-dimensional array, it will returns an array of keys.  
+	 * multi-dimensional array, it will returns an array of keys.
 	 *
 	 * @param 	array 	$haystack 	the array to search
 	 * @param 	string 	$needle 	the type of element to find (i.e. 'numeric' 
 	 *								or 'string')
-	 * @param 	int 	$n 			the nth element to find   
+	 * @param 	int 	$n 			the nth element to find 
 	 * @return 	mixed	the key (or array of keys) of the found element(s) 
 	 * @throws 	Exception if it can't find enough elements
 	 * @throws 	Exception if $needle is invalid
 	 *************************************************************************/
-	public function arraySearchType($needle, $haystack,  $n = 1) {
+	public function arraySearchType($needle, $haystack, $n = 1) {
 		try {
 			$i = 0; // needle element counter
 			
@@ -184,10 +211,10 @@ class General {
 				$tempFile = self::makeLFLineEndings($csvFile);
 				$handle = fopen($tempFile, 'r');
 				
-			    while (($data = fgetcsv($handle, 1000, $fieldDelimiter)) 
-			    		!== FALSE) {
+				while (($data = fgetcsv($handle, 1000, $fieldDelimiter)) 
+					!== FALSE) {
 					$content[] = $data;
-			    } //<-- end while -->
+				} //<-- end while -->
 				
 				fclose($handle);
 				unlink($tempFile);
@@ -537,7 +564,7 @@ class General {
 			try {	
 				$handle = fopen($csvFile, 'w');
 				foreach ($content as $fields) {
-				    $length = fputcsv($handle, $fields, $fieldDelimiter);
+					$length = fputcsv($handle, $fields, $fieldDelimiter);
 				} //<-- end foreach -->
 				
 				fclose($handle);
