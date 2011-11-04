@@ -229,6 +229,25 @@ class General {
 	} //<-- end function -->
 
 	/************************************************************************** 
+	 * Returns an array from a multiline string
+	 *
+	 * @param 	string 	$content	a multiline string 
+	 * @return 	array	$content	array (one element from each line in the
+	 *								string)
+	 *************************************************************************/ 
+	public function lines2Array($content) {		
+		try {
+			$content = explode("\n", $content); // turn string to array
+			array_pop($content); // remove last element since it is empty
+			return $content;
+		} catch (Exception $e) { 
+			throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
+				__FUNCTION__.'() line '.__LINE__
+			);
+		} //<-- end try -->
+	} //<-- end function -->
+
+	/************************************************************************** 
 	 * Reads input from STDIN
 	 *
 	 * @return 	string	$string	data read from STDIN
