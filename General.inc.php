@@ -229,6 +229,37 @@ class General {
 	} //<-- end function -->
 
 	/************************************************************************** 
+	 * Converts an array to string while adding and extra string to beginning
+	 * and end of each element
+	 *
+	 * @param 	array 	$content	array to convert 
+	 * @param 	string 	$extra		string to add to the beginning and end of 
+	 *								each array element
+	 * @param 	string 	$delimiter	character to seperate each arrayelement 
+	 * @return 	string	$content	content formatted on 1 line with the extra
+	 *								string added to the beginning and end of
+	 *								each array element
+	 * @throws 	Exception if $content is not an array 
+	 *************************************************************************/ 
+	public function extraImplode($content, $extra = '\'', $delimiter = ' ') {		
+		if (!is_array($content)) {
+			throw new Exception('Please use an array from '.
+				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} else {
+			try {
+				$content = $extra.implode($extra.$delimiter.$extra, $content).
+					$extra; // array to string	
+				return $content;
+			} catch (Exception $e) { 
+				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
+					__FUNCTION__.'() line '.__LINE__
+				);
+			} //<-- end try -->
+		} //<-- end if -->
+	} //<-- end function -->
+
+	/************************************************************************** 
 	 * Returns an array from a multiline string
 	 *
 	 * @param 	string 	$content	a multiline string 
