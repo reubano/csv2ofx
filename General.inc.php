@@ -194,7 +194,7 @@ class General {
 	} //<-- end function -->
 
 	/************************************************************************** 
-	 * Returns csv data as an array
+	 * Returns an array from csv data
 	 *
 	 * @param 	string 	$csvFile		the path to a csv file 
 	 * @param 	string 	$fieldDelimiter the csv field delimiter 
@@ -367,8 +367,8 @@ class General {
 	/************************************************************************** 
 	 * Returns the filename without extension of a file
 	 *
-	 * @param 	string 	$file 		a filename or the path to a file
-	 * @return 	string	$base		filename without extension
+	 * @param 	string 	$file 	a filename or the path to a file
+	 * @return 	string	$base	filename without extension
 	 * @throws 	Exception if an empty value is passed
 	 *************************************************************************/ 
 	public function getBase($file) {
