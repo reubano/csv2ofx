@@ -370,6 +370,37 @@ class General {
 	} //<-- end function -->
 
 	/************************************************************************** 
+	 * Returns the full path to files in the current directory
+	 *
+	 * @param 	array 	$files 	a file in the current directory
+	 * @return 	string	$base	filename without extension
+	 * @throws 	Exception if $files is not an array 
+	 *************************************************************************/ 
+	public function getFullPath($files) {
+		if (!is_array($files)) {
+			throw new Exception('Please use an array from '.
+				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} else {
+			try {
+				$dir = getcwd();
+				
+				foreach ($files as $key => $value) {
+					if (strpos($value, '/') === FALSE) {
+						$files[$key] = '"'.$dir.'/'.$value.'"';
+					} //<-- end if -->
+				} //<-- end foreach -->
+				
+				return $files;
+			} catch (Exception $e) { 
+				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
+					__FUNCTION__.'() line '.__LINE__
+				);
+			} //<-- end try -->
+		} //<-- end if -->
+	} //<-- end function -->
+
+	/************************************************************************** 
 	 * Writes a contents of a given file to a new file with LF line endings
 	 * 
 	 * @param 	string 	$file 		a filename or the path to a file
