@@ -437,7 +437,7 @@ class General {
 				
 				foreach ($files as $key => $value) {
 					if (strpos($value, '/') === FALSE) {
-						$files[$key] = '"'.$dir.'/'.$value.'"';
+						$files[$key] = $dir.'/'.$value;
 					} //<-- end if -->
 				} //<-- end foreach -->
 				
