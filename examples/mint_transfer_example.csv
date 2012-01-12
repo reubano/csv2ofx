@@ -1,0 +1,4 @@
+"Date","Description","Original Description","Amount","Transaction Type","Category","Account Name","Labels","Notes"
+"06/12/10","Account Transfer","Account Transfer","1,000.00","debit","Checking","Savings","",""
+"06/12/10","Account Transfer","Account Transfer","1,000.00","credit","Savings","Checking","",""
+"06/13/10","Account Transfer","Account Transfer","2,000.00","credit","Savings","Checking","",""

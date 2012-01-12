@@ -1,0 +1,201 @@
+h1. csv2ofx
+
+h2. LICENSE:
+
+This file is part of csv2ofx.
+
+csv2ofx is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. 
+
+csv2ofx is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program. If not, see "GNU.":http://www.gnu.org/licenses/
+
+Copyright © 2009 "Reuben Cummings":mailto:reubano@gmail.com?subject=csv2ofx
+
+h2. INTRODUCTION:
+
+"csv2ofx":http://github.com/reubano/csv2ofx is a command line program that converts CSV files to OFX and QIF files for importing into GnuCash or similar financial accounting programs. It was inspired by "mulicheng/csv2ofx.":http://github.com/mulicheng/csv2ofx "csv2ofx":http://github.com/reubano/csv2ofx is distributed under the terms of the GNU General Public License (GPL) and has been tested on the following configuration:
+* MacOS X 10.5.8
+* PHP 5.3.0
+* Console_CommandLine 1.1.1
+* csv file exported from www.mint.com as of 04/11/2010
+* GnuCash 2.2.9
+
+h2. REQUIREMENTS:
+
+"csv2ofx":http://github.com/reubano/csv2ofx requires the following programs in order to run properly:
+* "PHP 5.3+":http://pear.php.net/manual/en/installation.php
+* "PEAR":http://us2.php.net/downloads.php
+* "Console_CommandLine":http://pear.php.net/package/Console_CommandLine/download
+* "reubano/csv2ofx":http://github.com/reubano/csv2ofx
+* "reubano/library":http://github.com/reubano/library
+
+h2. PREPARATION:
+
+_*check that PHP, PEAR, and Console_CommandLine are installed*_
+
+<pre>pear -V
+pear list</pre>
+
+_*set the directory that you wish to hold the program*_
+
+@cd /path/to/repos@
+
+_*clone csv2ofx using "Git":http://git-scm.com/download (recommended)*_
+
+<pre>git clone git://github.com/reubano/library.git
+git clone git://github.com/reubano/csv2ofx.git
+</pre>
+
+_*or download csv2ofx on Linux*_
+
+<pre>wget -c http://github.com/reubano/library/zipball/master
+unzip reubano-library*
+rm -f reubano-library*.zip
+mv reubano-library*/ library
+wget -c http://github.com/reubano/csv2ofx/zipball/master
+unzip reubano-csv2ofx*
+rm -f reubano-csv2ofx*.zip
+mv reubano-csv2ofx*/ csv2ofx</pre>
+
+_*or download csv2ofx on Mac*_
+
+<pre>
+curl -Lo library.zip http://github.com/reubano/library/zipball/master
+unzip library
+rm -f library.zip
+mv reubano-library*/ library
+curl -Lo csv2ofx.zip http://github.com/reubano/csv2ofx/zipball/master
+unzip csv2ofx
+rm -f csv2ofx.zip
+mv reubano-csv2ofx*/ csv2ofx
+</pre>
+
+h2. INSTALLATION:
+
+_*Create symlink of csv2ofx in your ~/bin directory*_
+
+<pre>if [-d $~/bin]; then mkdir ~/bin; fi
+ln -s ./csv2ofx/csv2ofx.php ~/bin/csv2ofx</pre>
+
+_*Make csv2ofx executable and add ~/bin to your PATH variable so that you can run 'csv2ofx' from the command line*_
+
+<pre>chmod 755 ~/bin/csv2ofx
+echo 'export PATH=~/bin:$PATH' >> ~/.profile
+. ~/.profile</pre>
+
+h2. USING csv2ofx:
+
+h3. Usage:
+
+<pre>csv2ofx [options] <csv_file></pre>
+
+h3. Options:
+
+<pre>  -a name, --account=name           account mapping to use, defaults to
+                                    'mint'
+  -A type, --account-type=type      set default account type if match is
+                                    not found, defaults to 'CHECKING'
+  -c currency, --currency=currency  set currency, defaults to 'USD'
+  -d, --debug                       enables debug mode, displays the
+                                    options and arguments passed to the
+                                    parser
+  -e date, --end=date               end date, defaults to today
+  -l lang, --language=lang          set language, defaults to 'ENG'
+  -o /path, --out-file=/path        location and name of resulting output
+                                    file (use '-' to write to stdout),
+                                    defaults to the project downloads
+                                    folder
+  -p name, --primary=name           primary account used to pay credit
+                                    cards, defaults to 'MITFCU Checking'
+  -q, --qif                         enables 'QIF' output instead of 'OFX'
+  -s date, --start=date             start date, defaults to one month from
+                                    today
+  -t, --transfer                    treats ofx transactions as transfers
+                                    from one account to another (sets
+                                    'category' as the destination account)
+  -T, --test                        enables test mode, prints selection to
+                                    the standard output without writing
+                                    file to disk
+  -v, --verbose                     verbose output
+  -V, --variables                   enables variable mode, displays the
+                                    value of all program variables
+  -h, --help                        show this help message and exit
+  --version                         show the program version and exit</pre>
+
+h3. Arguments:
+
+@csv_file /path@
+
+h3. Usage examples:
+
+_*normal usage*_
+
+@csv2ofx ~/Downloads/transactions.csv@
+
+_*qif output*_
+
+@csv2ofx -q ~/Downloads/transactions.csv@
+
+_*specify date range from one year ago to yesterday with qif output*_
+
+@csv2ofx -s'-1 year' -e'yesterday' -q ~/Downloads/transactions.csv@
+
+_*direct ofx file output to the user's downloads folder*_
+
+@csv2ofx -o ~/Downloads/transactions.ofx ~/Downloads/transactions.csv@
+
+_*use yoodle settings*_
+
+@csv2ofx -a yoodle ~/Downloads/transactions.csv@
+
+h3. Where does csv2ofx save files?
+
+csv2ofx saves resultant qif and ofx files in the "downloads" sub-folder of the installed "csv2ofx" folder. 
+
+h3. Additional date format examples:
+
+@'10 September 2000'@
+@'08/10/00'@
+@'-2 years 1 week'@
+@'-1 month'@
+@'last friday'@
+@'next monday'@
+
+h2. CUSTOMIZATION:
+
+h3. Code modification:
+
+If you would like to import csv files that aren't from mint or yoodle, you will have to modify the code below in the csv2ofx.php file to match your csv header fields.
+
+_*change this code in csv2ofx.php*_
+
+<pre>$head_account     = 'Header Field';
+$head_account_id  = 'Header Field';
+$head_date        = 'Header Field';
+$head_tran_type   = 'Header Field';
+$head_amount      = 'Header Field';
+$head_description = 'Header Field';
+$head_payee       = 'Header Field';
+$head_notes       = 'Header Field';
+$head_category    = 'Header Field';
+$head_dest_account = 'Header Field';
+$head_class       = 'Header Field';
+$head_tran_id     = 'Header Field';</pre>
+
+h3. Required variables:
+
+| $head_account:     | account name                       |
+| $head_date:        | date the transaction was posted    |
+| $head_tran_type:   | type of transaction (credit/debit) |
+| $head_amount:      | amount of transaction              |
+| $head_description: | transaction description            |
+| $head_payee:       | transaction payee                  |
+| $head_category:    | transaction category               |
+
+h3. Optional variables:
+
+| $head_dest_account: | destination account of transfer (required for the 'transfer' option) |
+| $head_notes:        | notes/memo                                                           |
+| $head_class:        | transaction classification                                           |
+| $head_tran_id:      | unique transaction identifier                                        |
