@@ -1,0 +1,4 @@
+[subtree "lib_general"]
+	url = lib_general
+	path = lib_general
+	branch = master
