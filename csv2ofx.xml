@@ -3,22 +3,29 @@
 	<name>csv2ofx</name>
 	<description>converts a csv file of transactions to an ofx or qif file.</description>
 	<version>1.0.0</version>
-	<option name="account">
-		<short_name>-a</short_name>
-		<long_name>--account</long_name>
-		<description>account mapping to use, defaults to 'mint'</description>
+	<option name="source">
+		<short_name>-s</short_name>
+		<long_name>--source</long_name>
+		<description>source mapping to use, defaults to 'mint'</description>
 		<action>StoreString</action>
 		<help_name>name</help_name>
 	</option>
-	<option name="account_type">
+	<option name="accountType">
 		<short_name>-A</short_name>
 		<long_name>--account-type</long_name>
 		<description>set default account type if match is not found, defaults to 'CHECKING'</description>
 		<action>StoreString</action>
 		<help_name>type</help_name>
 	</option>
-	<option name="currency">
+	<option name="collapse">
 		<short_name>-c</short_name>
+		<long_name>--collapse</long_name>
+		<description>account(s) to collapse (comma delimited), defaults to 'Accounts Receivable'</description>
+		<action>StoreString</action>
+		<help_name>currency</help_name>
+	</option>
+	<option name="currency">
+		<short_name>-C</short_name>
 		<long_name>--currency</long_name>
 		<description>set currency, defaults to 'USD'</description>
 		<action>StoreString</action>
@@ -44,7 +51,7 @@
 		<action>StoreString</action>
 		<help_name>lang</help_name>
 	</option>
-	<option name="out_file">
+	<option name="outFile">
 		<short_name>-o</short_name>
 		<long_name>--out-file</long_name>
 		<description>location and name of resulting output file (use '-' to write to stdout), defaults to the project downloads folder</description>
@@ -68,7 +75,7 @@
 	<option name="start">
 		<short_name>-s</short_name>
 		<long_name>--start</long_name>
-		<description>start date, defaults to one month from today</description>
+		<description>start date, defaults to '1/1/1900'</description>
 		<action>StoreString</action>
 		<help_name>date</help_name>
 	</option>
@@ -96,7 +103,7 @@
 		<description>enables variable mode, displays the value of all program variables</description>
 		<action>StoreTrue</action>
 	</option>
-	<argument name="csv_file">
+	<argument name="csvFile">
 		<description>/path</description>
 	</argument>
 </command>
