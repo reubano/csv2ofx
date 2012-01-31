@@ -1,42 +1,16 @@
 !Account
-NLiabilities:Accounts Payable
-D
-TOth L
+NChecking
+TBank
 ^
-!Type:Oth L
+!Type:Bank
 D2009-10-01
 T-115.00
-MA subscription to a VAT registered supplier
-SLiabilities:VAT Control
-EVat split of a registered supplier
+N1005
+PMemo
+SCash
+ESplit Memo
 $15.00
-SExpenses:Subscriptions
-EThe subscription
+SOther
+ESplit Memo
 $100.00
 ^
-D2009-10-01
-T-230.00
-MA subscription to a VAT registered supplier
-SLiabilities:VAT Control
-EVat split of a registered supplier
-$30.00
-SExpenses:Supplies
-EThe Supply
-$200.00
-^
-!Account
-NAssets:Accounts Receivable
-D
-TOth A
-^
-!Type:Oth A
-D2009-10-01
-T115.00
-MThe company made a supply
-SLiabilities:VAT Control
-EVAT on supply - new account - spelling is critical
-$-15.00
-SIncome:Sales
-EA sale
-$-100.00
-^ 
