@@ -17,11 +17,11 @@ class General {
 		'HTTP_POST_FILES', '_REQUEST', 'ignoreList',
 	);
 
-	/************************************************************************** 
+	/*************************************************************************** 
 	 * The class constructor
 	 *
 	 * @param 	boolean $verbose	enable verbose comments
-	 *************************************************************************/
+	 **************************************************************************/
 	function __construct($verbose = FALSE) {
 		$this->verbose = $verbose;
 		if ($this->verbose) {
@@ -29,16 +29,16 @@ class General {
 		} //<-- end if -->
 	} //<-- end function -->
 
-	/************************************************************************** 
+	/*************************************************************************** 
 	 * Returns the extension of a file
 	 *
 	 * @param 	string 	$file 		a filename or the path to a file
 	 * @return 	string	$ext		the file extension
 	 * @throws 	Exception if $file is empty
-	 *************************************************************************/
+	 **************************************************************************/
 	public function getExtension($file) {
 		if (empty($file)) {
-			throw new Exception('Empty file passed from '.__CLASS__.'->'.
+			throw new Exception('Empty file passed from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
@@ -46,20 +46,20 @@ class General {
 				$ext = pathinfo($file, PATHINFO_EXTENSION);
 				return $ext;
 			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
-					__FUNCTION__.'() line '.__LINE__
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
 				);
 			} //<-- end try -->
 		} //<-- end if -->
 	} //<-- end function -->
 
-	/************************************************************************** 
+	/*************************************************************************** 
 	 * Returns the ordinal suffix of a num, e.g., 1st, 2nd, 3rd.
 	 *
 	 * @param 	integer	$num a number
 	 * @return 	string	$ext a number with the ordinal suffix
 	 * @throws 	Exception if $file is empty
-	 *************************************************************************/
+	 **************************************************************************/
 	public function addOrdinal($num) {
 		try {
 			if (!in_array(($num % 100), array(11, 12, 13))){
@@ -74,13 +74,13 @@ class General {
 			return $num.'th';
 			
 			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
-					__FUNCTION__.'() line '.__LINE__
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
 				);
 			} //<-- end try -->
 	} //<-- end function -->
 
-	/************************************************************************** 
+	/*************************************************************************** 
 	 * Recursively searches an array for the nth occurance of a given value 
 	 * type and returns the corresponding key if successful. If passed a 
 	 * multi-dimensional array, it will returns an array of keys.
@@ -92,7 +92,7 @@ class General {
 	 * @return 	mixed	the key (or array of keys) of the found element(s) 
 	 * @throws 	Exception if it can't find enough elements
 	 * @throws 	Exception if $needle is invalid
-	 *************************************************************************/
+	 **************************************************************************/
 	public function arraySearchType($needle, $haystack, $n = 1) {
 		try {
 			$i = 0; // needle element counter
@@ -120,12 +120,15 @@ class General {
 								break;
 								
 							default:
-								throw new Exception('Wrong search type entered.'. 
-									'Please type \'numeric\' or \'string\'.'
+								throw new Exception('Wrong search type '. 
+									'entered. Please type \'numeric\' or '.
+									'\'string\'.'
 								);
 						} //<-- end switch -->
 					} else { // it IS an array, so recurse
-						$needleKeys[] = self::arraySearchType($needle, $value, $n);
+						$needleKeys[] = self::arraySearchType(
+							$needle, $value, $n
+						);
 					} //<-- end if !is_array -->
 				} //<-- end if $i < $n -->
 			} //<-- end foreach -->
@@ -150,13 +153,13 @@ class General {
 			} //<-- end if -->
 			
 		} catch (Exception $e) { 
-			throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
+			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
 	
-	/************************************************************************** 
+	/*************************************************************************** 
 	 * Writes data to a file 
 	 * 
 	 * @param 	string 	$content 	the data to write to the file 
@@ -164,15 +167,15 @@ class General {
 	 * @return 	boolean	TRUE
 	 * @throws 	Exception if $content is empty
 	 * @throws 	Exception if $file exists as a non-empty file
-	 *************************************************************************/
+	 **************************************************************************/
 	public function write2File($content, $file) {
 		if (empty($content)) { // check to make sure $content isn't empty
-			throw new Exception('Empty content passedfrom '.__CLASS__.'->'.
-				__FUNCTION__.'() line '.__LINE__
+			throw new Exception('Empty content passed from '.$this->className.
+				'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} elseif (file_exists($file) && filesize($file) != 0) {
 			throw new Exception('File .'.$file.' already exists from '.
-				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
+				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
 			try {
@@ -186,25 +189,25 @@ class General {
 					
 				return TRUE;
 			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
-					__FUNCTION__.'() line '.__LINE__
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
 				);
 			} //<-- end try -->
 		} //<-- end if -->
 	} //<-- end function -->
 
-	/************************************************************************** 
+	/*************************************************************************** 
 	 * Returns an array from csv data
 	 *
 	 * @param 	string 	$csvFile		the path to a csv file 
 	 * @param 	string 	$fieldDelimiter the csv field delimiter 
 	 * @return 	array	$content		array of csv data
 	 * @throws 	Exception if $csvFile does not exist
-	 *************************************************************************/ 
+	 **************************************************************************/
 	public function csv2Array($csvFile, $fieldDelimiter = ',') {		
 		if (!file_exists($csvFile)) {
 			throw new Exception('File '.$csvFile.' does not exist from '.
-				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
+				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
 			try {
@@ -221,14 +224,14 @@ class General {
 				return $content;
 				
 			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
-					__FUNCTION__.'() line '.__LINE__
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
 				);
 			} //<-- end try -->
 		} //<-- end if -->
 	} //<-- end function -->
 
-	/************************************************************************** 
+	/*************************************************************************** 
 	 * Converts an array to string while adding and extra string to beginning
 	 * and end of each element
 	 *
@@ -240,11 +243,11 @@ class General {
 	 *								string added to the beginning and end of
 	 *								each array element
 	 * @throws 	Exception if $content is not an array 
-	 *************************************************************************/ 
+	 **************************************************************************/
 	public function extraImplode($content, $extra = '\'', $delimiter = ' ') {		
 		if (!is_array($content)) {
 			throw new Exception('Please use an array from '.
-				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
+				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
 			try {
@@ -252,38 +255,38 @@ class General {
 					$extra; // array to string	
 				return $content;
 			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
-					__FUNCTION__.'() line '.__LINE__
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
 				);
 			} //<-- end try -->
 		} //<-- end if -->
 	} //<-- end function -->
 
-	/************************************************************************** 
+	/*************************************************************************** 
 	 * Returns an array from a multiline string
 	 *
 	 * @param 	string 	$content	a multiline string 
 	 * @return 	array	$content	array (one element from each line in the
 	 *								string)
-	 *************************************************************************/ 
+	 **************************************************************************/
 	public function lines2Array($content) {		
 		try {
 			$content = explode("\n", $content); // turn string to array
 			array_pop($content); // remove last element since it is empty
 			return $content;
 		} catch (Exception $e) { 
-			throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
+			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/************************************************************************** 
+	/*************************************************************************** 
 	 * Reads input from STDIN
 	 *
 	 * @return 	string	$string	data read from STDIN
 	 * @throws 	Exception if there is no input
-	 *************************************************************************/ 
+	 **************************************************************************/
 	public function readSTDIN() {
 		try {
 			$string = NULL;
@@ -301,13 +304,13 @@ class General {
 				return $string;
 			} //<-- end if -->
 		} catch (Exception $e) { 
-			die('Exception in '.__CLASS__.'->'.__FUNCTION__.'() line '.
+			die('Exception in '.$this->className.'->'.__FUNCTION__.'() line '.
 				$e->getLine().': '.$e->getMessage()."\n"
 			);
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/************************************************************************** 
+	/*************************************************************************** 
 	 * Performs array_combine() on a multi-dimensional array using the first 
 	 * element for the keys and the remaining elements as the values
 	 *
@@ -330,11 +333,11 @@ class General {
 	 *									$key3 => $value6))
 	 *
 	 * @throws 	Exception if $content is not a multi-dimensional array
-	 *************************************************************************/ 
+	 **************************************************************************/
 	public function arrayInsertKey($content) {	
 		if (!is_array($content[0])) {
 			throw new Exception('Please use a multi-dimensional array from '.
-				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
+				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
 			try {				
@@ -342,10 +345,10 @@ class General {
 				$maxValues = count($content[0]);
 				
 				// loop through each array
-				foreach ($content as $values) {				
+				foreach ($content as $key => $values) {				
 					// check that arrays are same size
 					if (count($values) != $maxValues) { 
-						throw new Exception('Arrays are not of same size');
+						throw new Exception('Array '.$key.' is wrong size');
 					} //<-- end if -->
 				} //<-- end for -->
 				
@@ -358,19 +361,19 @@ class General {
 				
 				return $newContent;
 			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
-					__FUNCTION__.'() line '.__LINE__
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
 				);
 			} //<-- end try -->
 		} //<-- end if -->
 	} //<-- end function -->
 	
-	/************************************************************************** 
+	/*************************************************************************** 
 	 * Recursively returns all defined variables
 	 *
 	 * @param 	array 	$ignoreList 	the variables to ignore 
 	 * @return 	array 	$definedVars	defined variables not in the ignore list
-	 *************************************************************************/ 
+	 **************************************************************************/
 	public function getVars($vars, $ignoreList = NULL) {
 		try {
 			if (empty($ignoreList)) {
@@ -389,22 +392,22 @@ class General {
 			
 			return $definedVars;
 		} catch (Exception $e) { 
-			throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
+			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
 	
-	/************************************************************************** 
+	/*************************************************************************** 
 	 * Returns the filename without extension of a file
 	 *
 	 * @param 	string 	$file 	a filename or the path to a file
 	 * @return 	string	$base	filename without extension
 	 * @throws 	Exception if an empty value is passed
-	 *************************************************************************/ 
+	 **************************************************************************/
 	public function getBase($file) {
 		if (empty($file)) {
-			throw new Exception('Empty file passed from '.__CLASS__.'->'.
+			throw new Exception('Empty file passed from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
@@ -412,24 +415,24 @@ class General {
 				$base = pathinfo($file, PATHINFO_FILENAME);
 				return $base;
 			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
-					__FUNCTION__.'() line '.__LINE__
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
 				);
 			} //<-- end try -->
 		} //<-- end if -->
 	} //<-- end function -->
 
-	/************************************************************************** 
+	/*************************************************************************** 
 	 * Returns the full path to files in the current directory
 	 *
 	 * @param 	array 	$files 	a file in the current directory
 	 * @return 	string	$base	filename without extension
 	 * @throws 	Exception if $files is not an array 
-	 *************************************************************************/ 
+	 **************************************************************************/
 	public function getFullPath($files) {
 		if (!is_array($files)) {
 			throw new Exception('Please use an array from '.
-				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
+				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
 			try {
@@ -443,24 +446,24 @@ class General {
 				
 				return $files;
 			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
-					__FUNCTION__.'() line '.__LINE__
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
 				);
 			} //<-- end try -->
 		} //<-- end if -->
 	} //<-- end function -->
 
-	/************************************************************************** 
+	/*************************************************************************** 
 	 * Writes a contents of a given file to a new file with LF line endings
 	 * 
 	 * @param 	string 	$file 		a filename or the path to a file
 	 * @return 	string	$tempFile	path to the temporary file created
 	 * @throws 	Exception if $file does not exist
-	 *************************************************************************/ 
+	 **************************************************************************/
 	public function makeLFLineEndings($file) {
 		if (!file_exists($file)) {
 			throw new Exception('File '.$file.' does not exist from '.
-				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
+				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
 			try {
@@ -479,14 +482,14 @@ class General {
 				self::write2File($string, $tempFile);
 				return $tempFile;
 			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
-					__FUNCTION__.'() line '.__LINE__
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
 				);
 			} //<-- end try -->
 		} //<-- end if -->
 	} //<-- end function -->
 
-	/************************************************************************** 
+	/*************************************************************************** 
 	 * Performs a number or date format on the elements of a given key in a 
 	 * multi-dimensional array suitable for import into a sqlite database
 	 *	 
@@ -506,11 +509,11 @@ class General {
 	 * @return 	array	$newContent	new array with formatted values	
 	 * @throws 	Exception if $content is not a multi-dimensional array
 	 * @throws 	Exception if $format is invalid
-	 *************************************************************************/
+	 **************************************************************************/
 	public function formatArray($content, $key, $format) {
 		if (!is_array($content[0])) {
 			throw new Exception('Please use a multi-dimensional array from '.
-				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
+				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
 			try {
@@ -552,19 +555,97 @@ class General {
 						
 				return $newContent;
 				} catch (Exception $e) { 
-					throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
-						__FUNCTION__.'() line '.__LINE__
+					throw new Exception($e->getMessage().' from '
+						.$this->className.'->'.__FUNCTION__.'() line '.__LINE__
 					);
 				} //<-- end try -->
 			} //<-- end if -->
 		} //<-- end function -->
+
+	/*************************************************************************** 
+	 * Sort a multidimensional array by the value of a given subkey
+	 * 
+	 * @param 	array 	$array	the array to sort
+	 * @param 	string 	$key	the subkey to sort by 
+	 * @return 	array	$content	new array with moved values	
+	 **************************************************************************/
+	public function arraySortBySubValue(&$array, $key) {
+		if(!array_key_exists($key, $array[0])) {
+			throw new Exception('Key \''.$key.'\' not found from '.
+				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} else {
+			try {
+				$cmp = function (array $a, array $b) use ($key) {
+			    	return strcmp($a[$key], $b[$key]);
+				};
+				
+			    usort($array, $cmp);
+			} catch (Exception $e) { 
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
+				);
+			} //<-- end try -->
+		} //<-- end if -->
+	} //<-- end function -->			
+
+	/*************************************************************************** 
+	 * Move a given element to the beginning of an array 
+	 * elements in an array
+	 * 
+	 * @param 	array 	$array	the array to perform the move on
+	 * @param 	string 	$key	the the key of the element to move 
+	 **************************************************************************/
+	public function arrayMove(&$array, $key) {
+		if(!array_key_exists($key, $array)) {
+			throw new Exception('Key '.$key.' not found from '.
+				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} else {
+			try {
+				$append = $array[$key];
+				array_splice($array, $key, 1);
+				array_unshift($array, $append);
+			} catch (Exception $e) { 
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
+				);
+			} //<-- end try -->
+		} //<-- end if -->
+	} //<-- end function -->			
+
+	/*************************************************************************** 
+	 * Recursively replaces all occurrences of $needle with $replace on 
+	 * elements in an array (by reference)
+	 * 
+	 * @param 	array 	$content	the array to perform the replacement on
+	 * @param 	string 	$needle		the value being searched for (an array may 
+	 *								be used to designate multiple needles)
+	 * @param 	string 	$replace	the replacement value that replaces $needle 
+	 *								(an array may be used to designate multiple 
+	 *								replacements)
+	 **************************************************************************/
+	public function arraySubstituteBr(&$content, $needle, $replace) {	
+		try {
+			foreach ($content as &$haystack) {
+				if (!is_array($haystack)) { // If it's not an array, sanitize it
+					$haystack = str_replace($needle, $replace, $haystack);
+				} else { // it IS an array, so recurse
+					self::arraySubstituteBr($haystack, $needle, $replace);
+				} //<-- end if -->
+			} //<-- end foreach -->	
+		} catch (Exception $e) { 
+			throw new Exception($e->getMessage().' from '.$this->className.'->'.
+				__FUNCTION__.'() line '.__LINE__
+			);
+		} //<-- end try -->
+	} //<-- end function -->
 			
-	/************************************************************************** 
+	/*************************************************************************** 
 	 * Recursively replaces all occurrences of $needle with $replace on 
 	 * elements in an array
 	 * 
 	 * @param 	array 	$content	the array to perform the replacement on
-	 *
 	 * @param 	string 	$needle		the value being searched for (an array may 
 	 *								be used to designate multiple needles)
 	 * @param 	string 	$replace	the replacement value that replaces $needle 
@@ -572,7 +653,7 @@ class General {
 	 *								replacements)
 	 *								
 	 * @return 	array	$newContent	new array with replaced values	
-	 *************************************************************************/ 
+	 **************************************************************************/
 	public function arraySubstitute($content, $needle, $replace) {
 		try {
 			foreach ($content as $haystack) {
@@ -580,22 +661,45 @@ class General {
 					$newContent[] = str_replace($needle, $replace, $haystack);
 				} else { // it IS an array, so recurse
 					$newContent[] = self::arraySubstitute($haystack, 
-						$needle, $replace
-					);
+						$needle, $replace);
 				} //<-- end if -->
 			} //<-- end foreach -->		
 			
-			// I think all I have to do is the following:
-			// $newContent = str_replace($needle, $replace, $content);
 			return $newContent;
 		} catch (Exception $e) { 
-			throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
+			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
-
-	/************************************************************************** 
+	
+	/*************************************************************************** 
+	 * Converts data to xml compliant input
+	 * 
+	 * @param 	string 	$content the content to clean 
+	 * @return 	string 	$content the cleaned content
+	 * @throws 	Exception if $content is empty
+	 **************************************************************************/
+	public function xmlize($content) {
+		if (empty($content)) { // check to make sure $content isn't empty
+			throw new Exception('Empty value passed from '.
+				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} else {
+			try {
+				$invalid_text = array('&', '<', '>', '\r\n', '\n');
+				$valid_text = array('&amp;', '&lt;', '&gt;', ' ', ' ');
+				$content = str_replace($invalid_text, $valid_text, $content);
+				return $content;
+			} catch (Exception $e) { 
+				throw new Exception($e->getMessage().' from '.$this->className.
+					'->'.__FUNCTION__.'() line '.__LINE__
+				);
+			} //<-- end try -->
+		} //<-- end if -->
+	} //<-- end function -->
+	
+	/*************************************************************************** 
 	 * Overwrites an array to a pre-existing csv file
 	 * 
 	 * @param 	string 	$content 		the data to write to the file 
@@ -603,11 +707,11 @@ class General {
 	 * @param 	string 	$fieldDelimiter the csv field delimiter 
 	 * @return 	boolean	TRUE
 	 * @throws 	Exception if $csvFile does not exist
-	 *************************************************************************/ 
+	 **************************************************************************/
 	public function overwriteCSV($content, $csvFile, $fieldDelimiter = ',') {	
 		if (!file_exists($csvFile)) {
 			throw new Exception('File .'.$csvFile.' does not exsit from '.
-				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
+				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
 			try {
@@ -619,14 +723,14 @@ class General {
 				unlink($tempFile);
 				return TRUE;
 			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
-					__FUNCTION__.'() line '.__LINE__
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
 				);
 			} //<-- end try -->
 		} //<-- end if -->
 	} //<-- end function -->
 			
-	/************************************************************************** 
+	/*************************************************************************** 
 	 * Writes an array to a csv file 
 	 *
 	 * @param 	string 	$content 		the data to write to the file 
@@ -635,11 +739,11 @@ class General {
 	 * @param 	string 	$fieldDelimiter the csv field delimiter 
 	 * @return 	boolean	TRUE
 	 * @throws 	Exception if $csvFile exists or is non-empty 
-	 *************************************************************************/ 
+	 **************************************************************************/
 	public function array2CSV($content, $csvFile, $fieldDelimiter = ',') {	
 		if (file_exists($csvFile) && filesize($csvFile) != 0) {
 			throw new Exception('File .'.$csvFile.' already exists from '.
-				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
+				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
 			try {	
@@ -656,8 +760,8 @@ class General {
 				
 				return TRUE;
 			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.__CLASS__.'->'.
-					__FUNCTION__.'() line '.__LINE__
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
 				);
 			} //<-- end try -->
 		} //<-- end if -->
