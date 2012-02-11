@@ -311,6 +311,42 @@ class General {
 	} //<-- end function -->
 
 	/*************************************************************************** 
+	 * Hashes the contents of an array
+	 *
+	 * @param 	array 	$content	the array containing the content to hash
+	 * @param 	string 	$hashKey	the key of the element to hash
+	 * @param 	string 	$algo		the hashing algorithm to use
+	 *
+	 * supported algorithms:
+	 * adler32; crc32; crc32b; gost; haval128,3; haval128,4; haval128,5; 
+	 * haval160,3; haval160,4; haval160,5; haval192,3; haval192,4; haval192,5; 
+	 * haval224,3; haval224,4; haval224,5; haval256,3; haval256,4; haval256,5; 
+	 * md2; md4; md5; ripemd128; ripemd160; ripemd256; ripemd320; sha1; sha256; 
+	 * sha384; sha512; snefru; tiger128,3; tiger128,4; tiger160,3; tiger160,4; 
+	 * tiger192,3; tiger192,4; whirlpool
+	 * 
+	 * @throws 	Exception if $hashKey does not exist
+	 **************************************************************************/
+	public function hash(&$content, $hashKey, $algo) {
+		if(!array_key_exists($hashKey, $content[0])) {
+			throw new Exception('Key \''.$hashKey.'\' not found from '.
+				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} else {
+			try {
+				foreach ($content as $key => $value) {
+					$content[$key][$hashKey] = hash($algo, $value[$hashKey]);
+				}
+		
+			} catch (Exception $e) { 
+				die('Exception in '.$this->className.'->'.__FUNCTION__.
+					'() line '.$e->getLine().': '.$e->getMessage()."\n"
+				);
+			} //<-- end try -->
+		} //<-- end if -->
+	} //<-- end function -->
+	
+	/*************************************************************************** 
 	 * Performs array_combine() on a multi-dimensional array using the first 
 	 * element for the keys and the remaining elements as the values
 	 *
