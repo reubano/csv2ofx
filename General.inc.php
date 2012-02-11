@@ -199,36 +199,53 @@ class General {
 	/*************************************************************************** 
 	 * Returns an array from csv data
 	 *
-	 * @param 	string 	$csvFile		the path to a csv file 
+	 * @param 	string 	$csvContent		csv text or path to a csv file 
+	 * @param 	boolean	$file 			is $csvContent a file path?
 	 * @param 	string 	$fieldDelimiter the csv field delimiter 
 	 * @return 	array	$content		array of csv data
 	 * @throws 	Exception if $csvFile does not exist
 	 **************************************************************************/
-	public function csv2Array($csvFile, $fieldDelimiter = ',') {		
-		if (!file_exists($csvFile)) {
-			throw new Exception('File '.$csvFile.' does not exist from '.
-				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
-			);
-		} else {
-			try {
+	public function csv2Array($csvContent, $file = TRUE, 
+		$fieldDelimiter = ',') 
+	{
+		try {
+			if ($file) {
+				$csvFile = $csvContent;
+			
+				if (!file_exists($csvFile)) {
+					throw new Exception('File '.$csvFile.' does not exist'.
+						' from '.$this->className.'->'.__FUNCTION__.'() line '.
+						__LINE__
+					);
+				}
+				
 				$tempFile = self::makeLFLineEndings($csvFile);
 				$handle = fopen($tempFile, 'r');
-				
+				unlink($tempFile);
+			} else { // not a file
+				$csvContent = self::lines2Array($csvContent);
+			} //<-- end if -->
+			
+			if ($file) {	
 				while (($data = fgetcsv($handle, 1000, $fieldDelimiter)) 
-					!== FALSE) {
+					!== FALSE)
+				{
 					$content[] = $data;
 				} //<-- end while -->
 				
 				fclose($handle);
-				unlink($tempFile);
-				return $content;
-				
-			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.$this->className
-					.'->'.__FUNCTION__.'() line '.__LINE__
-				);
-			} //<-- end try -->
-		} //<-- end if -->
+			} else { // not a file
+				foreach ($csvContent as $data) {
+					$content[] = str_getcsv($data, $fieldDelimiter);
+				} //<-- end while -->
+			} //<-- end if -->
+			
+			return $content;			
+		} catch (Exception $e) { 
+			throw new Exception($e->getMessage().' from '.$this->className
+				.'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} //<-- end try -->
 	} //<-- end function -->
 
 	/*************************************************************************** 
@@ -373,46 +390,38 @@ class General {
 	 * @throws 	Exception if $content is not a multi-dimensional array
 	 **************************************************************************/
 	public function arrayInsertKey($content) {
-		try {
-			$keys = array_keys($content);
-			print_r($keys);
-			
-			if (is_numeric($keys[0])) {
-				if (!is_array($content[0])) {
-					throw new Exception('Please use a multi-dimensional array'.
-						'from '.$this->className.'->'.__FUNCTION__.'() line '.
-						__LINE__
-					);
-				} else {							
-					$maxElements = count($content);
-					$maxValues = count($content[0]);
-					
-					// loop through each array
-					foreach ($content as $key => $values) {				
-						// check that arrays are same size
-						if (count($values) != $maxValues) { 
-							throw new Exception('Array '.$key.' is wrong size');
-						} //<-- end if -->
-					} //<-- end for -->
-					
-					$keys = $content[0]; // get key names
-					
-					// loop through each array
-					foreach ($content as $values) { 
-						$newContent[] = array_combine($keys, $values);
-					} //<-- end for loop through each array -->
-					
-					return $newContent;
-				} //<-- end if -->
-			} else {
-				$newContent = $content;
-				return $newContent;
-			} //<-- end if -->
-		} catch (Exception $e) { 
-			throw new Exception($e->getMessage().' from '.$this->className
-				.'->'.__FUNCTION__.'() line '.__LINE__
+		if (!is_array(current($content))) {
+			throw new Exception('Please use a multi-dimensional array'.
+				'from '.$this->className.'->'.__FUNCTION__.'() line '.
+				__LINE__
 			);
-		} //<-- end try -->
+		} else {
+			try {				
+				$maxElements = count($content);
+				$maxValues = count(current($content));
+				
+				// loop through each array
+				foreach ($content as $key => $values) {				
+					// check that arrays are same size
+					if (count($values) != $maxValues) { 
+						throw new Exception('Array '.$key.' is wrong size');
+					} //<-- end if -->
+				} //<-- end for -->
+				
+				$keys = $content[0]; // get key names
+				
+				// loop through each array
+				foreach ($content as $values) { 
+					$newContent[] = array_combine($keys, $values);
+				} //<-- end for loop through each array -->
+				
+				return $newContent;
+			} catch (Exception $e) { 
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
+				);
+			} //<-- end try -->
+		} //<-- end if -->
 	} //<-- end function -->
 	
 	/*************************************************************************** 
