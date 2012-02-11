@@ -501,6 +501,37 @@ class General {
 	} //<-- end function -->
 
 	/*************************************************************************** 
+	 * Reads the contents of a given file
+	 * 
+	 * @param 	string 	$file 		a filename or the path to a file
+	 * @return 	string	$content	the file contents
+	 * @throws 	Exception if $file does not exist
+	 **************************************************************************/
+	public function readFile($file) {
+		if (!file_exists($file)) {
+			throw new Exception('File '.$file.' does not exist from '.
+				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} else {
+			try {
+				$handle 	= fopen($file, 'r');
+				$string 	= NULL;
+				
+				while (!feof($handle)) {
+					$string .= fgets($handle, 1024);
+				} //<-- end while -->
+				
+				fclose($handle);
+				return $string;
+			} catch (Exception $e) { 
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
+				);
+			} //<-- end try -->
+		} //<-- end if -->
+	} //<-- end function -->
+
+	/*************************************************************************** 
 	 * Writes a contents of a given file to a new file with LF line endings
 	 * 
 	 * @param 	string 	$file 		a filename or the path to a file
@@ -514,18 +545,10 @@ class General {
 			);
 		} else {
 			try {
-				$handle 	= fopen($file, 'r');
-				$string 	= NULL;
 				$tempFile	= tempnam('/tmp', __FUNCTION__.'.');
-				
-				while (!feof($handle)) {
-					$line = fgets($handle, 1024);
-					$line = str_replace("\r\n", "\n", $line);
-					$line = str_replace("\r", "\n", $line);
-					$string .= $line;
-				} //<-- end while -->
-				
-				fclose($handle);
+				$string 	= self::readFile($file);
+				$string 	= str_replace("\r\n", "\n", $string);
+				$string 	= str_replace("\r", "\n", $string);
 				self::write2File($string, $tempFile);
 				return $tempFile;
 			} catch (Exception $e) { 
