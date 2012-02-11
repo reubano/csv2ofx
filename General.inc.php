@@ -720,7 +720,7 @@ class General {
 	 **************************************************************************/
 	public function arraySubstitute($content, $needle, $replace) {
 		try {
-			foreach ($content as $haystack) {
+			foreach ($content as $haystack) {				
 				if (!is_array($haystack)) { // If it's not an array, sanitize it
 					$newContent[] = str_replace($needle, $replace, $haystack);
 				} else { // it IS an array, so recurse
