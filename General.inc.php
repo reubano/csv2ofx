@@ -581,42 +581,37 @@ class General {
 	 *										$key2 => $value5, 
 	 *										$key3 => $value6))
 	 *
-	 * @param 	string 	$key		the key whose values you want to format
+	 * @param 	string 	$formatKey	the key whose values you want to format
 	 * @param 	string 	$format		the type of format to apply the (i.e. 
 	 *								'number' or 'date')
 	 *								
-	 * @return 	array	$newContent	new array with formatted values	
 	 * @throws 	Exception if $content is not a multi-dimensional array
 	 * @throws 	Exception if $format is invalid
 	 **************************************************************************/
-	public function formatArray($content, $key, $format) {
+	public function formatArray(&$content, $formatKey, $format) {
 		if (!is_array(current($content))) {
 			throw new Exception('Please use a multi-dimensional array from '.
 				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
 			try {
-				$i = 0;
-				
 				switch ($format){
 					case 'number':
-						foreach ($content as $row) {
-							$number = $row[$key];
-							$number = str_replace(',', '', $number);
-							$number = $number + 0;
-							$formattedRow[] = number_format($number, 2, '.',
-								''
-							);
+						foreach ($content as $key => $row) {
+							$number = $row[$formatKey];
+							$number = str_replace(',', '', $number) + 0;
+							$number = number_format($number, 2, '.', '');
+							$content[$key][$formatKey] = $number;
 						} //<-- end foreach -->
 					
 						break;
 						
 					case 'date':
-						foreach ($content as $row) {
-							$date = $row[$key];
-							
+						foreach ($content as $key => $row) {
+							$date = $row[$formatKey];
 							// format to yyyy-mm-dd
-							$formattedRow[] = date("Y-m-d", strtotime($date));
+							$date = date("Y-m-d", strtotime($date));
+							$content[$key][$formatKey] = $date;
 						} //<-- end foreach -->
 						
 						break;
@@ -626,20 +621,13 @@ class General {
 							' \'number\' or \'date\'.'
 						);
 				} //<-- end switch -->
-	
-				foreach ($formattedRow as $row) {
-					$newContent[$i][$key] = $row;
-					$i++;
-				} //<-- end foreach -->
-						
-				return $newContent;
-				} catch (Exception $e) { 
-					throw new Exception($e->getMessage().' from '
-						.$this->className.'->'.__FUNCTION__.'() line '.__LINE__
-					);
-				} //<-- end try -->
-			} //<-- end if -->
-		} //<-- end function -->
+			} catch (Exception $e) { 
+				throw new Exception($e->getMessage().' from '
+					.$this->className.'->'.__FUNCTION__.'() line '.__LINE__
+				);
+			} //<-- end try -->
+		} //<-- end if -->
+	} //<-- end function -->
 
 	/*************************************************************************** 
 	 * Sort a multidimensional array by the value of a given subkey
