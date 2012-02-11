@@ -627,7 +627,6 @@ class General {
 
 	/*************************************************************************** 
 	 * Move a given element to the beginning of an array 
-	 * elements in an array
 	 * 
 	 * @param 	array 	$array	the array to perform the move on
 	 * @param 	string 	$key	the the key of the element to move 
