@@ -205,9 +205,7 @@ class General {
 	 * @return 	array	$content		array of csv data
 	 * @throws 	Exception if $csvFile does not exist
 	 **************************************************************************/
-	public function csv2Array($csvContent, $file = TRUE, 
-		$fieldDelimiter = ',') 
-	{
+	public function csv2Array($csvContent, $fieldDelimiter = ',', $file = TRUE){
 		try {
 			if ($file) {
 				$csvFile = $csvContent;
@@ -800,9 +798,9 @@ class General {
 	 * Writes an array to a csv file
 	 *
 	 * @param 	string 	$content 		the data to write to the file 
+	 * @param 	string 	$fieldDelimiter the csv field delimiter 
 	 * @param 	string 	$csvFile 		the path to an empty or non existing 
 	 *									csv file
-	 * @param 	string 	$fieldDelimiter the csv field delimiter 
 	 * @return 	boolean	TRUE
 	 * @throws 	Exception if $csvFile exists or is non-empty 
 	 **************************************************************************/
