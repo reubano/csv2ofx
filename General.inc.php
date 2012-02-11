@@ -328,7 +328,7 @@ class General {
 	 * @throws 	Exception if $hashKey does not exist
 	 **************************************************************************/
 	public function hash(&$content, $hashKey, $algo) {
-		if(!array_key_exists($hashKey, $content[0])) {
+		if(!array_key_exists($hashKey, current($content))) {
 			throw new Exception('Key \''.$hashKey.'\' not found from '.
 				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
@@ -556,7 +556,7 @@ class General {
 	 * @throws 	Exception if $format is invalid
 	 **************************************************************************/
 	public function formatArray($content, $key, $format) {
-		if (!is_array($content[0])) {
+		if (!is_array(current($content))) {
 			throw new Exception('Please use a multi-dimensional array from '.
 				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
@@ -615,7 +615,7 @@ class General {
 	 * @return 	array	$content	new array with moved values	
 	 **************************************************************************/
 	public function arraySortBySubValue(&$array, $key) {
-		if(!array_key_exists($key, $array[0])) {
+		if(!array_key_exists($key, current($array))) {
 			throw new Exception('Key \''.$key.'\' not found from '.
 				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
 			);
@@ -775,7 +775,7 @@ class General {
 	} //<-- end function -->
 			
 	/*************************************************************************** 
-	 * Writes an array to a csv file 
+	 * Writes an array to a csv file
 	 *
 	 * @param 	string 	$content 		the data to write to the file 
 	 * @param 	string 	$csvFile 		the path to an empty or non existing 
