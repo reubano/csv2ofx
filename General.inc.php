@@ -370,38 +370,47 @@ class General {
 	 *
 	 * @throws 	Exception if $content is not a multi-dimensional array
 	 **************************************************************************/
-	public function arrayInsertKey($content) {	
-		if (!is_array($content[0])) {
-			throw new Exception('Please use a multi-dimensional array from '.
-				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
-			);
-		} else {
-			try {				
-				$maxElements = count($content);
-				$maxValues = count($content[0]);
-				
-				// loop through each array
-				foreach ($content as $key => $values) {				
-					// check that arrays are same size
-					if (count($values) != $maxValues) { 
-						throw new Exception('Array '.$key.' is wrong size');
-					} //<-- end if -->
-				} //<-- end for -->
-				
-				$keys = $content[0]; // get key names
-				
-				// loop through each array
-				foreach ($content as $values) { 
-					$newContent[] = array_combine($keys, $values);
-				} //<-- end for loop through each array -->
-				
+	public function arrayInsertKey($content) {
+		try {
+			$keys = array_keys($content);
+			print_r($keys);
+			
+			if (is_numeric($keys[0])) {
+				if (!is_array($content[0])) {
+					throw new Exception('Please use a multi-dimensional array'.
+						'from '.$this->className.'->'.__FUNCTION__.'() line '.
+						__LINE__
+					);
+				} else {							
+					$maxElements = count($content);
+					$maxValues = count($content[0]);
+					
+					// loop through each array
+					foreach ($content as $key => $values) {				
+						// check that arrays are same size
+						if (count($values) != $maxValues) { 
+							throw new Exception('Array '.$key.' is wrong size');
+						} //<-- end if -->
+					} //<-- end for -->
+					
+					$keys = $content[0]; // get key names
+					
+					// loop through each array
+					foreach ($content as $values) { 
+						$newContent[] = array_combine($keys, $values);
+					} //<-- end for loop through each array -->
+					
+					return $newContent;
+				} //<-- end if -->
+			} else {
+				$newContent = $content;
 				return $newContent;
-			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.$this->className
-					.'->'.__FUNCTION__.'() line '.__LINE__
-				);
-			} //<-- end try -->
-		} //<-- end if -->
+			} //<-- end if -->
+		} catch (Exception $e) { 
+			throw new Exception($e->getMessage().' from '.$this->className
+				.'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} //<-- end try -->
 	} //<-- end function -->
 	
 	/*************************************************************************** 
