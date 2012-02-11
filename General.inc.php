@@ -271,6 +271,8 @@ class General {
 	 **************************************************************************/
 	public function lines2Array($content) {		
 		try {
+			$content = str_replace("\r\n", "\n", $content);
+			$content = str_replace("\r", "\n", $content);
 			$content = explode("\n", $content); // turn string to array
 			array_pop($content); // remove last element since it is empty
 			return $content;
