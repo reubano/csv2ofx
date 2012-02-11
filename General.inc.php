@@ -362,6 +362,41 @@ class General {
 			} //<-- end try -->
 		} //<-- end if -->
 	} //<-- end function -->
+
+	/*************************************************************************** 
+	 * Adds elements to a multidimensional array so that each sub-array is as
+	 * long as the first sub-array
+	 *
+	 * @param 	array 	$content	of the following form:
+	 * @throws 	Exception if $content is not a multi-dimensional array
+	 **************************************************************************/
+	public function lengthenArray(&$content) {
+		if (!is_array(current($content))) {
+			throw new Exception('Please use a multi-dimensional array'.
+				'from '.$this->className.'->'.__FUNCTION__.'() line '.
+				__LINE__
+			);
+		} else {
+			try {				
+				$count = count(current($content));
+				
+				// loop through each array
+				foreach ($content as $key => $values) {				
+					$num = $count - count($values);
+					
+					if ($num > 0) { // check that arrays are same size
+						for ($i = 0; $i < $num; $i++) {
+							array_push($content[$key], '');
+						} //<-- end for -->
+					} //<-- end if -->
+				} //<-- end foreach -->
+			} catch (Exception $e) { 
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
+				);
+			} //<-- end try -->
+		} //<-- end if -->
+	} //<-- end function -->
 	
 	/*************************************************************************** 
 	 * Performs array_combine() on a multi-dimensional array using the first 
