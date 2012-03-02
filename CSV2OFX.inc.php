@@ -102,13 +102,34 @@ class CSV2OFX {
 				$this->headDate 	= 'Date';
 				$this->headAmount 	= 'Total';
 				$this->headPayee 	= 'Description';
-				$this->headCheckNum 	= 'Reference';
-				$this->headDesc 	= 'Notes';
+				$this->headDesc 	= 'Reference';
 				$this->headSplitAccount = 'Category';
 				$this->headTranId 	= 'row';
 				$this->split		= FALSE;
 				break;
-	 
+
+			case 'payment':
+				$this->headAccount	= 'Account';
+				$this->headDate 	= 'Date';
+				$this->headAmount 	= 'Total';
+				$this->headPayee 	= 'Description';
+				$this->headCheckNum 	= 'Inv';
+				$this->headDesc 	= 'Rcp';
+				$this->headSplitAccount = 'Category';
+				$this->headTranId 	= 'row';
+				$this->split		= FALSE;
+				break;
+
+			case 'paid':
+				$this->headAccount	= 'Account';
+				$this->headDate 	= 'Date';
+				$this->headAmount 	= 'Total';
+				$this->headPayee 	= 'Product';
+				$this->headSplitAccount = 'Category';
+				$this->headTranId 	= 'row';
+				$this->split		= FALSE;
+				break;
+
 	 		default:
 				$this->headAccount	= 'Field';
 				$this->headAccountId= 'Field';
@@ -468,9 +489,12 @@ class CSV2OFX {
 				}
 			}
 			
-			$this->tranDesc = $transaction[$this->headDesc];
 			$this->tranPayee = $transaction[$this->headPayee];
 			$this->tranSplitAccount = $transaction[$this->headSplitAccount];
+			
+			if ($this->headDesc) {
+				$this->tranDesc = $transaction[$this->headDesc];
+			}
 
 			if ($this->headNotes) {
 				$this->tranNotes = $transaction[$this->headNotes];
