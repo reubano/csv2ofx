@@ -52,7 +52,7 @@ class CSV2OFX {
 		$this->source = $source;
 		$this->csvContent = $csvContent;
 		$this->verbose = $verbose;
-
+				
 		// set headers 
 		// modify the 'custom' section to add support for other websites
 		// add additional case blocks if needed
@@ -94,6 +94,17 @@ class CSV2OFX {
 				$this->headSplitAccount = 'Category';
 				$this->headClass 	= 'Classification';
 				$this->headTranId 	= 'Transaction Id';
+				$this->split		= FALSE;
+				break;
+
+			case 'custom':
+				$this->headAccount	= 'Account';
+				$this->headDate 	= 'Date';
+				$this->headAmount 	= 'Total';
+				$this->headPayee 	= 'Description';
+				$this->headDesc 	= 'Reference';
+				$this->headSplitAccount = 'Category';
+				$this->headTranId 	= 'row';
 				$this->split		= FALSE;
 				break;
 	 
