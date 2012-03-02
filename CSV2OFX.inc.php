@@ -566,10 +566,15 @@ class CSV2OFX {
 			if ($this->split) {
 				$content .= "T$this->tranAmount\n";
 			} else {
-				if (substr($this->tranAmount, 0, 1) == '-') {
-					$tranAmount = substr($this->tranAmount, 1);
+				if ($this->source == 'xero') {
+					// switch signs
+					if (substr($this->tranAmount, 0, 1) == '-') {
+						$tranAmount = substr($this->tranAmount, 1);
+					} else {
+						$tranAmount = '-'.$this->tranAmount;
+					}
 				} else {
-					$tranAmount = '-'.$this->tranAmount;
+					$tranAmount = $this->tranAmount;
 				}
 				
 				$content .= "T$tranAmount\n";
