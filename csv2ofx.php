@@ -145,7 +145,7 @@ try {
 	if ($stdin) {
 		$csvContent = $general->readSTDIN();
 	} else {
-		$csvContent = $general->csv2array($csvFile);
+		$csvContent = $general->csv2Array($csvFile);
 	} //<-- end if -->
 	
 	$csvContent = $general->arrayInsertKey($csvContent);
@@ -290,7 +290,6 @@ try {
 		$general->write2file($content, $outFile);
 	} else {
 		print_r($content);
-		//fwrite(STDOUT, "$content\n");
 	} //<-- end if not test mode -->
 
 	exit(0);
