@@ -148,6 +148,8 @@ try {
 		$csvContent = $general->csv2Array($csvFile);
 	} //<-- end if -->
 	
+	$general->trimArray($csvContent);
+	$general->lengthenArray($csvContent);
 	$csvContent = $general->arrayInsertKey($csvContent);
 	array_shift($csvContent);
 	
