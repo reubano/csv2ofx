@@ -199,36 +199,51 @@ class General {
 	/*************************************************************************** 
 	 * Returns an array from csv data
 	 *
-	 * @param 	string 	$csvFile		the path to a csv file 
+	 * @param 	string 	$csvContent		csv text or path to a csv file 
+	 * @param 	boolean	$file 			is $csvContent a file path?
 	 * @param 	string 	$fieldDelimiter the csv field delimiter 
 	 * @return 	array	$content		array of csv data
 	 * @throws 	Exception if $csvFile does not exist
 	 **************************************************************************/
-	public function csv2Array($csvFile, $fieldDelimiter = ',') {		
-		if (!file_exists($csvFile)) {
-			throw new Exception('File '.$csvFile.' does not exist from '.
-				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
-			);
-		} else {
-			try {
+	public function csv2Array($csvContent, $fieldDelimiter = ',', $file = TRUE){
+		try {
+			if ($file) {
+				$csvFile = $csvContent;
+			
+				if (!file_exists($csvFile)) {
+					throw new Exception('File '.$csvFile.' does not exist'.
+						' from '.$this->className.'->'.__FUNCTION__.'() line '.
+						__LINE__
+					);
+				}
+				
 				$tempFile = self::makeLFLineEndings($csvFile);
 				$handle = fopen($tempFile, 'r');
-				
+				unlink($tempFile);
+			} else { // not a file
+				$csvContent = self::lines2Array($csvContent);
+			} //<-- end if -->
+			
+			if ($file) {	
 				while (($data = fgetcsv($handle, 1000, $fieldDelimiter)) 
-					!== FALSE) {
+					!== FALSE)
+				{
 					$content[] = $data;
 				} //<-- end while -->
 				
 				fclose($handle);
-				unlink($tempFile);
-				return $content;
-				
-			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.$this->className
-					.'->'.__FUNCTION__.'() line '.__LINE__
-				);
-			} //<-- end try -->
-		} //<-- end if -->
+			} else { // not a file
+				foreach ($csvContent as $data) {
+					$content[] = str_getcsv($data, $fieldDelimiter);
+				} //<-- end while -->
+			} //<-- end if -->
+			
+			return $content;			
+		} catch (Exception $e) { 
+			throw new Exception($e->getMessage().' from '.$this->className
+				.'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} //<-- end try -->
 	} //<-- end function -->
 
 	/*************************************************************************** 
@@ -271,6 +286,8 @@ class General {
 	 **************************************************************************/
 	public function lines2Array($content) {		
 		try {
+			$content = str_replace("\r\n", "\n", $content);
+			$content = str_replace("\r", "\n", $content);
 			$content = explode("\n", $content); // turn string to array
 			array_pop($content); // remove last element since it is empty
 			return $content;
@@ -311,6 +328,77 @@ class General {
 	} //<-- end function -->
 
 	/*************************************************************************** 
+	 * Hashes the contents of an array
+	 *
+	 * @param 	array 	$content	the array containing the content to hash
+	 * @param 	string 	$hashKey	the key of the element to hash
+	 * @param 	string 	$algo		the hashing algorithm to use
+	 *
+	 * supported algorithms:
+	 * adler32; crc32; crc32b; gost; haval128,3; haval128,4; haval128,5; 
+	 * haval160,3; haval160,4; haval160,5; haval192,3; haval192,4; haval192,5; 
+	 * haval224,3; haval224,4; haval224,5; haval256,3; haval256,4; haval256,5; 
+	 * md2; md4; md5; ripemd128; ripemd160; ripemd256; ripemd320; sha1; sha256; 
+	 * sha384; sha512; snefru; tiger128,3; tiger128,4; tiger160,3; tiger160,4; 
+	 * tiger192,3; tiger192,4; whirlpool
+	 * 
+	 * @throws 	Exception if $hashKey does not exist
+	 **************************************************************************/
+	public function hash(&$content, $hashKey, $algo) {
+		if(!array_key_exists($hashKey, current($content))) {
+			throw new Exception('Key \''.$hashKey.'\' not found from '.
+				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} else {
+			try {
+				foreach ($content as $key => $value) {
+					$content[$key][$hashKey] = hash($algo, $value[$hashKey]);
+				}
+		
+			} catch (Exception $e) { 
+				die('Exception in '.$this->className.'->'.__FUNCTION__.
+					'() line '.$e->getLine().': '.$e->getMessage()."\n"
+				);
+			} //<-- end try -->
+		} //<-- end if -->
+	} //<-- end function -->
+
+	/*************************************************************************** 
+	 * Adds elements to a multidimensional array so that each sub-array is as
+	 * long as the first sub-array
+	 *
+	 * @param 	array 	$content	of the following form:
+	 * @throws 	Exception if $content is not a multi-dimensional array
+	 **************************************************************************/
+	public function lengthenArray(&$content) {
+		if (!is_array(current($content))) {
+			throw new Exception('Please use a multi-dimensional array'.
+				'from '.$this->className.'->'.__FUNCTION__.'() line '.
+				__LINE__
+			);
+		} else {
+			try {				
+				$count = count(current($content));
+				
+				// loop through each array
+				foreach ($content as $key => $values) {				
+					$num = $count - count($values);
+					
+					if ($num > 0) { // check that arrays are same size
+						for ($i = 0; $i < $num; $i++) {
+							array_push($content[$key], '');
+						} //<-- end for -->
+					} //<-- end if -->
+				} //<-- end foreach -->
+			} catch (Exception $e) { 
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
+				);
+			} //<-- end try -->
+		} //<-- end if -->
+	} //<-- end function -->
+	
+	/*************************************************************************** 
 	 * Performs array_combine() on a multi-dimensional array using the first 
 	 * element for the keys and the remaining elements as the values
 	 *
@@ -334,15 +422,16 @@ class General {
 	 *
 	 * @throws 	Exception if $content is not a multi-dimensional array
 	 **************************************************************************/
-	public function arrayInsertKey($content) {	
-		if (!is_array($content[0])) {
-			throw new Exception('Please use a multi-dimensional array from '.
-				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
+	public function arrayInsertKey($content) {
+		if (!is_array(current($content))) {
+			throw new Exception('Please use a multi-dimensional array'.
+				'from '.$this->className.'->'.__FUNCTION__.'() line '.
+				__LINE__
 			);
 		} else {
 			try {				
 				$maxElements = count($content);
-				$maxValues = count($content[0]);
+				$maxValues = count(current($content));
 				
 				// loop through each array
 				foreach ($content as $key => $values) {				
@@ -454,6 +543,37 @@ class General {
 	} //<-- end function -->
 
 	/*************************************************************************** 
+	 * Reads the contents of a given file
+	 * 
+	 * @param 	string 	$file 		a filename or the path to a file
+	 * @return 	string	$content	the file contents
+	 * @throws 	Exception if $file does not exist
+	 **************************************************************************/
+	public function readFile($file) {
+		if (!file_exists($file)) {
+			throw new Exception('File '.$file.' does not exist from '.
+				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} else {
+			try {
+				$handle 	= fopen($file, 'r');
+				$string 	= NULL;
+				
+				while (!feof($handle)) {
+					$string .= fgets($handle, 1024);
+				} //<-- end while -->
+				
+				fclose($handle);
+				return $string;
+			} catch (Exception $e) { 
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
+				);
+			} //<-- end try -->
+		} //<-- end if -->
+	} //<-- end function -->
+
+	/*************************************************************************** 
 	 * Writes a contents of a given file to a new file with LF line endings
 	 * 
 	 * @param 	string 	$file 		a filename or the path to a file
@@ -467,18 +587,10 @@ class General {
 			);
 		} else {
 			try {
-				$handle 	= fopen($file, 'r');
-				$string 	= NULL;
 				$tempFile	= tempnam('/tmp', __FUNCTION__.'.');
-				
-				while (!feof($handle)) {
-					$line = fgets($handle, 1024);
-					$line = str_replace("\r\n", "\n", $line);
-					$line = str_replace("\r", "\n", $line);
-					$string .= $line;
-				} //<-- end while -->
-				
-				fclose($handle);
+				$string 	= self::readFile($file);
+				$string 	= str_replace("\r\n", "\n", $string);
+				$string 	= str_replace("\r", "\n", $string);
 				self::write2File($string, $tempFile);
 				return $tempFile;
 			} catch (Exception $e) { 
@@ -502,42 +614,37 @@ class General {
 	 *										$key2 => $value5, 
 	 *										$key3 => $value6))
 	 *
-	 * @param 	string 	$key		the key whose values you want to format
+	 * @param 	string 	$formatKey	the key whose values you want to format
 	 * @param 	string 	$format		the type of format to apply the (i.e. 
 	 *								'number' or 'date')
 	 *								
-	 * @return 	array	$newContent	new array with formatted values	
 	 * @throws 	Exception if $content is not a multi-dimensional array
 	 * @throws 	Exception if $format is invalid
 	 **************************************************************************/
-	public function formatArray($content, $key, $format) {
-		if (!is_array($content[0])) {
+	public function formatArray(&$content, $formatKey, $format) {
+		if (!is_array(current($content))) {
 			throw new Exception('Please use a multi-dimensional array from '.
 				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
 			try {
-				$i = 0;
-				
 				switch ($format){
 					case 'number':
-						foreach ($content as $row) {
-							$number = $row[$key];
-							$number = str_replace(',', '', $number);
-							$number = $number + 0;
-							$formattedRow[] = number_format($number, 2, '.',
-								''
-							);
+						foreach ($content as $key => $row) {
+							$number = $row[$formatKey];
+							$number = str_replace(',', '', $number) + 0;
+							$number = number_format($number, 2, '.', '');
+							$content[$key][$formatKey] = $number;
 						} //<-- end foreach -->
 					
 						break;
 						
 					case 'date':
-						foreach ($content as $row) {
-							$date = $row[$key];
-							
+						foreach ($content as $key => $row) {
+							$date = $row[$formatKey];
 							// format to yyyy-mm-dd
-							$formattedRow[] = date("Y-m-d", strtotime($date));
+							$date = date("Y-m-d", strtotime($date));
+							$content[$key][$formatKey] = $date;
 						} //<-- end foreach -->
 						
 						break;
@@ -547,20 +654,13 @@ class General {
 							' \'number\' or \'date\'.'
 						);
 				} //<-- end switch -->
-	
-				foreach ($formattedRow as $row) {
-					$newContent[$i][$key] = $row;
-					$i++;
-				} //<-- end foreach -->
-						
-				return $newContent;
-				} catch (Exception $e) { 
-					throw new Exception($e->getMessage().' from '
-						.$this->className.'->'.__FUNCTION__.'() line '.__LINE__
-					);
-				} //<-- end try -->
-			} //<-- end if -->
-		} //<-- end function -->
+			} catch (Exception $e) { 
+				throw new Exception($e->getMessage().' from '
+					.$this->className.'->'.__FUNCTION__.'() line '.__LINE__
+				);
+			} //<-- end try -->
+		} //<-- end if -->
+	} //<-- end function -->
 
 	/*************************************************************************** 
 	 * Sort a multidimensional array by the value of a given subkey
@@ -570,7 +670,7 @@ class General {
 	 * @return 	array	$content	new array with moved values	
 	 **************************************************************************/
 	public function arraySortBySubValue(&$array, $key) {
-		if(!array_key_exists($key, $array[0])) {
+		if(!array_key_exists($key, current($array))) {
 			throw new Exception('Key \''.$key.'\' not found from '.
 				__CLASS__.'->'.__FUNCTION__.'() line '.__LINE__
 			);
@@ -591,7 +691,6 @@ class General {
 
 	/*************************************************************************** 
 	 * Move a given element to the beginning of an array 
-	 * elements in an array
 	 * 
 	 * @param 	array 	$array	the array to perform the move on
 	 * @param 	string 	$key	the the key of the element to move 
@@ -656,7 +755,7 @@ class General {
 	 **************************************************************************/
 	public function arraySubstitute($content, $needle, $replace) {
 		try {
-			foreach ($content as $haystack) {
+			foreach ($content as $haystack) {				
 				if (!is_array($haystack)) { // If it's not an array, sanitize it
 					$newContent[] = str_replace($needle, $replace, $haystack);
 				} else { // it IS an array, so recurse
@@ -731,12 +830,12 @@ class General {
 	} //<-- end function -->
 			
 	/*************************************************************************** 
-	 * Writes an array to a csv file 
+	 * Writes an array to a csv file
 	 *
 	 * @param 	string 	$content 		the data to write to the file 
+	 * @param 	string 	$fieldDelimiter the csv field delimiter 
 	 * @param 	string 	$csvFile 		the path to an empty or non existing 
 	 *									csv file
-	 * @param 	string 	$fieldDelimiter the csv field delimiter 
 	 * @return 	boolean	TRUE
 	 * @throws 	Exception if $csvFile exists or is non-empty 
 	 **************************************************************************/
