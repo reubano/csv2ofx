@@ -364,10 +364,51 @@ class General {
 	} //<-- end function -->
 
 	/*************************************************************************** 
+	 * Delete elements of a multidimensional array all all the sub-arrays are
+	 * empty
+	 *
+	 * @param 	array 	$content	multi-dimensional array
+	 * @throws 	Exception if $content is not a multi-dimensional array
+	 **************************************************************************/
+	public function trimArray(&$content) {
+		if (!is_array(current($content))) {
+			throw new Exception('Please use a multi-dimensional array'.
+				'from '.$this->className.'->'.__FUNCTION__.'() line '.
+				__LINE__
+			);
+		} else {
+			try {			
+				// loop through each array
+				$count = count($content);
+				
+				for ($i = 0; $i < $count; $i++) {
+					$last = count($content[$i]) - 1;
+					
+					foreach ($content[$i] as $subKey => $subValue) {
+						if (!empty($subValue)) {
+							continue;
+						}
+						
+						if ($subKey == $last) {
+							array_splice($content, $i, 1);
+							$i--;
+							$count--;
+						}
+					} //<-- end foreach -->
+				} //<-- end foreach -->
+			} catch (Exception $e) { 
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
+				);
+			} //<-- end try -->
+		} //<-- end if -->
+	} //<-- end function -->
+
+	/*************************************************************************** 
 	 * Adds elements to a multidimensional array so that each sub-array is as
 	 * long as the first sub-array
 	 *
-	 * @param 	array 	$content	of the following form:
+	 * @param 	array 	$content	multi-dimensional array
 	 * @throws 	Exception if $content is not a multi-dimensional array
 	 **************************************************************************/
 	public function lengthenArray(&$content) {
