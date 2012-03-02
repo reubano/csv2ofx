@@ -461,9 +461,7 @@ class CSV2OFX {
 			$this->tranDate2 = date("Ymd", $timestamp); 
 			$this->tranAmount = $transaction[$this->headAmount];
 			
-			if ($this->source != 'xero') {
-				$this->tranType = $transaction[$this->headTranType];
-				
+			if ($this->headTranType) {
 				if ($this->tranType == 'debit') {
 					$this->tranAmount = '-'.$this->tranAmount;
 				}
@@ -471,9 +469,12 @@ class CSV2OFX {
 			
 			$this->tranDesc = $transaction[$this->headDesc];
 			$this->tranPayee = $transaction[$this->headPayee];
-			$this->tranNotes = $transaction[$this->headNotes];
 			$this->tranSplitAccount = $transaction[$this->headSplitAccount];
-						
+
+			if ($this->headNotes) {
+				$this->tranNotes = $transaction[$this->headNotes];
+			}
+									
 			if ($this->headClass) {
 				$this->tranClass = $transaction[$this->headClass];
 			}
