@@ -100,7 +100,7 @@ class CSV2OFX {
 			case 'custom':
 				$this->headAccount	= 'Account';
 				$this->headDate 	= 'Date';
-				$this->headAmount 	= 'Total';
+				$this->headAmount 	= 'Amount';
 				$this->headPayee 	= 'Description';
 				$this->headDesc 	= 'Reference';
 				$this->headSplitAccount = 'Category';
