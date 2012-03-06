@@ -386,7 +386,7 @@ class General {
 					
 					foreach ($content[$i] as $subKey => $subValue) {
 						if (!empty($subValue)) {
-							continue;
+							continue 2; // go to next array
 						}
 						
 						if ($subKey == $last) {
