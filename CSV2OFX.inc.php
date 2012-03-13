@@ -102,31 +102,10 @@ class CSV2OFX {
 				$this->headDate 	= 'Date';
 				$this->headAmount 	= 'Amount';
 				$this->headPayee 	= 'Description';
+				$this->headCheckNum = 'Num';
 				$this->headDesc 	= 'Reference';
 				$this->headSplitAccount = 'Category';
-				$this->headTranId 	= 'row';
-				$this->split		= FALSE;
-				break;
-
-			case 'payment':
-				$this->headAccount	= 'Account';
-				$this->headDate 	= 'Date';
-				$this->headAmount 	= 'Total';
-				$this->headPayee 	= 'Description';
-				$this->headCheckNum 	= 'Inv';
-				$this->headDesc 	= 'Rcp';
-				$this->headSplitAccount = 'Category';
-				$this->headTranId 	= 'row';
-				$this->split		= FALSE;
-				break;
-
-			case 'paid':
-				$this->headAccount	= 'Account';
-				$this->headDate 	= 'Date';
-				$this->headAmount 	= 'Total';
-				$this->headPayee 	= 'Product';
-				$this->headSplitAccount = 'Category';
-				$this->headTranId 	= 'row';
+				$this->headTranId 	= 'Row';
 				$this->split		= FALSE;
 				break;
 
