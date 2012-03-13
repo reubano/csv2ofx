@@ -847,6 +847,7 @@ class General {
 		} else {
 			try {	
 				$handle = fopen($csvFile, 'w');
+				
 				foreach ($content as $fields) {
 					$length = fputcsv($handle, $fields, $fieldDelimiter);
 				} //<-- end foreach -->
