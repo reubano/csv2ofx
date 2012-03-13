@@ -840,34 +840,31 @@ class General {
 	} //<-- end function -->
 	
 	/*************************************************************************** 
-	 * Overwrites an array to a pre-existing csv file
+	 * Writes an array to a csv file (overwrites file if it exists)
 	 * 
 	 * @param 	string 	$content 		the data to write to the file 
 	 * @param 	string 	$csvFile 		the path to a csv file 
 	 * @param 	string 	$fieldDelimiter the csv field delimiter 
 	 * @return 	boolean	TRUE
-	 * @throws 	Exception if $csvFile does not exist
 	 **************************************************************************/
 	public function overwriteCSV($content, $csvFile, $fieldDelimiter = ',') {	
-		if (!file_exists($csvFile)) {
-			throw new Exception('File .'.$csvFile.' does not exsit from '.
-				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
+		try {
+			if (!file_exists($csvFile)) {
+				self::write2File('',$csvFile);
+			} //<-- end if -->
+
+			$tempFile = self::makeLFLineEndings($csvFile);
+			$handle = fopen($tempFile, 'r');
+			self::array2CSV($content, $tempFile, $fieldDelimiter);
+			copy($tempFile, $csvFile);				
+			fclose($handle);
+			unlink($tempFile);
+			return TRUE;
+		} catch (Exception $e) { 
+			throw new Exception($e->getMessage().' from '.$this->className
+				.'->'.__FUNCTION__.'() line '.__LINE__
 			);
-		} else {
-			try {
-				$tempFile = self::makeLFLineEndings($csvFile);
-				$handle = fopen($tempFile, 'r');
-				self::array2CSV($content, $tempFile, $fieldDelimiter);
-				copy($tempFile, $csvFile);				
-				fclose($handle);
-				unlink($tempFile);
-				return TRUE;
-			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.$this->className
-					.'->'.__FUNCTION__.'() line '.__LINE__
-				);
-			} //<-- end try -->
-		} //<-- end if -->
+		} //<-- end try -->		
 	} //<-- end function -->
 			
 	/*************************************************************************** 
@@ -888,6 +885,7 @@ class General {
 		} else {
 			try {	
 				$handle = fopen($csvFile, 'w');
+				
 				foreach ($content as $fields) {
 					$length = fputcsv($handle, $fields, $fieldDelimiter);
 				} //<-- end foreach -->
