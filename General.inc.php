@@ -344,7 +344,7 @@ class General {
 	 * 
 	 * @throws 	Exception if $hashKey does not exist
 	 **************************************************************************/
-	public function hash(&$content, $hashKey, $algo) {
+	public function hashArray(&$content, $hashKey, $algo = 'md5') {
 		if(!array_key_exists($hashKey, current($content))) {
 			throw new Exception('Key \''.$hashKey.'\' not found from '.
 				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
