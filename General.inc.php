@@ -850,15 +850,16 @@ class General {
 	public function overwriteCSV($content, $csvFile, $fieldDelimiter = ',') {	
 		try {
 			if (!file_exists($csvFile)) {
-				self::write2File('',$csvFile);
+				self::array2CSV($content, $csvFile, $fieldDelimiter);
+			} else {
+				$tempFile = self::makeLFLineEndings($csvFile);
+				$handle = fopen($tempFile, 'r');
+				self::array2CSV($content, $tempFile, $fieldDelimiter);
+				copy($tempFile, $csvFile);				
+				fclose($handle);
+				unlink($tempFile);
 			} //<-- end if -->
-
-			$tempFile = self::makeLFLineEndings($csvFile);
-			$handle = fopen($tempFile, 'r');
-			self::array2CSV($content, $tempFile, $fieldDelimiter);
-			copy($tempFile, $csvFile);				
-			fclose($handle);
-			unlink($tempFile);
+			
 			return TRUE;
 		} catch (Exception $e) { 
 			throw new Exception($e->getMessage().' from '.$this->className
