@@ -880,7 +880,7 @@ class General {
 	 **************************************************************************/
 	public function array2CSV($content, $csvFile, $fieldDelimiter = ',') {	
 		if (file_exists($csvFile) && filesize($csvFile) != 0) {
-			throw new Exception('File .'.$csvFile.' already exists from '.
+			throw new Exception('File '.$csvFile.' already exists from '.
 				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
