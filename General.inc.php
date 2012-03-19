@@ -323,6 +323,37 @@ class General {
 		} catch (Exception $e) { 
 			die('Exception in '.$this->className.'->'.__FUNCTION__.'() line '.
 				$e->getLine().': '.$e->getMessage()."\n"
+	/*************************************************************************** 
+	 * Creates an array by using one array for keys and another for its values
+	 * Truncates/fills values if the number of elements for each array isn't 
+	 * equal. 
+	 *
+	 * @param 	array 	$keys	the keys
+	 * @param 	array 	$values	the values
+	 * @return 	string	$string	data read from STDIN
+	 * @throws 	Exception if there is no input
+	 **************************************************************************/
+	public function safeArrayCombine($keys, $values) { 
+		try {
+			$combinedArray = array(); 
+			$keyCount = count($keys);
+			$valueCount = count($values);
+		    $difference = $keyCount - $valueCount;
+		    
+		    if ($difference > 0) {
+		    	for ($i = 0; $i < $difference; $i++) {
+					$values[] = $values[$valueCount - 1];
+		    	}
+			}
+			
+			for ($i=0, $keyCount; $i < $keyCount; $i++) {
+				$combinedArray[$keys[$i]] = $values[$i];
+			} 
+		        
+			return $combinedArray;
+		} catch (Exception $e) { 
+			throw new Exception($e->getMessage().' from '.$this->className.'->'.
+				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
