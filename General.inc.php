@@ -321,8 +321,12 @@ class General {
 				return $string;
 			} //<-- end if -->
 		} catch (Exception $e) { 
-			die('Exception in '.$this->className.'->'.__FUNCTION__.'() line '.
-				$e->getLine().': '.$e->getMessage()."\n"
+			throw new Exception($e->getMessage().' from '.$this->className.'->'.
+				__FUNCTION__.'() line '.__LINE__
+			);
+		} //<-- end try -->
+	} //<-- end function -->
+
 	/*************************************************************************** 
 	 * Creates an array by using one array for keys and another for its values
 	 * Truncates/fills values if the number of elements for each array isn't 
@@ -387,8 +391,8 @@ class General {
 				}
 		
 			} catch (Exception $e) { 
-				die('Exception in '.$this->className.'->'.__FUNCTION__.
-					'() line '.$e->getLine().': '.$e->getMessage()."\n"
+				throw new Exception($e->getMessage().' from '.$this->className.
+					'->'.__FUNCTION__.'() line '.__LINE__
 				);
 			} //<-- end try -->
 		} //<-- end if -->
