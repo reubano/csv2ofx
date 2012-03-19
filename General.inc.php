@@ -22,8 +22,9 @@ class General {
 	 *
 	 * @param 	boolean $verbose	enable verbose comments
 	 **************************************************************************/
-	function __construct($verbose = FALSE) {
+	public function __construct($verbose = FALSE) {
 		$this->verbose = $verbose;
+
 		if ($this->verbose) {
 			fwrite(STDOUT, "$this->className class constructor set.\n");
 		} //<-- end if -->
