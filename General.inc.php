@@ -546,7 +546,7 @@ class General {
 			} //<-- end if -->
 			
 			foreach ($vars as $key => $val) {
-				if (!in_array($key, $ignoreList) && !empty($val)) {
+				if ($key === 0 || (!in_array($key, $ignoreList)) && !empty($val)) {
 					if (is_array($val)) {
 						$definedVars[$key] = self::getVars($val);
 					} elseif (is_string($val)) { 
