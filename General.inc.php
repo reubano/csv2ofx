@@ -364,6 +364,20 @@ class General {
 	} //<-- end function -->
 
 	/*************************************************************************** 
+	 * Case insensitive array search. 
+	 *
+	 * @param 	mixed 	$needle		the searched value
+	 * @param 	array 	$haystack	the array to search
+	 * @return 	string	$string		TRUE/FALSE
+	 * @throws 	Exception if there is no input
+	 **************************************************************************/
+	public function in_arrayi($needle, $haystack) {
+        return in_array(strtolower($needle), 
+        	array_map('strtolower', $haystack)
+        );
+    }
+
+	/*************************************************************************** 
 	 * Hashes the contents of an array
 	 *
 	 * @param 	array 	$content	the array containing the content to hash
