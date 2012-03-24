@@ -930,7 +930,8 @@ class General {
 			if (!file_exists($csvFile)) {
 				self::array2CSV($content, $csvFile, $fieldDelimiter);
 			} else {
-				$tempFile = self::makeLFLineEndings($csvFile);
+				//$tempFile = self::makeLFLineEndings($csvFile);
+				$tempFile = tempnam('/tmp', __FUNCTION__.'.');
 				$handle = fopen($tempFile, 'r');
 				self::array2CSV($content, $tempFile, $fieldDelimiter);
 				copy($tempFile, $csvFile);				
