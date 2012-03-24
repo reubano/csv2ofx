@@ -31,7 +31,7 @@ $ofxAccountTypeList	= array(
 );
 
 $source				= 'mint';
-$collapse			= array('Accounts Receivable');
+$collAccts			= array('Accounts Receivable');
 $primary			= 'MITFCU Checking';
 $destFile 			= $thisProjectDir.'/exports/'.$timeStamp;
 $currency			= 'USD';
@@ -88,8 +88,7 @@ try {
 	}
 	
 	if ($result->options['collapse']) {
-		$collapse = $result->options['collapse'];
-		$collapse = explode(',', $collapse);
+		$collAccts = explode(',', $result->options['collapse']);
 	}
 	
 	if ($result->options['currency']) {
@@ -98,10 +97,6 @@ try {
 	
 	if ($result->options['language']) {
 		$language = $result->options['language'];
-	}
-		
-	if ($result->options['transfer']) {
-		$transfer = $result->options['transfer'];
 	}
 	
 	if ($result->options['qif']) {
@@ -156,7 +151,7 @@ try {
 		$csv2ofx->setTranIds();
 		$csv2ofx->verifySplits();
 		$csv2ofx->sortSplits($csv2ofx->headAccount);
-		$csv2ofx->collapseSplits($collapse);
+		$csv2ofx->collapseSplits($collAccts);
 		$csv2ofx->organizeSplits();
 	} else { // not a split transaction
 		$csv2ofx->makeSplits();
@@ -224,7 +219,7 @@ try {
 		// remove non xml compliant characters
 		$csvContent = $general->xmlize($csvContent); // make recursive
 		
-		if ($transfer) {
+		if ($result->options['transfer']) {
 			$content = $csv2ofx->getOFXTransferHeader($timeStamp);
 		} else { // it's a transaction
 			$content = $csv2ofx->getOFXTransactionHeader($timeStamp);
@@ -235,7 +230,7 @@ try {
 			// create account id using an md5 hash of the account name
 			$accountId = md5($account);
 			
-			if (!$transfer) {
+			if (!$result->options['transfer']) {
 				$content .= $csv2ofx->getOFXTransactionAccountStart();
 			} //<-- end if not transfer -->
 			
@@ -263,7 +258,7 @@ try {
 
 					$csv2ofx->setTransactionData($transaction, $timestamp);
 					
-					if ($transfer) {
+					if ($result->options['transfer']) {
 						$content .= 
 							$csv2ofx->getOFXTransfer($account, $accountType);
 					} else { // it's a transaction
@@ -272,12 +267,12 @@ try {
 				} //<-- end if -->
 			} //<-- end for loop through transactions -->
 			
-			if (!$transfer) {
+			if (!$result->options['transfer']) {
 				$content .= $csv2ofx->getOFXTransactionAccountEnd();
 			} //<-- end if not transfer -->
 		} //<-- end foreach loop through accounts -->
 		
-		if ($transfer) {
+		if ($result->options['transfer']) {
 			$content .=$csv2ofx->getOFXTransferFooter();
 		} else { // it's a transaction
 			$content .=	$csv2ofx->getOFXTransactionFooter();
@@ -287,7 +282,7 @@ try {
 	if ($result->options['test']) {
 		print_r($csvContent);
 	} else {
-		if ($overwrite) {
+		if ($result->options['overwrite']) {
 			$general->overwriteCSV($content, $destFile, $delimiter);
 		} else {
 			$general->array2CSV($content, $destFile, $delimiter);

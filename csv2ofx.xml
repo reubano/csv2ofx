@@ -13,14 +13,14 @@
 	<option name="accountType">
 		<short_name>-A</short_name>
 		<long_name>--account-type</long_name>
-		<description>set account type if match is not found, defaults to 'CHECKING' for OFX and 'Bank' for QIF.</description>
+		<description>account type to use if no match is found, defaults to 'CHECKING' for OFX and 'Bank' for QIF.</description>
 		<action>StoreString</action>
 		<help_name>type</help_name>
 	</option>
 	<option name="collapse">
 		<short_name>-c</short_name>
 		<long_name>--collapse</long_name>
-		<description>account(s) to collapse (comma delimited), defaults to 'Accounts Receivable'</description>
+		<description>account(s) to summarize by date if the transaction are recorded double entry stlye (e.g. full data export from xero.com or Quickbooks), defaults to 'Accounts Receivable'</description>
 		<action>StoreString</action>
 		<help_name>account(s)</help_name>
 	</option>
