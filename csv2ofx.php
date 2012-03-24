@@ -10,7 +10,9 @@ date_default_timezone_set('Africa/Nairobi');
 
 $thisProjectDir		= dirname(__FILE__);
 $projectsDir		= dirname($thisProjectDir);
-$stdin 				= FALSE;
+$stdin				= FALSE;
+$stdout				= FALSE;
+$destFile 			= NULL;
 $today				= date("Ymd"); // format to yyyymmdd
 $timeStamp			= date("Ymd_His"); // format to yyyymmdd_hhmmss
 $startDate			= strtotime('1/1/1900');
@@ -31,12 +33,13 @@ $ofxAccountTypeList	= array(
 $source				= 'mint';
 $collapse			= array('Accounts Receivable');
 $primary			= 'MITFCU Checking';
-$outFile 			= $thisProjectDir.'/exports/'.$timeStamp;
+$destFile 			= $thisProjectDir.'/exports/'.$timeStamp;
 $currency			= 'USD';
 $defTranType		= 'CREDIT';
 $ofxAccountType 	= 'CHECKING';
 $qifAccountType 	= 'Bank';
 $language			= 'ENG';
+$ext 				= 'ofx';
 
 // include files
 require_once 'Console/CommandLine.php';
@@ -51,21 +54,20 @@ try {
 	// run the parser
 	$result = $parser->parse();
 
-	// command argument
-	$csvFile = $result->args['csvFile'];
-
-	if ($csvFile == '$') {
+	// command arguments
+	if ($result->args['srcFile'] == '$') {
 		$stdin = TRUE;
-	} //<-- end if -->
+	} //<-- end if -->	
 	
-	// command options
-	$debugmode	= $result->options['debug'];
-	$varmode	= $result->options['variables'];
-	$verbose	= $result->options['verbose'];
-	$testmode	= $result->options['test'];
-
+	if ($result->args['destFile'] == '$') {
+		$stdout = TRUE;
+		$destFile = tempnam('/tmp', __FILE__.'.');
+	} elseif ($result->args['destFile']) {
+		$destFile = $result->args['destFile']
+	}
+	
 	// program setting
-	$general = new general($verbose);
+	$general = new general($result->options['verbose']);
 	$program = $general->getBase(__FILE__);
 
 	// load options if present
@@ -97,44 +99,38 @@ try {
 	if ($result->options['language']) {
 		$language = $result->options['language'];
 	}
-	
-	if ($result->options['outFile']) {
-		$outFile = $result->options['outFile'];
 		
-		if ($outFile=='-') {
-			$testmode = TRUE;
-		}
-	}
-	
 	if ($result->options['transfer']) {
 		$transfer = $result->options['transfer'];
 	}
 	
-	if ($result->options['accountType']) {
-		$defAccountType = $result->options['accountType'];
-	}
-
 	if ($result->options['qif']) {
-		$qif = $result->options['qif'];
+		$ext = 'qif';
 		$accountTypeList = $qifAccountTypeList;
-		$outFile = $outFile.'_'.$source.'_export.qif';
 		$defAccountType = $qifAccountType;
 	} else {
 		$accountTypeList = $ofxAccountTypeList;
-		$outFile = $outFile.'_'.$source.'_export.ofx';
 		$defAccountType = $ofxAccountType;
 	} //<-- end if -->
+
+	if (!$destFile) {
+		$destFile = $thisProjectDir.'/export/'.$timeStamp.'_'.$source.'.'.$ext;
+	}
+
+	if ($result->options['accountType']) {
+		$defAccountType = $result->options['accountType'];
+	}
 	
 	// debug and variable mode settings
-	if ($debugmode OR $varmode) {
-		if ($debugmode) {
+	if ($result->options['debug'] OR $result->options['variables']) {
+		if ($result->options['debug']) {
 			print("[Command opts] ");
 			print_r($result->options);
 			print("[Command args] ");
 			print_r($result->args);
 		} //<-- end if -->
 
-		if ($varmode) {
+		if ($result->options['variables']) {
 			$general->printVars(get_defined_vars());
 		}
 		
@@ -143,17 +139,17 @@ try {
 
 	// execute program
 	if ($stdin) {
-		$csvContent = $general->readSTDIN();
+		$csvContent = $general->csv2Array($general->readSTDIN(), $fieldDelimiter, FALSE);
 	} else {
-		$csvContent = $general->csv2Array($csvFile);
+		$csvContent = $general->csv2Array($result->options['srcFile'], $fieldDelimiter);
 	} //<-- end if -->
-	
+
 	$general->trimArray($csvContent);
 	$general->lengthenArray($csvContent);
 	$csvContent = $general->arrayInsertKey($csvContent);
 	array_shift($csvContent);
 	
-	$csv2ofx = new csv2ofx($source, $csvContent, $verbose);
+	$csv2ofx = new csv2ofx($source, $csvContent, $result->options['verbose']);
 	$csv2ofx->setAmounts();
 
 	if ($csv2ofx->split) {
@@ -168,7 +164,7 @@ try {
 
 	$csv2ofx->getAccounts($accountTypeList, $defAccountType);
 
-	if ($qif) {
+	if ($result->options['qif']) {
 		$content = '';
 		
 		foreach ($csv2ofx->accounts as $account => $accountType) {
@@ -288,10 +284,20 @@ try {
 		} //<-- end if transfer -->
 	} //<-- end if qif -->
 
-	if (!$testmode) {
-		$general->write2file($content, $outFile);
+	if ($result->options['test']) {
+		print_r($csvContent);
 	} else {
-		print_r($content);
+		if ($overwrite) {
+			$general->overwriteCSV($content, $destFile, $delimiter);
+		} else {
+			$general->array2CSV($content, $destFile, $delimiter);
+		} //<-- end if -->
+		
+		if($stdout) {
+			$content = $general->readFile($destFile);
+			print($content);
+			unlink($destFile);
+		} //<-- end if -->
 	} //<-- end if not test mode -->
 
 	exit(0);

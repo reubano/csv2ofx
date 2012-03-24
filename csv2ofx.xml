@@ -13,7 +13,7 @@
 	<option name="accountType">
 		<short_name>-A</short_name>
 		<long_name>--account-type</long_name>
-		<description>set default account type if match is not found, defaults to 'CHECKING'</description>
+		<description>set account type if match is not found, defaults to 'CHECKING' for OFX and 'Bank' for QIF.</description>
 		<action>StoreString</action>
 		<help_name>type</help_name>
 	</option>
@@ -22,7 +22,7 @@
 		<long_name>--collapse</long_name>
 		<description>account(s) to collapse (comma delimited), defaults to 'Accounts Receivable'</description>
 		<action>StoreString</action>
-		<help_name>currency</help_name>
+		<help_name>account(s)</help_name>
 	</option>
 	<option name="currency">
 		<short_name>-C</short_name>
@@ -50,13 +50,6 @@
 		<description>set language, defaults to 'ENG'</description>
 		<action>StoreString</action>
 		<help_name>lang</help_name>
-	</option>
-	<option name="outFile">
-		<short_name>-o</short_name>
-		<long_name>--out-file</long_name>
-		<description>location and name of resulting output file (use '-' to write to stdout), defaults to the project downloads folder</description>
-		<action>StoreString</action>
-		<help_name>/path</help_name>
 	</option>
 	<option name="primary">
 		<short_name>-p</short_name>
@@ -103,7 +96,13 @@
 		<description>enables variable mode, displays the value of all program variables</description>
 		<action>StoreTrue</action>
 	</option>
-	<argument name="csvFile">
-		<description>/path</description>
+	<argument name="srcFile">
+		<description>the csv file, enter '$' to read data from standard input</description>
+		<help_name>file</help_name>
+	</argument>
+	<argument name="destFile">
+		<description>(optional) the output file, enter '$' to print to standard output, defaults to '.../csv2of/export/...'</description>
+		<help_name>file</help_name>
+		<optional>true</optional>
 	</argument>
 </command>
