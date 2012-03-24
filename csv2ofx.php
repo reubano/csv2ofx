@@ -140,7 +140,7 @@ try {
 	if ($stdin) {
 		$csvContent = $general->csv2Array($general->readSTDIN(), $delimiter, FALSE);
 	} else {
-		$csvContent = $general->csv2Array($result->options['srcFile'], $delimiter);
+		$csvContent = $general->csv2Array($result->args['srcFile'], $delimiter);
 	} //<-- end if -->
 	
 	$general->trimArray($csvContent);
