@@ -22,8 +22,9 @@ class General {
 	 *
 	 * @param 	boolean $verbose	enable verbose comments
 	 **************************************************************************/
-	function __construct($verbose = FALSE) {
+	public function __construct($verbose = FALSE) {
 		$this->verbose = $verbose;
+
 		if ($this->verbose) {
 			fwrite(STDOUT, "$this->className class constructor set.\n");
 		} //<-- end if -->
@@ -321,11 +322,60 @@ class General {
 				return $string;
 			} //<-- end if -->
 		} catch (Exception $e) { 
-			die('Exception in '.$this->className.'->'.__FUNCTION__.'() line '.
-				$e->getLine().': '.$e->getMessage()."\n"
+			throw new Exception($e->getMessage().' from '.$this->className.'->'.
+				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
+
+	/*************************************************************************** 
+	 * Creates an array by using one array for keys and another for its values
+	 * Truncates/fills values if the number of elements for each array isn't 
+	 * equal. 
+	 *
+	 * @param 	array 	$keys	the keys
+	 * @param 	array 	$values	the values
+	 * @return 	string	$string	data read from STDIN
+	 * @throws 	Exception if there is no input
+	 **************************************************************************/
+	public function safeArrayCombine($keys, $values) { 
+		try {
+			$combinedArray = array(); 
+			$keyCount = count($keys);
+			$valueCount = count($values);
+		    $difference = $keyCount - $valueCount;
+		    
+		    if ($difference > 0) {
+		    	for ($i = 0; $i < $difference; $i++) {
+					$values[] = $values[$valueCount - 1];
+		    	}
+			}
+			
+			for ($i=0, $keyCount; $i < $keyCount; $i++) {
+				$combinedArray[$keys[$i]] = $values[$i];
+			} 
+		        
+			return $combinedArray;
+		} catch (Exception $e) { 
+			throw new Exception($e->getMessage().' from '.$this->className.'->'.
+				__FUNCTION__.'() line '.__LINE__
+			);
+		} //<-- end try -->
+	} //<-- end function -->
+
+	/*************************************************************************** 
+	 * Case insensitive array search. 
+	 *
+	 * @param 	mixed 	$needle		the searched value
+	 * @param 	array 	$haystack	the array to search
+	 * @return 	string	$string		TRUE/FALSE
+	 * @throws 	Exception if there is no input
+	 **************************************************************************/
+	public function in_arrayi($needle, $haystack) {
+        return in_array(strtolower($needle), 
+        	array_map('strtolower', $haystack)
+        );
+    }
 
 	/*************************************************************************** 
 	 * Hashes the contents of an array
@@ -344,7 +394,7 @@ class General {
 	 * 
 	 * @throws 	Exception if $hashKey does not exist
 	 **************************************************************************/
-	public function hash(&$content, $hashKey, $algo) {
+	public function hashArray(&$content, $hashKey, $algo = 'md5') {
 		if(!array_key_exists($hashKey, current($content))) {
 			throw new Exception('Key \''.$hashKey.'\' not found from '.
 				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
@@ -356,8 +406,8 @@ class General {
 				}
 		
 			} catch (Exception $e) { 
-				die('Exception in '.$this->className.'->'.__FUNCTION__.
-					'() line '.$e->getLine().': '.$e->getMessage()."\n"
+				throw new Exception($e->getMessage().' from '.$this->className.
+					'->'.__FUNCTION__.'() line '.__LINE__
 				);
 			} //<-- end try -->
 		} //<-- end if -->
@@ -511,7 +561,7 @@ class General {
 			} //<-- end if -->
 			
 			foreach ($vars as $key => $val) {
-				if (!in_array($key, $ignoreList) && !empty($val)) {
+				if ($key === 0 || (!in_array($key, $ignoreList)) && !empty($val)) {
 					if (is_array($val)) {
 						$definedVars[$key] = self::getVars($val);
 					} elseif (is_string($val)) { 
@@ -840,34 +890,32 @@ class General {
 	} //<-- end function -->
 	
 	/*************************************************************************** 
-	 * Overwrites an array to a pre-existing csv file
+	 * Writes an array to a csv file (overwrites file if it exists)
 	 * 
 	 * @param 	string 	$content 		the data to write to the file 
 	 * @param 	string 	$csvFile 		the path to a csv file 
 	 * @param 	string 	$fieldDelimiter the csv field delimiter 
 	 * @return 	boolean	TRUE
-	 * @throws 	Exception if $csvFile does not exist
 	 **************************************************************************/
 	public function overwriteCSV($content, $csvFile, $fieldDelimiter = ',') {	
-		if (!file_exists($csvFile)) {
-			throw new Exception('File .'.$csvFile.' does not exsit from '.
-				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
-			);
-		} else {
-			try {
+		try {
+			if (!file_exists($csvFile)) {
+				self::array2CSV($content, $csvFile, $fieldDelimiter);
+			} else {
 				$tempFile = self::makeLFLineEndings($csvFile);
 				$handle = fopen($tempFile, 'r');
 				self::array2CSV($content, $tempFile, $fieldDelimiter);
 				copy($tempFile, $csvFile);				
 				fclose($handle);
 				unlink($tempFile);
-				return TRUE;
-			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.$this->className
-					.'->'.__FUNCTION__.'() line '.__LINE__
-				);
-			} //<-- end try -->
-		} //<-- end if -->
+			} //<-- end if -->
+			
+			return TRUE;
+		} catch (Exception $e) { 
+			throw new Exception($e->getMessage().' from '.$this->className
+				.'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} //<-- end try -->		
 	} //<-- end function -->
 			
 	/*************************************************************************** 
@@ -882,12 +930,13 @@ class General {
 	 **************************************************************************/
 	public function array2CSV($content, $csvFile, $fieldDelimiter = ',') {	
 		if (file_exists($csvFile) && filesize($csvFile) != 0) {
-			throw new Exception('File .'.$csvFile.' already exists from '.
+			throw new Exception('File '.$csvFile.' already exists from '.
 				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
 			try {	
 				$handle = fopen($csvFile, 'w');
+				
 				foreach ($content as $fields) {
 					$length = fputcsv($handle, $fields, $fieldDelimiter);
 				} //<-- end foreach -->
