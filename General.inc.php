@@ -175,7 +175,7 @@ class General {
 				'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} elseif (file_exists($file) && filesize($file) != 0) {
-			throw new Exception('File .'.$file.' already exists from '.
+			throw new Exception('File '.$file.' already exists from '.
 				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
