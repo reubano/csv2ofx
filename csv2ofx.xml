@@ -37,6 +37,13 @@
 		<description>enables debug mode, displays the options and arguments passed to the parser</description>
 		<action>StoreTrue</action>
 	</option>
+	<option name="delimiter">
+		<short_name>-D</short_name>
+		<long_name>--delimiter</long_name>
+		<description>one character field delimiter, defaults to ','</description>
+		<action>StoreString</action>
+		<help_name>character</help_name>
+	</option>
 	<option name="end">
 		<short_name>-e</short_name>
 		<long_name>--end</long_name>
@@ -50,6 +57,12 @@
 		<description>set language, defaults to 'ENG'</description>
 		<action>StoreString</action>
 		<help_name>lang</help_name>
+	</option>
+	<option name="overwrite">
+		<short_name>-o</short_name>
+		<long_name>--overwrite</long_name>
+		<description>overwrite destination file if it exists</description>
+		<action>StoreTrue</action>
 	</option>
 	<option name="primary">
 		<short_name>-p</short_name>
@@ -76,12 +89,6 @@
 		<short_name>-t</short_name>
 		<long_name>--transfer</long_name>
 		<description>treats ofx transactions as transfers from one account to another (sets 'category' as the destination account)</description>
-		<action>StoreTrue</action>
-	</option>
-	<option name="test">
-		<short_name>-T</short_name>
-		<long_name>--test</long_name>
-		<description>enables test mode, prints selection to the standard output without writing file to disk</description>
 		<action>StoreTrue</action>
 	</option>
 	<option name="verbose">

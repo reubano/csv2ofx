@@ -13,6 +13,7 @@ $projectsDir		= dirname($thisProjectDir);
 $stdin				= FALSE;
 $stdout				= FALSE;
 $destFile 			= NULL;
+$delimiter	 		= ',';
 $today				= date("Ymd"); // format to yyyymmdd
 $timeStamp			= date("Ymd_His"); // format to yyyymmdd_hhmmss
 $startDate			= strtotime('1/1/1900');
@@ -61,9 +62,8 @@ try {
 	
 	if ($result->args['destFile'] == '$') {
 		$stdout = TRUE;
-		$destFile = tempnam('/tmp', __FILE__.'.');
 	} elseif ($result->args['destFile']) {
-		$destFile = $result->args['destFile']
+		$destFile = $result->args['destFile'];
 	}
 	
 	// program setting
@@ -71,6 +71,10 @@ try {
 	$program = $general->getBase(__FILE__);
 
 	// load options if present
+	if ($result->options['delimiter']) {
+		$delimiter = $result->options['delimiter'];
+	} //<-- end if -->
+
 	if ($result->options['source']) {
 		$source = $result->options['source'];
 	}
@@ -108,7 +112,7 @@ try {
 		$defAccountType = $ofxAccountType;
 	} //<-- end if -->
 
-	if (!$destFile) {
+	if (!$destFile && !$stdout) {
 		$destFile = $thisProjectDir.'/export/'.$timeStamp.'_'.$source.'.'.$ext;
 	}
 
@@ -134,11 +138,11 @@ try {
 
 	// execute program
 	if ($stdin) {
-		$csvContent = $general->csv2Array($general->readSTDIN(), $fieldDelimiter, FALSE);
+		$csvContent = $general->csv2Array($general->readSTDIN(), $delimiter, FALSE);
 	} else {
-		$csvContent = $general->csv2Array($result->options['srcFile'], $fieldDelimiter);
+		$csvContent = $general->csv2Array($result->options['srcFile'], $delimiter);
 	} //<-- end if -->
-
+	
 	$general->trimArray($csvContent);
 	$general->lengthenArray($csvContent);
 	$csvContent = $general->arrayInsertKey($csvContent);
@@ -279,19 +283,13 @@ try {
 		} //<-- end if transfer -->
 	} //<-- end if qif -->
 
-	if ($result->options['test']) {
-		print_r($csvContent);
+	if ($stdout) {
+		print($content);
 	} else {
 		if ($result->options['overwrite']) {
-			$general->overwriteCSV($content, $destFile, $delimiter);
+			$general->overwriteFile($content, $destFile);
 		} else {
-			$general->array2CSV($content, $destFile, $delimiter);
-		} //<-- end if -->
-		
-		if($stdout) {
-			$content = $general->readFile($destFile);
-			print($content);
-			unlink($destFile);
+			$general->write2file($content, $destFile, $delimiter);
 		} //<-- end if -->
 	} //<-- end if not test mode -->
 
