@@ -198,6 +198,34 @@ class General {
 	} //<-- end function -->
 
 	/*************************************************************************** 
+	 * Writes data to a file (overwrites file if it exists)
+	 * 
+	 * @param 	string 	$content 	the data to write to the file 
+	 * @param 	string 	$file 		the path to a file 
+	 * @return 	boolean	TRUE
+	 **************************************************************************/
+	public function overwriteFile($content, $file) {	
+		try {
+			if (!file_exists($file)) {
+				self::write2File($content, $file);
+			} else {
+				$tempFile = tempnam('/tmp', __FUNCTION__.'.');
+				$handle = fopen($tempFile, 'r');
+				self::write2File($content, $tempFile);
+				copy($tempFile, $file);				
+				fclose($handle);
+				unlink($tempFile);
+			} //<-- end if -->
+			
+			return TRUE;
+		} catch (Exception $e) { 
+			throw new Exception($e->getMessage().' from '.$this->className
+				.'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} //<-- end try -->		
+	} //<-- end function -->
+
+	/*************************************************************************** 
 	 * Returns an array from csv data
 	 *
 	 * @param 	string 	$csvContent		csv text or path to a csv file 
