@@ -3,13 +3,6 @@
 	<name>csv2ofx</name>
 	<description>converts a csv file of transactions to an ofx or qif file.</description>
 	<version>1.0.0</version>
-	<option name="source">
-		<short_name>-s</short_name>
-		<long_name>--source</long_name>
-		<description>source mapping to use, defaults to 'mint'</description>
-		<action>StoreString</action>
-		<help_name>name</help_name>
-	</option>
 	<option name="accountType">
 		<short_name>-A</short_name>
 		<long_name>--account-type</long_name>
@@ -84,6 +77,13 @@
 		<description>start date, defaults to '1/1/1900'</description>
 		<action>StoreString</action>
 		<help_name>date</help_name>
+	</option>
+	<option name="source">
+		<short_name>-S</short_name>
+		<long_name>--source</long_name>
+		<description>source mapping to use, defaults to 'mint'</description>
+		<action>StoreString</action>
+		<help_name>name</help_name>
 	</option>
 	<option name="transfer">
 		<short_name>-t</short_name>
