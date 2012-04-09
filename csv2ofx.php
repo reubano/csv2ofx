@@ -120,19 +120,12 @@ try {
 		$defAccountType = $result->options['accountType'];
 	}
 	
-	// debug and variable mode settings
-	if ($result->options['debug'] OR $result->options['variables']) {
-		if ($result->options['debug']) {
-			print("[Command opts] ");
-			print_r($result->options);
-			print("[Command args] ");
-			print_r($result->args);
-		} //<-- end if -->
-
-		if ($result->options['variables']) {
-			$general->printVars(get_defined_vars());
-		}
-		
+	// debug mode setting
+	if ($result->options['debug']) {
+		print("[Command opts] ");
+		print_r($result->options);
+		print("[Command args] ");
+		print_r($result->args);
 		exit(0);
 	} //<-- end if -->
 
@@ -162,6 +155,12 @@ try {
 	} //<-- end if split -->
 
 	$csv2ofx->getAccounts($accountTypeList, $defAccountType);
+	
+	// variable mode setting
+	if ($result->options['variables']) {
+		print_r($general->getVars(get_defined_vars()));
+		exit(0);
+	}
 
 	if ($result->options['qif']) {
 		$content = '';
