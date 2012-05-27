@@ -589,10 +589,13 @@ class General {
 			} //<-- end if -->
 			
 			foreach ($vars as $key => $val) {
-				if ($key === 0 || (!in_array($key, $ignoreList)) && !empty($val)) {
+				if ($key === 0 
+					|| (!in_array($key, $ignoreList)) 
+					&& !is_null($val)
+				) {
 					if (is_array($val)) {
 						$definedVars[$key] = self::getVars($val);
-					} elseif (is_string($val)) { 
+					} elseif (is_string($val) || is_numeric($val)) { 
 						$definedVars[$key] = $val;
 					} //<-- end if -->
 				} //<-- end if --> 
