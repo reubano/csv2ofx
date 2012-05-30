@@ -59,7 +59,6 @@ class General {
 	 *
 	 * @param 	integer	$num a number
 	 * @return 	string	$ext a number with the ordinal suffix
-	 * @throws 	Exception if $file is empty
 	 **************************************************************************/
 	public function addOrdinal($num) {
 		try {
@@ -74,11 +73,13 @@ class General {
 			
 			return $num.'th';
 			
-			} catch (Exception $e) { 
-				throw new Exception($e->getMessage().' from '.$this->className
-					.'->'.__FUNCTION__.'() line '.__LINE__
-				);
-			} //<-- end try -->
+		} catch (Exception $e) { 
+			throw new Exception($e->getMessage().' from '.$this->className
+				.'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} //<-- end try -->
+	} //<-- end function -->
+
 	/*************************************************************************** 
 	 * A date function supporting the microseconds.
 	 *
