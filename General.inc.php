@@ -79,6 +79,31 @@ class General {
 					.'->'.__FUNCTION__.'() line '.__LINE__
 				);
 			} //<-- end try -->
+	/*************************************************************************** 
+	 * A date function supporting the microseconds.
+	 *
+	 * @param 	string	$format 		time format
+	 * @param 	integer	$uTimeStamp 	time (defaults to the value of time())
+	 * @return 	string	$newTimestamp 	time with microseconds
+	 **************************************************************************/
+	public function udate($format, $uTimeStamp = NULL) {
+		try {
+			if (is_null($uTimeStamp)) {
+				$uTimeStamp = microtime(true);
+			}
+			
+			$timeStamp = floor($uTimeStamp);
+			$milliSeconds = round(($uTimeStamp - $timeStamp) * 1000000);
+			$newTimestamp = date(preg_replace('`(?<!\\\\)u`', $milliSeconds, 
+				$format), $timeStamp
+			);
+			
+			return $newTimestamp;
+		} catch (Exception $e) { 
+			throw new Exception($e->getMessage().' from '.$this->className
+				.'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} //<-- end try -->
 	} //<-- end function -->
 
 	/*************************************************************************** 
@@ -102,7 +127,7 @@ class General {
 				// check to make sure I haven't found too many elements
 				if ($i < $n) {
 					// It's not an array, so look for needle elements
-					if (!is_array($value)) { 
+					if (!is_array($value)) {
 						switch ($needle){
 							case 'numeric':
 								if (is_numeric($value)) {
@@ -371,18 +396,18 @@ class General {
 			$combinedArray = array(); 
 			$keyCount = count($keys);
 			$valueCount = count($values);
-		    $difference = $keyCount - $valueCount;
-		    
-		    if ($difference > 0) {
-		    	for ($i = 0; $i < $difference; $i++) {
+			$difference = $keyCount - $valueCount;
+			
+			if ($difference > 0) {
+				for ($i = 0; $i < $difference; $i++) {
 					$values[] = $values[$valueCount - 1];
-		    	}
+				}
 			}
 			
 			for ($i=0, $keyCount; $i < $keyCount; $i++) {
 				$combinedArray[$keys[$i]] = $values[$i];
 			} 
-		        
+				
 			return $combinedArray;
 		} catch (Exception $e) { 
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
@@ -400,10 +425,10 @@ class General {
 	 * @throws 	Exception if there is no input
 	 **************************************************************************/
 	public function in_arrayi($needle, $haystack) {
-        return in_array(strtolower($needle), 
-        	array_map('strtolower', $haystack)
-        );
-    }
+		return in_array(strtolower($needle), 
+			array_map('strtolower', $haystack)
+		);
+	}
 
 	/*************************************************************************** 
 	 * Hashes the contents of an array
@@ -442,7 +467,7 @@ class General {
 	} //<-- end function -->
 
 	/*************************************************************************** 
-	 * Delete elements of a multidimensional array all all the sub-arrays are
+	 * Delete elements of a multidimensional array if all the sub-arrays are
 	 * empty
 	 *
 	 * @param 	array 	$content	multi-dimensional array
