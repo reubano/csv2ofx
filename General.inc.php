@@ -526,16 +526,21 @@ class General {
 				// loop through each array
 				$count = count($content);
 				
-				for ($i = 0; $i < $count; $i++) {					
+				for ($i = 0; $i < $count; $i++) {
+					$lastkey = array_pop(array_keys($content[$i]));
+
 					foreach ($content[$i] as $subKey => $subValue) {
+						
 						if (is_null($subValue)) {
 							continue 2; // go to next array
-						} else {
+						} 
+						
+						if ($subKey == $lastkey) {
 							return $content[$i];
 						}
-						
-						return $content[0];
 					} //<-- end foreach -->
+					
+					return $content[0];
 				} //<-- end foreach -->
 				 
 			} catch (Exception $e) { 
