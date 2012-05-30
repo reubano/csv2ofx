@@ -509,6 +509,44 @@ class General {
 	} //<-- end function -->
 
 	/*************************************************************************** 
+	 * Returns the first set of completely non-null sub-arrays or the first
+	 * sub-array if none are non-null
+	 *
+	 * @param 	array 	$content	multi-dimensional array
+	 * @throws 	Exception if $content is not a multi-dimensional array
+	 **************************************************************************/
+	public function getNonNull($content) {
+		if (!is_array(current($content))) {
+			throw new Exception('Please use a multi-dimensional array'.
+				'from '.$this->className.'->'.__FUNCTION__.'() line '.
+				__LINE__
+			);
+		} else {
+			try {			
+				// loop through each array
+				$count = count($content);
+				
+				for ($i = 0; $i < $count; $i++) {					
+					foreach ($content[$i] as $subKey => $subValue) {
+						if (is_null($subValue)) {
+							continue 2; // go to next array
+						} else {
+							return $content[$i];
+						}
+						
+						return $content[0];
+					} //<-- end foreach -->
+				} //<-- end foreach -->
+				 
+			} catch (Exception $e) { 
+				throw new Exception($e->getMessage().' from '.$this->className
+					.'->'.__FUNCTION__.'() line '.__LINE__
+				);
+			} //<-- end try -->
+		} //<-- end if -->
+	} //<-- end function -->
+
+	/*************************************************************************** 
 	 * Adds elements to a multidimensional array so that each sub-array is as
 	 * long as the first sub-array
 	 *
@@ -825,10 +863,10 @@ class General {
 		} else {
 			try {
 				$cmp = function (array $a, array $b) use ($key) {
-			    	return strcmp($a[$key], $b[$key]);
+					return strcmp($a[$key], $b[$key]);
 				};
 				
-			    usort($array, $cmp);
+				usort($array, $cmp);
 			} catch (Exception $e) { 
 				throw new Exception($e->getMessage().' from '.$this->className
 					.'->'.__FUNCTION__.'() line '.__LINE__
