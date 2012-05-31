@@ -905,8 +905,43 @@ class General {
 	} //<-- end function -->			
 
 	/*************************************************************************** 
-	 * Recursively replaces all occurrences of $needle with $replace on 
-	 * elements in an array (by reference)
+	 * Recursively replaces all NULLs with 0 in an array (by reference) if the 
+	 * immidiate preciding and following elements are non-null 
+	 * @param 	array 	$content	the array to perform the replacement on
+	 * @param 	string 	$replace	the replacement value that replaces $needle 
+	 *								(an array may be used to designate multiple 
+	 *								replacements)
+	 **************************************************************************/
+	public function arrayFillMissing(&$content) {	
+		try {
+			$count = count($content) - 1;
+			$keys = array_keys($content);
+			
+			for ($i = 1; $i < $count; $i++) {
+				$prevkey = $keys[$i - 1];
+				$currkey = $keys[$i];
+				$nextkey = $keys[$i + 1];
+				
+				// If it's not an array, continue checking	
+				if (!is_array($content[$currkey])) {
+					if (is_null($content[$currkey])) { 
+						if (!is_null($content[$prevkey]) 
+							&& !is_null($content[$nextkey])
+						) {
+							$content[$currkey] = 0;
+						} //<-- end if -->
+					} //<-- end if -->
+				} else { // it IS an array, so recurse
+					self::arrayFillMissing($content[$currkey]);
+				} //<-- end if -->
+			} //<-- end foreach -->	
+		} catch (Exception $e) { 
+			throw new Exception($e->getMessage().' from '.$this->className.'->'.
+				__FUNCTION__.'() line '.__LINE__
+			);
+		} //<-- end try -->
+	} //<-- end function -->
+
 	/*************************************************************************** 
 	 * Recursively replaces all NULLs with $replace in an array (by reference)
 	 * @param 	array 	$content	the array to perform the replacement on
@@ -933,6 +968,9 @@ class General {
 		} //<-- end try -->
 	} //<-- end function -->
 	
+	/*************************************************************************** 
+	 * Recursively replaces all occurrences of $needle with $replace in an 
+	 * an array (by reference)
 	 * 
 	 * @param 	array 	$content	the array to perform the replacement on
 	 * @param 	string 	$needle		the value being searched for (an array may 
