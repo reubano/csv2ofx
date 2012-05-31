@@ -907,6 +907,32 @@ class General {
 	/*************************************************************************** 
 	 * Recursively replaces all occurrences of $needle with $replace on 
 	 * elements in an array (by reference)
+	/*************************************************************************** 
+	 * Recursively replaces all NULLs with $replace in an array (by reference)
+	 * @param 	array 	$content	the array to perform the replacement on
+	 * @param 	string 	$replace	the replacement value that replaces $needle 
+	 *								(an array may be used to designate multiple 
+	 *								replacements)
+	 **************************************************************************/
+	public function arrayReplaceNull(&$content, $replace) {	
+		try {
+			foreach ($content as &$haystack) {
+				// If it's not an array, replace it
+				if (!is_array($haystack)) {
+					if (is_null($haystack)) {
+						$haystack = $replace;
+					} //<-- end if -->
+				} else { // it IS an array, so recurse
+					self::arrayReplaceNull($haystack, $replace);
+				} //<-- end if -->
+			} //<-- end foreach -->	
+		} catch (Exception $e) { 
+			throw new Exception($e->getMessage().' from '.$this->className.'->'.
+				__FUNCTION__.'() line '.__LINE__
+			);
+		} //<-- end try -->
+	} //<-- end function -->
+	
 	 * 
 	 * @param 	array 	$content	the array to perform the replacement on
 	 * @param 	string 	$needle		the value being searched for (an array may 
