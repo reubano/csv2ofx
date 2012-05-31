@@ -905,8 +905,8 @@ class General {
 	} //<-- end function -->			
 
 	/*************************************************************************** 
-	 * Recursively replaces all NULLs with 0 in an array (by reference) if the 
-	 * immidiate preciding and following elements are non-null 
+	 * Recursively replaces all NULL elements with 0 in an array (by reference)
+	 * if a following element is non-null 
 	 * @param 	array 	$content	the array to perform the replacement on
 	 * @param 	string 	$replace	the replacement value that replaces $needle 
 	 *								(an array may be used to designate multiple 
@@ -914,21 +914,42 @@ class General {
 	 **************************************************************************/
 	public function arrayFillMissing(&$content) {	
 		try {
-			$count = count($content) - 1;
+			$count = count($content);
 			$keys = array_keys($content);
 			
-			for ($i = 1; $i < $count; $i++) {
-				$prevkey = $keys[$i - 1];
+			for ($i = 0; $i < $count; $i++) {
 				$currkey = $keys[$i];
-				$nextkey = $keys[$i + 1];
 				
 				// If it's not an array, continue checking	
 				if (!is_array($content[$currkey])) {
-					if (is_null($content[$currkey])) { 
-						if (!is_null($content[$prevkey]) 
-							&& !is_null($content[$nextkey])
-						) {
-							$content[$currkey] = 0;
+					if (is_null($content[$currkey])) {
+						if ($i != 0 && $i != $count - 1) {
+							$prevkey = $keys[$i - 1];
+							$nextkey = $keys[$i + 1];
+							
+							if (!is_null($content[$nextkey])) {
+								$content[$currkey] = 0;
+							} //<-- end if -->
+							
+							if (!is_null($content[$prevkey])) {
+								$pass = FALSE;
+								
+								for ($j = $i; $j < $count; $j++) {
+									// check to see if there is at least one
+									// additional non-null value following
+									if (!is_null($content[$keys[$j]])) {
+										$pass = TRUE;
+										break;
+									} //<-- end if -->
+								} //<-- end for -->
+								
+								if ($pass) {
+									$content[$currkey] = 0;
+								} else {
+									// no more non-null values so exit loop
+									break; 
+								} //<-- end if -->
+							} //<-- end if -->
 						} //<-- end if -->
 					} //<-- end if -->
 				} else { // it IS an array, so recurse
