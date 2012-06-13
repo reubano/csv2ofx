@@ -463,6 +463,8 @@ class CSV2OFX {
 			$this->tranAmount = $transaction[$this->headAmount];
 			
 			if ($this->headTranType) {
+				$this->tranType = $transaction[$this->headTranType];
+				
 				if ($this->tranType == 'debit') {
 					$this->tranAmount = '-'.$this->tranAmount;
 				}
