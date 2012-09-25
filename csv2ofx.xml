@@ -13,6 +13,7 @@
 	<option name="collapse">
 		<short_name>-c</short_name>
 		<long_name>--collapse</long_name>
+		<default>'Accounts Receivable'</default>
 		<description>account(s) to summarize by date if the transaction are recorded double entry stlye (e.g. full data export from xero.com or Quickbooks), defaults to 'Accounts Receivable'</description>
 		<action>StoreString</action>
 		<help_name>account(s)</help_name>
@@ -20,6 +21,7 @@
 	<option name="currency">
 		<short_name>-C</short_name>
 		<long_name>--currency</long_name>
+		<default>'USD'</default>
 		<description>set currency, defaults to 'USD'</description>
 		<action>StoreString</action>
 		<help_name>currency</help_name>
@@ -33,6 +35,7 @@
 	<option name="delimiter">
 		<short_name>-D</short_name>
 		<long_name>--delimiter</long_name>
+		<default>','</default>
 		<description>one character field delimiter, defaults to ','</description>
 		<action>StoreString</action>
 		<help_name>character</help_name>
@@ -40,6 +43,7 @@
 	<option name="end">
 		<short_name>-e</short_name>
 		<long_name>--end</long_name>
+		<default>'now'</default>
 		<description>end date, defaults to today</description>
 		<action>StoreString</action>
 		<help_name>date</help_name>
@@ -47,6 +51,7 @@
 	<option name="language">
 		<short_name>-l</short_name>
 		<long_name>--language</long_name>
+		<default>'ENG'</default>
 		<description>set language, defaults to 'ENG'</description>
 		<action>StoreString</action>
 		<help_name>lang</help_name>
@@ -60,6 +65,7 @@
 	<option name="primary">
 		<short_name>-p</short_name>
 		<long_name>--primary</long_name>
+		<default>'MITFCU Checking'</default>
 		<description>primary account used to pay credit cards, defaults to 'MITFCU Checking'</description>
 		<action>StoreString</action>
 		<help_name>name</help_name>
@@ -74,14 +80,16 @@
 	<option name="start">
 		<short_name>-s</short_name>
 		<long_name>--start</long_name>
+		<default>'1/1/1900'</default>
 		<description>start date, defaults to '1/1/1900'</description>
 		<action>StoreString</action>
 		<help_name>date</help_name>
 	</option>
-	<option name="source">
-		<short_name>-S</short_name>
-		<long_name>--source</long_name>
-		<description>source mapping to use, defaults to 'mint'</description>
+	<option name="mapping">
+		<short_name>-m</short_name>
+		<long_name>--mapping</long_name>
+		<default>'mint'</default>
+		<description>mapping to use, defaults to 'mint'</description>
 		<action>StoreString</action>
 		<help_name>name</help_name>
 	</option>

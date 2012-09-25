@@ -12,12 +12,8 @@ $thisProjectDir		= dirname(__FILE__);
 $projectsDir		= dirname($thisProjectDir);
 $stdin				= FALSE;
 $stdout				= FALSE;
-$destFile 			= NULL;
-$delimiter	 		= ',';
 $today				= date("Ymd"); // format to yyyymmdd
 $timeStamp			= date("Ymd_His"); // format to yyyymmdd_hhmmss
-$startDate			= strtotime('1/1/1900');
-$endDate			= strtotime('now');
 $qifAccountTypeList = array(
 	'Bank' => array('checking', 'savings', 'market', 'receivable', 'payable', 
 		'visa', 'master', 'express', 'discover'),
@@ -31,15 +27,10 @@ $ofxAccountTypeList	= array(
 	'CREDITLINE' => array('visa', 'master', 'express', 'discover'),
 );
 
-$source				= 'mint';
 $collAccts			= array('Accounts Receivable');
-$primary			= 'MITFCU Checking';
 $destFile 			= $thisProjectDir.'/exports/'.$timeStamp;
-$currency			= 'USD';
-$defTranType		= 'CREDIT';
 $ofxAccountType 	= 'CHECKING';
 $qifAccountType 	= 'Bank';
-$language			= 'ENG';
 $ext 				= 'ofx';
 
 // include files
@@ -71,37 +62,14 @@ try {
 	$program = $general->getBase(__FILE__);
 
 	// load options if present
-	if ($result->options['delimiter']) {
-		$delimiter = $result->options['delimiter'];
-	} //<-- end if -->
-
-	if ($result->options['source']) {
-		$source = $result->options['source'];
-	}
-	
-	if ($result->options['primary']) {
-		$primary = $result->options['primary'];
-	}
-	
-	if ($result->options['start']) {
-		$startDate = strtotime($result->options['start']);
-	}
-	
-	if ($result->options['end']) {
-		$endDate = strtotime($result->options['end']);
-	}
-	
-	if ($result->options['collapse']) {
-		$collAccts = explode(',', $result->options['collapse']);
-	}
-	
-	if ($result->options['currency']) {
-		$currency = $result->options['currency'];
-	}
-	
-	if ($result->options['language']) {
-		$language = $result->options['language'];
-	}
+	$delimiter = $result->options['delimiter'];
+	$mapping = $result->options['mapping'];
+	$primary = $result->options['primary'];	
+	$startDate = strtotime($result->options['start']);
+	$endDate = strtotime($result->options['end']);
+	$collAccts = explode(',', $result->options['collapse']);
+	$currency = $result->options['currency'];
+	$language = $result->options['language'];
 	
 	if ($result->options['qif']) {
 		$ext = 'qif';
