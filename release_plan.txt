@@ -1,1 +1,0 @@
-- read from STDIN support
