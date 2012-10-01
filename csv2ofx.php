@@ -46,17 +46,10 @@ $parser = Console_CommandLine::fromXmlFile($xmlfile);
 try {
 	// run the parser
 	$result = $parser->parse();
-
-	// command arguments
-	if ($result->args['srcFile'] == '$') {
-		$stdin = TRUE;
-	} //<-- end if -->	
 	
-	if ($result->args['destFile'] == '$') {
-		$stdout = TRUE;
-	} elseif ($result->args['destFile']) {
-		$destFile = $result->args['destFile'];
-	}
+	// command arguments
+	$source = $result->args['source'];
+	$dest = $result->args['dest'];
 	
 	// program setting
 	$vars = new vars($result->options['verbose']);
@@ -74,23 +67,32 @@ try {
 	$collAccts = explode(',', $result->options['collapse']);
 	$currency = $result->options['currency'];
 	$language = $result->options['language'];
-	
+
 	if ($result->options['qif']) {
-		$ext = 'qif';
-		$accountTypeList = $qifAccountTypeList;
-		$defAccountType = $qifAccountType;
+		$type = 'qif';
 	} else {
-		$accountTypeList = $ofxAccountTypeList;
-		$defAccountType = $ofxAccountType;
-	} //<-- end if -->
-
-	if (!$destFile && !$stdout) {
-		$destFile = $thisProjectDir.'/export/'.$timeStamp.'_'.$source.'.'.$ext;
+		$type = 'ofx';
 	}
+	
+	$accountType = $result->options['accountType'];
+	$accountTypeList = $accountTypeList[$type];
+	$ext = $ext[$type];
 
-	if ($result->options['accountType']) {
-		$defAccountType = $result->options['accountType'];
-	}
+	switch ($dest){
+		case '$':
+			$stdout = TRUE;
+			break;
+			
+		case '':
+			$stdout = FALSE;
+			$destFile = $thisProjectDir.'/'.$exportFolder.'/'.$timeStamp.'_'
+				.$mapping.'.'.$ext;
+			break;
+			
+		default:
+			$stdout = FALSE;
+			$destFile = $dest;
+	} //<-- end switch -->		
 	
 	// debug mode setting
 	if ($result->options['debug']) {
@@ -102,8 +104,11 @@ try {
 	} //<-- end if -->
 
 	// execute program
-	if ($stdin) {
+	if (file_exists($source)) {
+		$content = $file->file2String($source);
+		$content = $string->makeLFLineEndings($content, $delimiter);
 	} else {
+		$content = $source;
 	} //<-- end if -->
 	
 	$csvContent = $string->csv2Array($content, $delimiter);
