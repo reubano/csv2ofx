@@ -17,6 +17,6 @@ $spec = Pearfarm_PackageSpec::create(
 	->addGitFiles()
 	->setDependsOnPHPVersion('5.3')
 	->addPackageDependency('Console_CommandLine', 'pear.php.net')
-	->addExcludeFiles(array('.gitignore', 'pearfarm.spec'))
+	->addExcludeFiles(array('.gitignore', 'pearfarm.spec', '.gittrees'))
 	->addExecutable('csv2ofx.php')
 	;
