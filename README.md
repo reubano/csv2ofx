@@ -26,25 +26,29 @@ csv2ofx requires the following programs in order to run properly:
 	
 ### Examples
 
-normal usage
+_normal usage_
 
-	csv2ofx ~/Downloads/transactions.csv
+	csv2ofx file.csv file.ofx
 
-qif output
+_stdout_
 
-	csv2ofx -q ~/Downloads/transactions.csv
+	csv2ofx ~/Downloads/transactions.csv $
 
-specify date range from one year ago to yesterday with qif output
+_stdin_
 
-	csv2ofx -s'-1 year' -e'yesterday' -q ~/Downloads/transactions.csv
+	cat file.csv | csv2ofx -
+		
+_qif output_
 
-direct ofx file output to the user's downloads folder
+	csv2ofx -q file.csv
 
-	csv2ofx -o ~/Downloads/transactions.ofx ~/Downloads/transactions.csv
+_specify date range from one year ago to yesterday with qif output_
 
-use yoodle settings
+	csv2ofx -s '-1 year' -e yesterday -q file.csv
 
-	csv2ofx -a yoodle ~/Downloads/transactions.csv
+_use yoodle settings_
+
+	csv2ofx -m yoodle file.csv
   
 ### Options
 	  -A type, --account-type=type          account type to use if no match is
