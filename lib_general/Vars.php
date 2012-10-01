@@ -8,13 +8,12 @@ class Vars {
 	protected $_verbose;
 	protected $_fileIgnoreList = array('.', '..', '.DS_Store','.svn','.git*');
 	protected $_varIgnoreList = array(
-		'HTTP_POST_VARS', 'HTTP_GET_VARS', 'HTTP_COOKIE_VARS', 
-		'HTTP_SERVER_VARS', 'HTTP_ENV_VARS', 'HTTP_SESSION_VARS', '_ENV', 
-		'PHPSESSID','SESS_DBUSER', 'SESS_DBPASS','HTTP_COOKIE', 'GLOBALS', 
-		'_ENV', 'HTTP_ENV_VARS', 'argv', 'argc', '_POST', 'HTTP_POST_VARS', 
-		'_GET', 'HTTP_GET_VARS', '_COOKIE', 'HTTP_COOKIE_VARS', '_SERVER', 
-		'HTTP_SERVER_VARS', '_FILES', 'HTTP_POST_FILES', '_REQUEST', 
-		'ignoreList'
+		'_COOKIE', '_ENV', '_fileIgnoreList', '_FILES', '_GET', '_POST', 
+		'_REQUEST', '_SERVER', '_varIgnoreList', 'accountList', 'argc', 'argv', 
+		'GLOBALS', 'HTTP_COOKIE', 'HTTP_COOKIE_VARS', 'HTTP_ENV_VARS', 
+		'HTTP_GET_VARS', 'HTTP_POST_FILES', 'HTTP_POST_VARS', 
+		'HTTP_SERVER_VARS', 'HTTP_SESSION_VARS', 'MANPATH', 'parser', 
+		'PHPSESSID', 'SESS_DBPASS', 'SESS_DBUSER', 'SHELL', 'vars'
 	);
 	
 	/**
@@ -34,33 +33,19 @@ class Vars {
 	
 	/**
 	 ***************************************************************************
-	 * Recursively returns all defined variables
+	 * Recursively returns all defined variables not in blacklist
 	 *
-	 * @param array $vars 		the defined variables 
-	 * @param array $ignoreList the variables to ignore 
+	 * @param array $vars 		instance of get_defined_vars()
 	 *
-	 * @return array $definedVars defined variables not in the ignore list
+	 * @return array defined variables not in the ignore list
+	 *
+	 * @assert (array('one', '2w', 'GLOBALS' => '3a')) == array('one', '2w')
 	 **************************************************************************/
-	public function getVars($vars, $ignoreList=null) {
+	public function getVars($vars) {
 		try {
-			if (empty($ignoreList)) {
-				$ignoreList = $this->_varIgnoreList;
-			} //<-- end if -->
-				
-			$main = function ($val, $key) use ($ignoreList, &$definedVars) {
-				if ($key === 0 
-					|| (!in_array($key, $ignoreList)) && !is_null($val)
-				) {
-					if (is_array($val)) {
-						$definedVars[$key] = self::getVars($val);
-					} elseif (is_string($val) || is_numeric($val)) { 
-						$definedVars[$key] = $val;
-					} //<-- end if -->
-				} //<-- end if --> 
-			}; //<-- end closure -->
-			
-			array_walk($vars, $main);			
-			return $definedVars;
+			$varIgnoreList = $this->_varIgnoreList;
+
+			return array_diff_key($vars, array_flip($varIgnoreList));
 		} catch (Exception $e) { 
 			throw new Exception(
 				$e->getMessage().' from '.$this->_className.'->'.__FUNCTION__.
