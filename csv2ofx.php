@@ -8,30 +8,28 @@
  
 date_default_timezone_set('Africa/Nairobi');
 
-$thisProjectDir		= dirname(__FILE__);
-$projectsDir		= dirname($thisProjectDir);
-$stdin				= FALSE;
-$stdout				= FALSE;
-$today				= date("Ymd"); // format to yyyymmdd
-$timeStamp			= date("Ymd_His"); // format to yyyymmdd_hhmmss
-$qifAccountTypeList = array(
-	'Bank' => array('checking', 'savings', 'market', 'receivable', 'payable', 
-		'visa', 'master', 'express', 'discover'),
-	'Cash' => array('cash'),
-);
-
-$ofxAccountTypeList	= array(
+$thisProjectDir	= dirname(__FILE__);
+$projectsDir	= dirname($thisProjectDir);
+$today			= date("Ymd"); // format to yyyymmdd
+$timeStamp		= date("Ymd_His"); // format to yyyymmdd_hhmmss
+$accountList 	= array('ofx' => 'CHECKING', 'qif' => 'Bank');
+$ofxList 		= array(
 	'CHECKING' => array('checking'), 
 	'SAVINGS' => array('savings'), 
 	'MONEYMRKT' => array('market'),
-	'CREDITLINE' => array('visa', 'master', 'express', 'discover'),
+	'CREDITLINE' => array('visa', 'master', 'express', 'discover')
 );
 
-$collAccts			= array('Accounts Receivable');
-$destFile 			= $thisProjectDir.'/exports/'.$timeStamp;
-$ofxAccountType 	= 'CHECKING';
-$qifAccountType 	= 'Bank';
-$ext 				= 'ofx';
+$bankList 		= array(
+	'checking', 'savings', 'market', 'receivable', 'payable', 'visa', 'master',
+	'express', 'discover'
+);
+
+$qifList 		= array('Bank' => $bankList, 'Cash' => array('cash'));
+$accountTypeList= array('ofx' => $ofxList, 'qif' => $qifList);
+
+$ext 			= array('ofx' => 'ofx', 'qif' => 'qif');
+$exportFolder	= 'exports';
 
 // include files
 require_once 'Console/CommandLine.php';
