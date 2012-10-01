@@ -29,7 +29,7 @@ $qifList 		= array('Bank' => $bankList, 'Cash' => array('cash'));
 $accountTypeList= array('ofx' => $ofxList, 'qif' => $qifList);
 
 $ext 			= array('ofx' => 'ofx', 'qif' => 'qif');
-$exportFolder	= 'exports';
+$currDir		= getcwd();
 
 // include files
 require_once 'Console/CommandLine.php';
@@ -85,8 +85,9 @@ try {
 			
 		case '':
 			$stdout = FALSE;
-			$destFile = $thisProjectDir.'/'.$exportFolder.'/'.$timeStamp.'_'
-				.$mapping.'.'.$ext;
+			$destFile = $currDir.'/'.$timeStamp.'_'.$mapping.'.'.$ext;
+			print("$destFile\n");
+			exit;
 			break;
 			
 		default:

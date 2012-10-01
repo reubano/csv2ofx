@@ -116,7 +116,7 @@
 		<help_name>file</help_name>
 	</argument>
 	<argument name="destFile">
-		<description>(optional) the output file, enter '$' to print to standard output, defaults to '.../csv2of/export/...'</description>
+		<description>(optional) the output file, enter '$' to print to standard output, defaults to the current directory</description>
 		<help_name>file</help_name>
 		<optional>true</optional>
 	</argument>

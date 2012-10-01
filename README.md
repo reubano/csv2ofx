@@ -94,7 +94,7 @@ _use yoodle settings_
 
 ### Where does csv2ofx save files?
 
-csv2ofx saves resultant qif and ofx files in the "downloads" sub-folder of the installed "csv2ofx" folder. 
+csv2ofx saves resultant qif and ofx files to the current directory. 
 
 ### Additional date format examples
 
