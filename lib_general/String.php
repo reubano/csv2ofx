@@ -35,7 +35,7 @@ class String {
 	 * @return array $arrContent	 array of csv data
 	 * @throws Exception if $csvFile does not exist
 	 *
-	 * @assert (array('content,to,parse')) == array('content', 'to', 'parse')
+	 * @assert (array(0 => 'content,to,parse', 1 => 'content,to,parse')) == array(0 => array('content', 'to', 'parse'), 1 => array('content', 'to', 'parse'))
 	 **************************************************************************/
 	public function csv2Array($csvContent, $fieldDelimiter=',') {
 		try {
@@ -66,6 +66,8 @@ class String {
 	 *							string added to the beginning and end of
 	 *							each array element
 	 * @throws Exception if $content is not an array 
+	 *
+	 * @assert (array('one', 'two')) == "'one' 'two'"
 	 **************************************************************************/
 	public function extraImplode($content, $extra = '\'', $delimiter = ' ') {
 		if (!is_array($content)) {
@@ -94,6 +96,8 @@ class String {
 	 *
 	 * @return string $content data with LF line endings
 	 * @throws Exception if $file does not exist
+	 *
+	 * @assert ("line one\r\nline two\rline three") == "line one\nline two\nline three"
 	 **************************************************************************/
 	public function makeLFLineEndings($content) {
 		try {
