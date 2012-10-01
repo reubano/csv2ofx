@@ -8,40 +8,41 @@
  
 date_default_timezone_set('Africa/Nairobi');
 
-$thisProjectDir	= dirname(__FILE__);
-$projectsDir	= dirname($thisProjectDir);
-$today			= date("Ymd"); // format to yyyymmdd
-$timeStamp		= date("Ymd_His"); // format to yyyymmdd_hhmmss
-$accountList 	= array('ofx' => 'CHECKING', 'qif' => 'Bank');
-$ofxList 		= array(
+if (strpos('@php_bin@', '@php_bin') === 0) { // not a pear install
+	define('PROJECT_DIR', dirname(__FILE__).DIRECTORY_SEPARATOR);
+} else {
+	define('PROJECT_DIR', '@php_bin@'.DIRECTORY_SEPARATOR);
+}
+
+define('PROG_DIR', 'csv2ofx'.DIRECTORY_SEPARATOR);
+define('CUR_DIR', getcwd().DIRECTORY_SEPARATOR);
+define('TODAY', date("Ymd")); // format to yyyymmdd
+define('TIME_STAMP', date("Ymd_His"); // format to yyyymmdd_hhmmss
+define('XML_FILE', PROJECT_DIR.'csv2ofx.xml');
+
+require PROJECT_DIR.PROG_DIR.'Autoload.php';
+
+$accountList = array('ofx' => 'CHECKING', 'qif' => 'Bank');
+$ofxList = array(
 	'CHECKING' => array('checking'), 
 	'SAVINGS' => array('savings'), 
 	'MONEYMRKT' => array('market'),
 	'CREDITLINE' => array('visa', 'master', 'express', 'discover')
 );
 
-$bankList 		= array(
+$bankList = array(
 	'checking', 'savings', 'market', 'receivable', 'payable', 'visa', 'master',
 	'express', 'discover'
 );
 
-$qifList 		= array('Bank' => $bankList, 'Cash' => array('cash'));
-$accountTypeList= array('ofx' => $ofxList, 'qif' => $qifList);
+$qifList = array('Bank' => $bankList, 'Cash' => array('cash'));
+$accountTypeList = array('ofx' => $ofxList, 'qif' => $qifList);
 
-$ext 			= array('ofx' => 'ofx', 'qif' => 'qif');
-$currDir		= getcwd();
+$ext = array('ofx' => 'ofx', 'qif' => 'qif');
 
-// include files
-require_once 'Console/CommandLine.php';
-require_once $thisProjectDir.'/lib_general/Vars.php';
-require_once $thisProjectDir.'/lib_general/File.php';
-require_once $thisProjectDir.'/lib_general/String.php';
-require_once $thisProjectDir.'/lib_general/MyArray.php';
-require_once $thisProjectDir.'/CSV2OFX.inc.php';
 
 // create the parser from xml file
-$xmlfile = $thisProjectDir.'/csv2ofx.xml';
-$parser = Console_CommandLine::fromXmlFile($xmlfile);
+$parser = Console_CommandLine::fromXmlFile(XML_FILE);
 
 try {
 	// run the parser
@@ -85,7 +86,7 @@ try {
 			
 		case '':
 			$stdout = FALSE;
-			$destFile = $currDir.'/'.$timeStamp.'_'.$mapping.'.'.$ext;
+			$destFile = CUR_DIR.TIME_STAMP.'_'.$mapping.'.'.$ext;
 			print("$destFile\n");
 			exit;
 			break;
@@ -165,17 +166,17 @@ try {
 						}
 					} //<-- end if not split -->
 			
-					$timestamp = 
+					TIME_STAMP = 
 						strtotime($transaction[0][$csv2ofx->headDate]);
 					
 					// if transaction is not in the specified date range, 
 					// go to the next one
-					if ($timestamp <= $startDate || $timestamp >= $endDate) { 
+					if (TIME_STAMP <= $startDate || TIME_STAMP >= $endDate) { 
 						continue;
 					}
 	
 					// get data for first split
-					$csv2ofx->setTransactionData($transaction[0], $timestamp);
+					$csv2ofx->setTransactionData($transaction[0], TIME_STAMP);
 					
 					$content .= 
 						$csv2ofx->getQIFTransactionContent($accountType);
@@ -185,7 +186,7 @@ try {
 						foreach ($transaction as $key => $split) {
 							if ($key > 0) {
 								$csv2ofx->setTransactionData($split, 
-									$timestamp
+									TIME_STAMP
 								);
 								
 								$content .= $csv2ofx->getQIFSplitContent();
@@ -204,9 +205,9 @@ try {
 		$csvContent = $array->xmlize($csvContent);
 		
 		if ($result->options['transfer']) {
-			$content = $csv2ofx->getOFXTransferHeader($timeStamp);
+			$content = $csv2ofx->getOFXTransferHeader(TIME_STAMP);
 		} else { // it's a transaction
-			$content = $csv2ofx->getOFXTransactionHeader($timeStamp);
+			$content = $csv2ofx->getOFXTransactionHeader(TIME_STAMP);
 		} //<-- end if transfer -->
 
 		// loop through each account
@@ -232,15 +233,15 @@ try {
 					}
 					
 					// else, business as usual
-					$timestamp = strtotime($transaction[$csv2ofx->headDate]);
+					TIME_STAMP = strtotime($transaction[$csv2ofx->headDate]);
 					
 					// if transaction is not in the specified date range, 
 					// go to the next one
-					if ($timestamp <= $startDate || $timestamp >= $endDate) { 
+					if (TIME_STAMP <= $startDate || TIME_STAMP >= $endDate) { 
 						continue;
 					}
 
-					$csv2ofx->setTransactionData($transaction, $timestamp);
+					$csv2ofx->setTransactionData($transaction, TIME_STAMP);
 					
 					if ($result->options['transfer']) {
 						$content .= 
