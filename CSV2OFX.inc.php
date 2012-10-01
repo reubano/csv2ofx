@@ -97,6 +97,15 @@ class CSV2OFX {
 				$this->split		= FALSE;
 				break;
 
+			case 'exim':
+				$this->headAccount	= 'Account';
+				$this->headDate 	= 'Date';
+				$this->headAmount 	= 'Amount';
+				$this->headPayee 	= 'Narration';
+				$this->headTranId 	= 'Reference Number';
+				$this->split		= FALSE;
+				break;
+
 			case 'custom':
 				$this->headAccount	= 'Account';
 				$this->headDate 	= 'Date';
