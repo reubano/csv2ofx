@@ -5,7 +5,7 @@
 
 // include files
 $thisProjectDir	= dirname(__FILE__);
-require_once $thisProjectDir.'/lib_general/General.inc.php';
+require_once $thisProjectDir.'/lib_general/MyArray.php';
 
 //<-- begin class -->
 class CSV2OFX {
@@ -323,7 +323,10 @@ class CSV2OFX {
 					}
 				
 					if ($mainKeys[$id] != 0) {		
-						general::arrayMove($transaction, $mainKeys[$id]);
+						$transaction = myarray::arrayMove(
+							$transaction, $mainKeys[$id]
+						);
+						
 						$this->newContent[$id] = $transaction;
 					} //<-- end if -->
 				} //<-- end foreach -->
@@ -349,7 +352,9 @@ class CSV2OFX {
 		} else {
 			try {
 				foreach ($this->newContent as $id => &$transaction) {
-					general::arraySortBySubValue($transaction, 'AccountName');
+					$transaction = myarray::arraySortBySubValue(
+						$transaction, 'AccountName'
+					);
 				}
 			} catch (Exception $e) { 
 				throw new Exception($e->getMessage().' from '.$this->className.
