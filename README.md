@@ -2,7 +2,7 @@
 
 ## INTRODUCTION
 
-[csv2ofx](http://github.com/reubano/csv2ofx) is a command line program that converts CSV files to OFX and QIF files for importing into GnuCash or similar financial accounting programs. csv2ofx has built in support for converting csv files from mint, yoodle, and xero. csv2ofx was inspired by [mulicheng/csv2ofx](http://github.com/mulicheng/csv2ofx) and has been tested on the following configuration:
+[csv2ofx](http://github.com/reubano/csv2ofx) is a command line program that converts CSV files to OFX and QIF files for importing into GnuCash or similar financial accounting programs. csv2ofx has built in support for importing csv files from mint, yoodle, and xero. csv2ofx was inspired by [mulicheng/csv2ofx](http://github.com/mulicheng/csv2ofx) and has been tested on the following configuration:
 
 * MacOS X 10.7.4
 * PHP 5.3.15

@@ -6,7 +6,7 @@ $spec = Pearfarm_PackageSpec::create(
 	->setName('csv2ofx')
 	->setChannel('reubano.pearfarm.org')
 	->setSummary('converts csv files to ofx and qif files')
-	->setDescription('csv2ofx converts csv files to ofx and qif files and has built in support for csv source files from mint, yoodle, and xero')
+	->setDescription('csv2ofx is a command line program that converts CSV files to OFX and QIF files for importing into GnuCash or similar financial accounting programs. csv2ofx has built in support for importing csv files from mint, yoodle, and xero.')
 	->setReleaseVersion('0.9.0')
 	->setReleaseStability('beta')
 	->setApiVersion('0.9.0')
