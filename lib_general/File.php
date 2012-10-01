@@ -3,6 +3,8 @@
  *******************************************************************************
  * purpose: contains general functions to be used by all programs
  ******************************************************************************/
+
+date_default_timezone_set('Africa/Nairobi');
 class File {
 	protected $_className = __CLASS__;	// class name
 	protected $_verbose;
