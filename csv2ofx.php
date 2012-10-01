@@ -94,11 +94,10 @@ try {
 			$destFile = $dest;
 	} //<-- end switch -->		
 	
-	// debug mode setting
 	if ($result->options['debug']) {
-		print("[Command opts] ");
+		print('[Command opts] ');
 		print_r($result->options);
-		print("[Command args] ");
+		print('[Command args] ');
 		print_r($result->args);
 		exit(0);
 	} //<-- end if -->
