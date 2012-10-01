@@ -35,7 +35,10 @@ $ext 				= 'ofx';
 
 // include files
 require_once 'Console/CommandLine.php';
-require_once $thisProjectDir.'/lib_general/General.inc.php';
+require_once $thisProjectDir.'/lib_general/Vars.php';
+require_once $thisProjectDir.'/lib_general/File.php';
+require_once $thisProjectDir.'/lib_general/String.php';
+require_once $thisProjectDir.'/lib_general/MyArray.php';
 require_once $thisProjectDir.'/CSV2OFX.inc.php';
 
 // create the parser from xml file
@@ -58,8 +61,11 @@ try {
 	}
 	
 	// program setting
-	$general = new general($result->options['verbose']);
-	$program = $general->getBase(__FILE__);
+	$vars = new vars($result->options['verbose']);
+	$file = new file($result->options['verbose']);
+	$array = new myarray($result->options['verbose']);
+	$string = new string($result->options['verbose']);
+	$program = $file->getBase(__FILE__);
 
 	// load options if present
 	$delimiter = $result->options['delimiter'];
@@ -99,14 +105,13 @@ try {
 
 	// execute program
 	if ($stdin) {
-		$csvContent = $general->csv2Array($general->readSTDIN(), $delimiter, FALSE);
 	} else {
-		$csvContent = $general->csv2Array($result->args['srcFile'], $delimiter);
 	} //<-- end if -->
 	
-	$general->trimArray($csvContent);
-	$general->lengthenArray($csvContent);
-	$csvContent = $general->arrayInsertKey($csvContent);
+	$csvContent = $string->csv2Array($content, $delimiter);
+	$csvContent = $array->arrayTrim($csvContent, $delimiter);
+	$csvContent = $array->arrayLengthen($csvContent, $delimiter);
+	$csvContent = $array->arrayInsertKey($csvContent);
 	array_shift($csvContent);
 	
 	$csv2ofx = new csv2ofx($source, $csvContent, $result->options['verbose']);
@@ -126,7 +131,7 @@ try {
 	
 	// variable mode setting
 	if ($result->options['variables']) {
-		print_r($general->getVars(get_defined_vars()));
+		print_r($vars->getVars(get_defined_vars()));
 		exit(0);
 	}
 
@@ -188,7 +193,7 @@ try {
 		} //<-- end loop through accounts -->	
 	} else { // it's ofx
 		// remove non xml compliant characters
-		$csvContent = $general->xmlize($csvContent); // make recursive
+		$csvContent = $array->xmlize($csvContent);
 		
 		if ($result->options['transfer']) {
 			$content = $csv2ofx->getOFXTransferHeader($timeStamp);
