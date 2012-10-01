@@ -1,3 +1,4 @@
 .DS_Store
 exports/*
 php_errors.log
+lib_general/.php
