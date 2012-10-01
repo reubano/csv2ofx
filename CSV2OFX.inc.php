@@ -510,7 +510,7 @@ class CSV2OFX {
 			if ($this->headCheckNum) {
 				$this->tranCheckNum = $transaction[$this->headCheckNum];
 			}
-
+			
 			// if no id, create it using check number or md5 
 			// hash of the transaction details
 			if (!$this->tranId) {
