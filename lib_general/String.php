@@ -127,7 +127,12 @@ class String {
 	public function lines2Array($content, $lineEnding="\n") {		
 		try {
 			$content = explode($lineEnding, $content); // turn string to array
-			array_pop($content); // remove last element since it is empty
+			$last = array_pop($content);
+
+			if (!empty($last)) {
+				$content[] = $last;
+			}
+
 			return $content;
 		} catch (Exception $e) { 
 			throw new Exception(
