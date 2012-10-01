@@ -150,8 +150,12 @@ try {
 				// find the rows matching the account name 
 				if ($transaction[0][$csv2ofx->headAccount] == $account) {
 					if (!$csv2ofx->split) {
-						$tranSplitAccount = 
-							$transaction[0][$csv2ofx->headSplitAccount];
+						if ($csv2ofx->headSplitAccount) {
+							$tranSplitAccount = 
+								$transaction[0][$csv2ofx->headSplitAccount];
+						} else {
+							$tranSplitAccount = $csv2ofx->defSplitAccount;
+						}
 						
 						// if this is a transfer from the primary account, 
 						// skip it and go to the next transaction
