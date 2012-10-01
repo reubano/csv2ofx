@@ -39,11 +39,11 @@ class String {
 	 **************************************************************************/
 	public function csv2Array($csvContent, $fieldDelimiter=',') {
 		try {
-			$arrContent = array_walk(
-				$csvContent, 'str_getcsv', $fieldDelimiter
+			return array_map(
+				'str_getcsv', 
+				$csvContent, 
+				array_fill(0, count($csvContent), $fieldDelimiter)
 			);
-			
-			return $arrContent;			
 		} catch (Exception $e) { 
 			throw new Exception(
 				$e->getMessage().' from '.$this->_className.'->'.__FUNCTION__.
