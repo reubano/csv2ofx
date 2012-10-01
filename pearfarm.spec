@@ -7,9 +7,9 @@ $spec = Pearfarm_PackageSpec::create(
 	->setChannel('reubano.pearfarm.org')
 	->setSummary('converts csv files to ofx and qif files')
 	->setDescription('csv2ofx is a command line program that converts CSV files to OFX and QIF files for importing into GnuCash or similar financial accounting programs. csv2ofx has built in support for importing csv files from mint, yoodle, and xero.')
-	->setReleaseVersion('0.9.0')
+	->setReleaseVersion('0.9.1')
 	->setReleaseStability('beta')
-	->setApiVersion('0.9.0')
+	->setApiVersion('0.9.1')
 	->setApiStability('beta')
 	->setLicense(Pearfarm_PackageSpec::LICENSE_MIT)
 	->setNotes('http://github.com/reubano/csv2ofx')
@@ -18,5 +18,5 @@ $spec = Pearfarm_PackageSpec::create(
 	->setDependsOnPHPVersion('5.3')
 	->addPackageDependency('Console_CommandLine', 'pear.php.net')
 	->addExcludeFiles(array('.gitignore', 'pearfarm.spec'))
-	->addExecutable('csv2ofx')
+	->addExecutable('csv2ofx.php')
 	;
