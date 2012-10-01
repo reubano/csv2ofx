@@ -165,17 +165,16 @@ try {
 						}
 					} //<-- end if not split -->
 			
-					TIME_STAMP = 
-						strtotime($transaction[0][$csv2ofx->headDate]);
+					$tranDate = strtotime($transaction[0][$csv2ofx->headDate]);
 					
 					// if transaction is not in the specified date range, 
 					// go to the next one
-					if (TIME_STAMP <= $startDate || TIME_STAMP >= $endDate) { 
+					if ($tranDate <= $startDate || $tranDate >= $endDate) { 
 						continue;
 					}
 	
 					// get data for first split
-					$csv2ofx->setTransactionData($transaction[0], TIME_STAMP);
+					$csv2ofx->setTransactionData($transaction[0], $tranDate);
 					
 					$content .= 
 						$csv2ofx->getQIFTransactionContent($accountType);
@@ -185,7 +184,7 @@ try {
 						foreach ($transaction as $key => $split) {
 							if ($key > 0) {
 								$csv2ofx->setTransactionData($split, 
-									TIME_STAMP
+									$tranDate
 								);
 								
 								$content .= $csv2ofx->getQIFSplitContent();
@@ -204,9 +203,9 @@ try {
 		$csvContent = $array->xmlize($csvContent);
 		
 		if ($result->options['transfer']) {
-			$content = $csv2ofx->getOFXTransferHeader(TIME_STAMP);
+			$content = $csv2ofx->getOFXTransferHeader($tranDate);
 		} else { // it's a transaction
-			$content = $csv2ofx->getOFXTransactionHeader(TIME_STAMP);
+			$content = $csv2ofx->getOFXTransactionHeader($tranDate);
 		} //<-- end if transfer -->
 
 		// loop through each account
@@ -232,15 +231,15 @@ try {
 					}
 					
 					// else, business as usual
-					TIME_STAMP = strtotime($transaction[$csv2ofx->headDate]);
+					$tranDate = strtotime($transaction[$csv2ofx->headDate]);
 					
 					// if transaction is not in the specified date range, 
 					// go to the next one
-					if (TIME_STAMP <= $startDate || TIME_STAMP >= $endDate) { 
+					if ($tranDate <= $startDate || $tranDate >= $endDate) { 
 						continue;
 					}
 
-					$csv2ofx->setTransactionData($transaction, TIME_STAMP);
+					$csv2ofx->setTransactionData($transaction, $tranDate);
 					
 					if ($result->options['transfer']) {
 						$content .= 
