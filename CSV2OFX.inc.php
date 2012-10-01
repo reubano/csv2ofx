@@ -149,7 +149,7 @@ class CSV2OFX {
 		try {		
 			foreach ($this->csvContent as $key => $content) {
 				$amount = $content[$this->headAmount];
-				$amount = floatval(ereg_replace("[^-0-9\.]","", $amount));
+				$amount = floatval(preg_replace("[^-0-9\.]","", $amount));
 				$this->csvContent[$key][$this->headAmount] = $amount;
 			} //<-- end for loop -->				
 		} catch (Exception $e) { 
