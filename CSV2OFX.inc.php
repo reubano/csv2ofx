@@ -42,6 +42,7 @@ class CSV2OFX {
 	public $tranSplitAccountId;
 	public $tranAmount;
 	public $tranDesc;
+	public $defSplitAccount = 'Orphan';
 	
 	/*************************************************************************** 
 	 * The class constructor
