@@ -20,7 +20,7 @@ csv2ofx requires the following programs in order to run properly:
 	pear channel-discover reubano.pearfarm.org
 	pear install reubano.pearfarm.org/csv2ofx
 
-## USING opentag
+## USING csv2ofx
 ### Usage
 	csv2ofx [options] <src_file> <dest_file>
 	
