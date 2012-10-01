@@ -110,6 +110,7 @@ try {
 		$content = $source;
 	} //<-- end if -->
 	
+	$content = $string->lines2Array($content);
 	$csvContent = $string->csv2Array($content, $delimiter);
 	$csvContent = $array->arrayTrim($csvContent, $delimiter);
 	$csvContent = $array->arrayLengthen($csvContent, $delimiter);
