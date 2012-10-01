@@ -484,8 +484,17 @@ class CSV2OFX {
 				}
 			}
 			
-			$this->tranPayee = $transaction[$this->headPayee];
-			$this->tranSplitAccount = $transaction[$this->headSplitAccount];
+			if ($this->headPayee) {
+				$this->tranPayee = $transaction[$this->headPayee];
+			} else {
+				$this->tranPayee = '';
+			}
+					
+			if ($this->headSplitAccount) {
+				$this->tranSplitAccount = $transaction[$this->headSplitAccount];
+			} else {
+				$this->tranSplitAccount = $this->defSplitAccount;
+			}
 			
 			if ($this->headDesc) {
 				$this->tranDesc = $transaction[$this->headDesc];
