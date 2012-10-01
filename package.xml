@@ -11,7 +11,7 @@
     <active>yes</active>
   </lead>
   <date>2012-10-01</date>
-  <time>18:19:00</time>
+  <time>21:04:10</time>
   <version>
     <release>0.9.1</release>
     <api>0.9.1</api>
@@ -24,11 +24,11 @@
   <notes>http://github.com/reubano/csv2ofx</notes>
   <contents>
     <dir name="/" baseinstalldir="csv2ofx">
-      <file name=".gittrees" role="php" md5sum="48bbf7636e72e9c6c9bc045d9f6c83ab"/>
+      <file name="Autoload.php" role="php" md5sum="b5aa0b3dfdedacd6843de93e32b6d816"/>
       <file name="CSV2OFX.inc.php" role="php" md5sum="8e618a5c2c6cf4c92ab39ce1402a4f54"/>
       <file name="LICENSE" role="php" md5sum="ad5edd33ac8cc501a8ccef4513f40d95"/>
       <file name="README.md" role="php" md5sum="787a93e9ecf235e71b5db48185982af3"/>
-      <file name="csv2ofx.php" role="script" baseinstalldir="/" md5sum="0c66e316a16d9c0a5f4328c414666657">
+      <file name="csv2ofx.php" role="script" baseinstalldir="/" md5sum="a520659439eeef89deced03266fc20f2">
         <tasks:replace type="pear-config" from="/usr/bin/env php" to="php_bin"/>
         <tasks:replace type="pear-config" from="@php_bin@" to="php_bin"/>
         <tasks:replace type="pear-config" from="@bin_dir@" to="bin_dir"/>
@@ -45,7 +45,6 @@
         <file name="xero_example.csv" role="php" md5sum="a294876a4b3facc9cf9f36e59ee25cf8"/>
       </dir>
       <dir name="lib_general">
-        <file name=".gitignore" role="php" md5sum="1c4b39b6653e38aca0c95504009117a9"/>
         <file name="File.php" role="php" md5sum="a39b0f8a75a540d548d5ea6e97013501"/>
         <file name="FileTest.php" role="php" md5sum="3f959ce55f0f99e0a801f1f757586a6e"/>
         <file name="MyArray.php" role="php" md5sum="ec170e04bf041e2c7ce9e63b3a690a75"/>
@@ -57,6 +56,7 @@
         <file name="Vars.php" role="php" md5sum="dd48dd5baf1f8426e44bcfcf9a18fe94"/>
         <file name="VarsTest.php" role="php" md5sum="43083ca6bfb892dfd04a4c6117148068"/>
       </dir>
+      <file name="package.xml" role="php" md5sum="652b44557731a3b7c2eb8d4c5bf39ae4"/>
     </dir>
   </contents>
   <dependencies>
