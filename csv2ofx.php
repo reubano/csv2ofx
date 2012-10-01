@@ -117,7 +117,7 @@ try {
 	$csvContent = $array->arrayInsertKey($csvContent);
 	array_shift($csvContent);
 	
-	$csv2ofx = new csv2ofx($source, $csvContent, $result->options['verbose']);
+	$csv2ofx = new csv2ofx($mapping, $csvContent, $result->options['verbose']);
 	$csv2ofx->setAmounts();
 
 	if ($csv2ofx->split) {
