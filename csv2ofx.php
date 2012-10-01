@@ -129,9 +129,9 @@ try {
 	} else { // not a split transaction
 		$csv2ofx->makeSplits();
 	} //<-- end if split -->
-
-	$csv2ofx->getAccounts($accountTypeList, $defAccountType);
 	
+	$csv2ofx->getAccounts($accountTypeList, $accountType[$type]);
+		
 	// variable mode setting
 	if ($result->options['variables']) {
 		print_r($vars->getVars(get_defined_vars()));
