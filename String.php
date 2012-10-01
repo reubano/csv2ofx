@@ -26,35 +26,6 @@ class String {
 			
 	/**
 	 ***************************************************************************
-	 * Makes a string xml compliant
-	 * 
-	 * @param string $content the content to clean 
-	 *
-	 * @return string $content the cleaned content
-	 * @throws Exception if $content is empty
-	 **************************************************************************/
-	public function xmlize($content) {
-		if (empty($content)) { // check to make sure $content isn't empty
-			throw new Exception(
-				'Empty value passed from '.$this->_className.'->'.__FUNCTION__.
-				'() line '.__LINE__
-			);
-		} else {
-			try {
-				$invalidText = array('&', '<', '>', '\r\n', '\n');
-				$validText = array('&amp;', '&lt;', '&gt;', ' ', ' ');
-				return str_replace($invalidText, $validText, $content);
-			} catch (Exception $e) { 
-				throw new Exception(
-					$e->getMessage().' from '.$this->_className.'->'.
-					__FUNCTION__.'() line '.__LINE__
-				);
-			} //<-- end try -->
-		} //<-- end if -->
-	} //<-- end function -->
-	
-	/**
-	 ***************************************************************************
 	 * Parses each line of an array of raw csv data into an array 
 	 *
 	 * @param array $csvContent		 csv content (each array should contain one
