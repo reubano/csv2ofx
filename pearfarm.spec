@@ -16,6 +16,6 @@
 		->addGitFiles()
 		->setDependsOnPHPVersion('5.3')
 		->addPackageDependency('Console_CommandLine', 'pear.php.net')
-		->addExcludeFiles(array('.gitignore', 'pearfarm.spec', '.gittrees', '*.tgz', 'lib_general/.gitignore'))
+		->addExcludeFiles(array('.gitignore', 'pearfarm.spec', '.gittrees', '*.tgz', 'lib_general/.gitignore', 'package.xml'))
 		->addExecutable('csv2ofx.php')
 		;
