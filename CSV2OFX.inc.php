@@ -74,7 +74,6 @@ class CSV2OFX {
 				$this->headAccount 	= 'AccountName';
 				$this->headDate 	= 'JournalDate';
 				$this->headAmount 	= 'NetAmount';
-				$this->headDesc 	= 'Description';
 				$this->headPayee 	= 'Description';
 				$this->headNotes 	= 'Product';
 				$this->headClass 	= 'Resource';
