@@ -253,11 +253,7 @@ try {
 	if ($stdout) {
 		print($content);
 	} else {
-		if ($result->options['overwrite']) {
-			$general->overwriteFile($content, $destFile);
-		} else {
-			$general->write2file($content, $destFile, $delimiter);
-		} //<-- end if -->
+		$file->write2file($content, $destFile, $result->options['overwrite']);
 	} //<-- end if not test mode -->
 
 	exit(0);
