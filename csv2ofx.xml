@@ -111,12 +111,12 @@
 		<description>enables variable mode, displays the value of all program variables</description>
 		<action>StoreTrue</action>
 	</option>
-	<argument name="srcFile">
-		<description>the csv file, enter '$' to read data from standard input</description>
+	<argument name="source">
+		<description>the source csv file or data, enter '-' to read data from standard input</description>
 		<help_name>file</help_name>
 	</argument>
-	<argument name="destFile">
-		<description>(optional) the output file, enter '$' to print to standard output, defaults to '.../csv2of/export/...'</description>
+	<argument name="dest">
+		<description>(optional) the destination file, enter '$' to print to standard output, defaults to '.../csv2ofx/exports/...'</description>
 		<help_name>file</help_name>
 		<optional>true</optional>
 	</argument>
