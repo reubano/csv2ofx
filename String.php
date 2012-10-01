@@ -112,10 +112,13 @@ class String {
 	 ***************************************************************************
 	 * Returns an array from a multiline string
 	 *
-	 * @param string $content a multiline string 
+	 * @param string $content    a multiline string 
+	 * @param string $lineEnding a the line ending ("\n", "\r\n", or "\r")
 	 *
 	 * @return array $content array (one element from each line in the
-	 *						  string)
+	 * 								string)
+	 *
+	 * @assert ("one\ntwo\nthree") == array('one', 'two', 'three')
 	 **************************************************************************/
 	public function lines2Array($content, $lineEnding="\n") {		
 		try {
