@@ -2,7 +2,7 @@
 <command>
 	<name>csv2ofx</name>
 	<description>converts a csv file of transactions to an ofx or qif file.</description>
-	<version>0.9.1</version>
+	<version>0.9.2</version>
 	<option name="accountType">
 		<short_name>-A</short_name>
 		<long_name>--account-type</long_name>
