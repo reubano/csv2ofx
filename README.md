@@ -17,8 +17,8 @@ csv2ofx requires the following programs in order to run properly:
 
 ## INSTALLATION
 	
-	pear channel-discover reubano.pearfarm.org
-	pear install reubano.pearfarm.org/csv2ofx
+	sudo pear channel-discover reubano.github.com/pear
+	sudo pear install reubano/csv2ofx
 
 ## USING csv2ofx
 ### Usage
