@@ -3,7 +3,7 @@
 		array(Pearfarm_PackageSpec::OPT_BASEDIR => dirname(__FILE__))
 	)
 		->setName('csv2ofx')
-		->setChannel('reubano.pearfarm.org')
+		->setChannel('reubano.github.com/pear')
 		->setSummary('converts csv files to ofx and qif files')
 		->setDescription('csv2ofx is a command line program that converts CSV files to OFX and QIF files for importing into GnuCash or similar financial accounting programs. csv2ofx has built in support for importing csv files from mint, yoodle, and xero.')
 		->setReleaseVersion('0.9.2')
