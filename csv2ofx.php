@@ -5,7 +5,7 @@
  * csv2ofx converts a csv file to ofx and qif
  *******************************************************************************
  */
- 
+
 date_default_timezone_set('Africa/Nairobi');
 
 if (strpos('@php_bin@', '@php_bin') === 0) { // not a pear install
@@ -24,8 +24,8 @@ require PROJECT_DIR.'Autoload.php';
 
 $accountList = array('ofx' => 'CHECKING', 'qif' => 'Bank');
 $ofxList = array(
-	'CHECKING' => array('checking'), 
-	'SAVINGS' => array('savings'), 
+	'CHECKING' => array('checking'),
+	'SAVINGS' => array('savings'),
 	'MONEYMRKT' => array('market'),
 	'CREDITLINE' => array('visa', 'master', 'express', 'discover')
 );
@@ -47,7 +47,7 @@ $parser = Console_CommandLine::fromXmlFile(XML_FILE);
 try {
 	// run the parser
 	$result = $parser->parse();
-	
+
 	// command arguments
 	$source = $result->args['source'];
 	$dest = $result->args['dest'];
@@ -55,7 +55,7 @@ try {
 	// load options if present
 	$delimiter = $result->options['delimiter'];
 	$mapping = $result->options['mapping'];
-	$primary = $result->options['primary'];	
+	$primary = $result->options['primary'];
 	$startDate = strtotime($result->options['start']);
 	$endDate = strtotime($result->options['end']);
 	$collAccts = explode(',', $result->options['collapse']);
@@ -67,7 +67,7 @@ try {
 	} else {
 		$type = 'ofx';
 	}
-	
+
 	$accountType = $result->options['accountType'];
 	$accountTypeList = $accountTypeList[$type];
 	$ext = $ext[$type];
@@ -76,17 +76,17 @@ try {
 		case '$':
 			$stdout = TRUE;
 			break;
-			
+
 		case '':
 			$stdout = FALSE;
 			$destFile = CUR_DIR.TIME_STAMP.'_'.$mapping.'.'.$ext;
 			break;
-			
+
 		default:
 			$stdout = FALSE;
 			$destFile = $dest;
-	} //<-- end switch -->		
-	
+	} //<-- end switch -->
+
 	if ($result->options['debug']) {
 		print('[Command opts] ');
 		print_r($result->options);
@@ -108,14 +108,14 @@ try {
 	} else {
 		$content = $source;
 	} //<-- end if -->
-	
+
 	$content = $string->lines2Array($content);
 	$csvContent = $string->csv2Array($content, $delimiter);
 	$csvContent = $array->arrayTrim($csvContent, $delimiter);
 	$csvContent = $array->arrayLengthen($csvContent, $delimiter);
 	$csvContent = $array->arrayInsertKey($csvContent);
 	array_shift($csvContent);
-	
+
 	$csv2ofx = new csv2ofx($mapping, $csvContent, $result->options['verbose']);
 	$csv2ofx->setAmounts();
 
@@ -128,9 +128,9 @@ try {
 	} else { // not a split transaction
 		$csv2ofx->makeSplits();
 	} //<-- end if split -->
-	
+
 	$csv2ofx->getAccounts($accountTypeList, $accountType[$type]);
-		
+
 	// variable mode setting
 	if ($result->options['variables']) {
 		print_r($vars->getVars(get_defined_vars()));
@@ -139,67 +139,67 @@ try {
 
 	if ($result->options['qif']) {
 		$content = '';
-		
+
 		foreach ($csv2ofx->accounts as $account => $accountType) {
-			$content .= 
+			$content .=
 				$csv2ofx->getQIFTransactionHeader($account, $accountType);
-			
+
 			// loop through each transaction
 			foreach ($csv2ofx->newContent as $transaction) {
-				// find the rows matching the account name 
+				// find the rows matching the account name
 				if ($transaction[0][$csv2ofx->headAccount] == $account) {
 					if (!$csv2ofx->split) {
 						if ($csv2ofx->headSplitAccount) {
-							$tranSplitAccount = 
+							$tranSplitAccount =
 								$transaction[0][$csv2ofx->headSplitAccount];
 						} else {
 							$tranSplitAccount = $csv2ofx->defSplitAccount;
 						}
-						
-						// if this is a transfer from the primary account, 
+
+						// if this is a transfer from the primary account,
 						// skip it and go to the next transaction
 						if ($tranSplitAccount == $primary) {
 							continue;
 						}
 					} //<-- end if not split -->
-			
+
 					$tranDate = strtotime($transaction[0][$csv2ofx->headDate]);
-					
-					// if transaction is not in the specified date range, 
+
+					// if transaction is not in the specified date range,
 					// go to the next one
-					if ($tranDate <= $startDate || $tranDate >= $endDate) { 
+					if ($tranDate <= $startDate || $tranDate >= $endDate) {
 						continue;
 					}
-	
+
 					// get data for first split
 					$csv2ofx->setTransactionData($transaction[0], $tranDate);
-					
-					$content .= 
+
+					$content .=
 						$csv2ofx->getQIFTransactionContent($accountType);
-					
+
 					if ($csv2ofx->split) {
 						// loop through each additional split
 						foreach ($transaction as $key => $split) {
 							if ($key > 0) {
-								$csv2ofx->setTransactionData($split, 
+								$csv2ofx->setTransactionData($split,
 									$tranDate
 								);
-								
+
 								$content .= $csv2ofx->getQIFSplitContent();
 							} //<-- end if -->
 						} //<-- end loop through splits -->
 					} else { // not a split transaction
 						$content .= $csv2ofx->getQIFSplitContent();
 					} //<-- end if split -->
-					
+
 					$content .= $csv2ofx->getQIFTransactionFooter();
 				} //<-- end if correct account -->
 			} //<-- end loop through transactions -->
-		} //<-- end loop through accounts -->	
+		} //<-- end loop through accounts -->
 	} else { // it's ofx
 		// remove non xml compliant characters
 		$csvContent = $array->xmlize($csvContent);
-		
+
 		if ($result->options['transfer']) {
 			$content = $csv2ofx->getOFXTransferHeader($tranDate);
 		} else { // it's a transaction
@@ -210,49 +210,49 @@ try {
 		foreach ($csv2ofx->accounts as $account => $accountType) {
 			// create account id using an md5 hash of the account name
 			$accountId = md5($account);
-			
+
 			if (!$result->options['transfer']) {
 				$content .= $csv2ofx->getOFXTransactionAccountStart();
 			} //<-- end if not transfer -->
-			
-			// find the rows matching the account name and loop 
+
+			// find the rows matching the account name and loop
 			// through each transaction
 			foreach ($csvContent as $transaction) {
 				if ($transaction[$csv2ofx->headAccount] == $account) {
-					// if this is a transfer from the primary account, 
+					// if this is a transfer from the primary account,
 					// skip it and go to the next transaction
-					$tranSplitAccount = 
+					$tranSplitAccount =
 						$transaction[$csv2ofx->headSplitAccount];
-					
+
 					if ($tranSplitAccount == $primary) {
 						continue;
 					}
-					
+
 					// else, business as usual
 					$tranDate = strtotime($transaction[$csv2ofx->headDate]);
-					
-					// if transaction is not in the specified date range, 
+
+					// if transaction is not in the specified date range,
 					// go to the next one
-					if ($tranDate <= $startDate || $tranDate >= $endDate) { 
+					if ($tranDate <= $startDate || $tranDate >= $endDate) {
 						continue;
 					}
 
 					$csv2ofx->setTransactionData($transaction, $tranDate);
-					
+
 					if ($result->options['transfer']) {
-						$content .= 
+						$content .=
 							$csv2ofx->getOFXTransfer($account, $accountType);
 					} else { // it's a transaction
 						$content .= $csv2ofx->getOFXTransaction();
 					} //<-- end if transfer -->
 				} //<-- end if -->
 			} //<-- end for loop through transactions -->
-			
+
 			if (!$result->options['transfer']) {
 				$content .= $csv2ofx->getOFXTransactionAccountEnd();
 			} //<-- end if not transfer -->
 		} //<-- end foreach loop through accounts -->
-		
+
 		if ($result->options['transfer']) {
 			$content .=$csv2ofx->getOFXTransferFooter();
 		} else { // it's a transaction
