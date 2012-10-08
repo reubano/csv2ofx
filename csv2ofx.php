@@ -86,8 +86,6 @@ try {
 		case '':
 			$stdout = FALSE;
 			$destFile = CUR_DIR.TIME_STAMP.'_'.$mapping.'.'.$ext;
-			print("$destFile\n");
-			exit;
 			break;
 			
 		default:
