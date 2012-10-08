@@ -14,10 +14,11 @@ if (strpos('@php_bin@', '@php_bin') === 0) { // not a pear install
 	define('PROJECT_DIR', '@php_bin@'.DIRECTORY_SEPARATOR);
 }
 
+define('PROGRAM', pathinfo(__FILE__, PATHINFO_FILENAME));
 define('CUR_DIR', getcwd().DIRECTORY_SEPARATOR);
 define('TODAY', date("Ymd")); // format to yyyymmdd
 define('TIME_STAMP', date("Ymd_His")); // format to yyyymmdd_hhmmss
-define('XML_FILE', PROJECT_DIR.'csv2ofx.xml');
+define('XML_FILE', PROJECT_DIR.PROGRAM.'.xml');
 
 require PROJECT_DIR.'Autoload.php';
 
@@ -56,7 +57,6 @@ try {
 	$file = new file($result->options['verbose']);
 	$array = new myarray($result->options['verbose']);
 	$string = new string($result->options['verbose']);
-	$program = $file->getBase(__FILE__);
 
 	// load options if present
 	$delimiter = $result->options['delimiter'];
@@ -270,7 +270,7 @@ try {
 
 	exit(0);
 } catch (Exception $e) {
-	fwrite(STDOUT, 'Program '.$program.': '.$e->getMessage()."\n");
+	fwrite(STDOUT, 'Program '.PROGRAM.': '.$e->getMessage()."\n");
 	exit(1);
 }
 ?>
