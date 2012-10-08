@@ -51,12 +51,6 @@ try {
 	// command arguments
 	$source = $result->args['source'];
 	$dest = $result->args['dest'];
-	
-	// program setting
-	$vars = new vars($result->options['verbose']);
-	$file = new file($result->options['verbose']);
-	$array = new myarray($result->options['verbose']);
-	$string = new string($result->options['verbose']);
 
 	// load options if present
 	$delimiter = $result->options['delimiter'];
@@ -100,6 +94,12 @@ try {
 		print_r($result->args);
 		exit(0);
 	} //<-- end if -->
+
+	// program setting
+	$vars = new vars($result->options['verbose']);
+	$file = new file($result->options['verbose']);
+	$array = new myarray($result->options['verbose']);
+	$string = new string($result->options['verbose']);
 
 	// execute program
 	if (file_exists($source)) {
