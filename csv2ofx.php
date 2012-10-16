@@ -79,12 +79,11 @@ try {
 
 		case '':
 			$stdout = FALSE;
-			$destFile = CUR_DIR.TIME_STAMP.'_'.$mapping.'.'.$ext;
+			$dest = CUR_DIR.TIME_STAMP.'_'.$mapping.'.'.$ext;
 			break;
 
 		default:
 			$stdout = FALSE;
-			$destFile = $dest;
 	} //<-- end switch -->
 
 	if ($result->options['debug']) {
@@ -263,7 +262,7 @@ try {
 	if ($stdout) {
 		print($content);
 	} else {
-		$file->write2file($content, $destFile, $result->options['overwrite']);
+		$file->write2file($content, $dest, $result->options['overwrite']);
 	} //<-- end if not test mode -->
 
 	exit(0);
