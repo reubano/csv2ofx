@@ -14,6 +14,11 @@ def main():
 	try:
 		env = TestFileEnvironment('.scripttest')
 		dir = os.path.dirname(__file__)
+
+		# test 1
+		env.run('someprogram --help')
+
+		# test 2
 		example = os.path.join('examples', 'custom_example.csv')
 		script = 'php csv2ofx.php -qm custom %s $' % example
 		result = env.run('%s' % script, cwd='%s' % dir)
