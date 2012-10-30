@@ -44,7 +44,8 @@ class CSV2OFX {
 	public $tranDesc;
 	public $defSplitAccount = 'Orphan';
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * The class constructor
 	 *
 	 * @param 	boolean $verbose	enable verbose comments
@@ -139,7 +140,8 @@ class CSV2OFX {
 		} //<-- end if -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Set amount values
 	 *
 	 * @param 	array 	$accountTypeList	list of possible account types
@@ -159,7 +161,8 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Set account names and types
 	 *
 	 * @param 	array 	$accountTypeList	list of possible account types
@@ -191,7 +194,8 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Detects account types from account list
 	 *
 	 * @param 	array 	$accountTypeList	list of possible account types
@@ -228,7 +232,8 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Gets transaction IDs
 	 *
 	 * @return 	array	$this->tranIds		the transaction IDs
@@ -250,7 +255,8 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Combines similiar splits from the same account
 	 *
 	 * @param 	array 	$collapse			accounts to collapse
@@ -297,7 +303,8 @@ class CSV2OFX {
 		} //<-- end if -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Organizes the splits of each transaction so that the main transaction is
 	 * listed first
 	 **************************************************************************/
@@ -348,7 +355,8 @@ class CSV2OFX {
 		} //<-- end if -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Sorts splits by a given field
 	 *
 	 * @param 	array 	$field	field to sort splits by
@@ -373,7 +381,8 @@ class CSV2OFX {
 		} //<-- end if -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Verifies that the splits of each transaction sum to 0
 	 *
 	 * @return 	array	$this->newContent	csv content organized by transaction
@@ -403,7 +412,8 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Verifies that the splits of each transaction sum to 0
 	 *
 	 * @return 	array	$this->newContent	csv content organized by transaction
@@ -422,7 +432,8 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Verifies that the splits of each transaction sum to 0
 	 *
 	 * @return 	array	$this->newContent	csv content organized by transaction
@@ -463,7 +474,8 @@ class CSV2OFX {
 	} //<-- end function -->
 
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Sets QIF format transaction variables
 	 *
 	 * @param 	string 	$transaction	the account
@@ -552,7 +564,8 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Gets QIF format account content
 	 *
 	 * @param 	string 	$account		the account
@@ -573,7 +586,8 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Gets QIF format transaction content
 	 *
 	 * @param 	string 	$accountType	the account types
@@ -616,7 +630,8 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Gets QIF format split content
 	 *
 	 * @return 	string	$content		the QIF content
@@ -633,7 +648,8 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Gets QIF transaction footer
 	 *
 	 * @return 	string	$content		the QIF content
@@ -649,7 +665,8 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Gets OFX format transaction content
 	 *
 	 * @param 	string 	$timeStamp	the time in mmddyy_hhmmss format
@@ -680,7 +697,8 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Gets OFX format transaction account start content
 	 *
 	 * @return 	string	$content	the OFX content
@@ -705,7 +723,8 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Gets OFX format transaction content
 	 *
 	 * @return 	string	$content	the OFX content
@@ -729,7 +748,8 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Gets OFX format transaction account end content
 	 *
 	 * @return 	string	$content	the OFX content
@@ -750,7 +770,8 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Gets OFX transfer footer
 	 *
 	 * @return 	string	$content		the OFX content
@@ -766,7 +787,8 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Gets OFX transfer header
 	 *
 	 * @param 	string 	$timeStamp	the time in mmddyy_hhmmss format
@@ -790,7 +812,8 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Gets OFX transfer start
 	 *
 	 * @param 	string 	$accountType	the account types
@@ -825,7 +848,8 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/***************************************************************************
+	/**
+	 ***************************************************************************
 	 * Gets OFX transfer footer
 	 *
 	 * @return 	string	$content		the OFX content
