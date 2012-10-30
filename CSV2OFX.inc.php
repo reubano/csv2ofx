@@ -69,7 +69,7 @@ class CSV2OFX {
 				$this->headSplitAccount = 'Category';
 				$this->split		= FALSE;
 				break;
-	
+
 			case 'xero':
 				$this->headAccount 	= 'AccountName';
 				$this->headDate 	= 'JournalDate';
@@ -82,7 +82,7 @@ class CSV2OFX {
 				$this->headCheckNum = 'Reference';
 				$this->split		= TRUE;
 				break;
-	
+
 			case 'yoodle':
 				$this->headAccount	= 'Account Name';
 				$this->headDate 	= 'Date';
@@ -131,7 +131,7 @@ class CSV2OFX {
 				$this->headClass 	= 'Field';
 				$this->headTranId 	= 'Field';
 				$this->headCheckNum = 'Field';
-				$this->split		= FALSE;			
+				$this->split		= FALSE;
 			} //<-- end switch -->
 
 		if ($this->verbose) {
@@ -151,8 +151,8 @@ class CSV2OFX {
 				$amount = $content[$this->headAmount];
 				$amount = floatval(preg_replace("[^-0-9\.]","", $amount));
 				$this->csvContent[$key][$this->headAmount] = $amount;
-			} //<-- end for loop -->				
-		} catch (Exception $e) { 
+			} //<-- end for loop -->
+		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
@@ -170,7 +170,7 @@ class CSV2OFX {
 			if ($this->split) {
 				$this->accounts = array_unique($this->mainAccounts);
 			} else {
-				foreach ($this->newContent as $content) {		
+				foreach ($this->newContent as $content) {
 					$this->accounts[] = $content[0][$this->headAccount];
 				} //<-- end for loop -->
 
@@ -234,8 +234,8 @@ class CSV2OFX {
 	 * @return 	array	$this->tranIds		the transaction IDs
 	 **************************************************************************/
 	public function setTranIds() {
-		try {		
-			foreach ($this->csvContent as $content) {		
+		try {
+			foreach ($this->csvContent as $content) {
 				$this->tranIds[] = $content[$this->headTranId];
 			} //<-- end for loop -->
 
@@ -276,7 +276,7 @@ class CSV2OFX {
 							$split[$this->headAmount] += $previousAmount;
 							$splice[] = $key - 1;
 						} //<-- end if -->
-						
+
 						$previousAccount = $split[$this->headAccount];
 						$previousAmount = $split[$this->headAmount];
 					} //<-- end loop through splits -->
@@ -317,7 +317,7 @@ class CSV2OFX {
 						$absAmount = abs($amount);
 
 						if ($absAmount > $max) {
-							$this->mainAccounts[$id] = 
+							$this->mainAccounts[$id] =
 								$split[$this->headAccount];
 							$mainKeys[$id] = $key;
 							$max = $absAmount;
@@ -473,12 +473,12 @@ class CSV2OFX {
 	public function setTransactionData($transaction, $timestamp) {
 		try {
 			$this->tranDate = date("m/d/y", $timestamp);
-			$this->tranDate2 = date("Ymd", $timestamp); 
+			$this->tranDate2 = date("Ymd", $timestamp);
 			$this->tranAmount = $transaction[$this->headAmount];
-			
+
 			if ($this->headTranType) {
 				$this->tranType = $transaction[$this->headTranType];
-				
+
 				if ($this->tranType == 'debit') {
 					$this->tranAmount = '-'.$this->tranAmount;
 				}
