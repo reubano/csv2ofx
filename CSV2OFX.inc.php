@@ -561,13 +561,11 @@ class CSV2OFX {
 	 **************************************************************************/
 	public function getQIFTransactionHeader($account, $accountType) {
 		try {
-			$content =
+			return
 				"!Account\n".
 				"N$account\n".
 				"T$accountType\n".
 				"^\n";
-
-			return $content;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -625,11 +623,9 @@ class CSV2OFX {
 	 **************************************************************************/
 	public function getQIFSplitContent() {
 		try {
-			$content = "S$this->tranSplitAccount\n".
+			return "S$this->tranSplitAccount\n".
 				"E$this->tranDesc\n".
 				'$'."$this->tranAmount\n";
-
-			return $content;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -645,8 +641,7 @@ class CSV2OFX {
 	public function getQIFTransactionFooter() {
 		try {
 			// need to make variables reference $this->
-			$content = "^\n";
-			return $content;
+			return "^\n";
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -662,7 +657,7 @@ class CSV2OFX {
 	 **************************************************************************/
 	public function getOFXTransactionHeader($timeStamp) {
 		try {
-			$content =
+			return
 				"<OFX>\n".
 				"\t<SIGNONMSGSRSV1>\n".
 				"\t\t<SONRS>\n".
@@ -678,8 +673,6 @@ class CSV2OFX {
 				"\t\t<TRNUID>$timestamp</TRNUID>\n".
 				"\t\t<STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>".
 				"\n";
-
-			return $content;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -694,7 +687,7 @@ class CSV2OFX {
 	 **************************************************************************/
 	public function getOFXTransactionAccountStart() {
 		try {
-			$content =
+			return
 				"\t<STMTRS>\n".
 				"\t\t<CURDEF>$currency</CURDEF>\n".
 				"\t\t<BANKACCTFROM>\n".
@@ -705,8 +698,6 @@ class CSV2OFX {
 				"\t\t<BANKTRANLIST>\n".
 				"\t\t\t<DTSTART>$today</DTSTART>\n".
 				"\t\t\t<DTEND>$today</DTEND>\n";
-
-			return $content;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -721,7 +712,7 @@ class CSV2OFX {
 	 **************************************************************************/
 	public function getOFXTransaction() {
 		try {
-			$content =
+			return
 				"\t\t\t\t<STMTTRN>\n".
 				"\t\t\t\t\t<TRNTYPE>$defTranType</TRNTYPE>\n".
 				"\t\t\t\t\t<DTPOSTED>$tranDate2</DTPOSTED>\n".
@@ -731,8 +722,6 @@ class CSV2OFX {
 				"\t\t\t\t\t<NAME>$tranPayee</NAME>\n".
 				"\t\t\t\t\t<MEMO>$tranMemo</MEMO>\n".
 				"\t\t\t\t</STMTTRN>\n";
-
-			return $content;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -747,15 +736,13 @@ class CSV2OFX {
 	 **************************************************************************/
 	public function getOFXTransactionAccountEnd() {
 		try {
-			$content =
+			return
 				"\t\t</BANKTRANLIST>\n".
 				"\t\t<LEDGERBAL>\n".
 				"\t\t\t<BALAMT>0</BALAMT>\n".
 				"\t\t\t<DTASOF>$today</DTASOF>\n".
 				"\t\t</LEDGERBAL>\n".
 				"\t</STMTRS>\n";
-
-			return $content;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -771,8 +758,7 @@ class CSV2OFX {
 	public function getOFXTransactionFooter() {
 		try {
 			// need to make variables reference $this->
-			$content = '</STMTTRNRS></BANKMSGSRSV1></OFX>';
-			return $content;
+			return '</STMTTRNRS></BANKMSGSRSV1></OFX>';
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -788,7 +774,7 @@ class CSV2OFX {
 	 **************************************************************************/
 	public function getOFXTransferHeader($timeStamp) {
 		try {
-			$content =
+			return
 				"<OFX>\n".
 				"\t<SIGNONMSGSRSV1>\n".
 				"\t\t<SONRS></SONRS>\n".
@@ -797,8 +783,6 @@ class CSV2OFX {
 				"\t\t<TRNUID>$timeStamp</TRNUID>\n".
 				"\t\t<STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>".
 				"\n";
-
-			return $content;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -815,7 +799,7 @@ class CSV2OFX {
 	public function getOFXTransfer($accountType) {
 		try {
 			// need to make variables reference $this->
-			$content =
+			return
 				"\t<INTRARS>\n". // Begin transfer response
 				"\t\t<CURDEF>$currency</CURDEF>\n".
 				"\t\t<SRVRTID>$timestamp</SRVRTID>\n".
@@ -834,8 +818,6 @@ class CSV2OFX {
 				"\t\t</XFERINFO>\n". // End transfer aggregate
 				"\t\t<DTPOSTED>$tranDate2</DTPOSTED>\n".
 				"\t</INTRARS>\n"; // End transfer response
-
-			return $content;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -851,8 +833,7 @@ class CSV2OFX {
 	public function getOFXTransferFooter() {
 		try {
 			// need to make variables reference $this->
-			$content = '</INTRATRNRS></BANKMSGSRSV1></OFX>'; // End response
-			return $content;
+			return '</INTRATRNRS></BANKMSGSRSV1></OFX>'; // End response
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
