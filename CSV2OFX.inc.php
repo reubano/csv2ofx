@@ -571,6 +571,8 @@ class CSV2OFX {
 	 * @param 	string 	$account		the account
 	 * @param 	string 	$accountType	the account types
 	 * @return 	string	$content		the QIF content
+	 *
+	 * @assert ('account', 'type') == "!Account\nN$account\nT$type\n^\n"
 	 **************************************************************************/
 	public function getQIFTransactionHeader($account, $accountType) {
 		try {
@@ -592,6 +594,9 @@ class CSV2OFX {
 	 *
 	 * @param 	string 	$accountType	the account types
 	 * @return 	string	$content		the QIF content
+	 *
+	 * @assert ('type', '20120101', 'payee', 100, 1) == "!Type:type\nN1\nD20120101\nPpayee\nT100\n"
+	 * @assert ('type', '20120101', 'payee', 100) == "!Type:type\nD20120101\nPpayee\nT100\n"
 	 **************************************************************************/
 	public function getQIFTransactionContent($accountType) {
 		try {
@@ -635,6 +640,8 @@ class CSV2OFX {
 	 * Gets QIF format split content
 	 *
 	 * @return 	string	$content		the QIF content
+	 *
+	 * @assert ('account', 'desc', 100) == "Saccount\nEdesc\n$100\n"
 	 **************************************************************************/
 	public function getQIFSplitContent() {
 		try {
@@ -653,6 +660,8 @@ class CSV2OFX {
 	 * Gets QIF transaction footer
 	 *
 	 * @return 	string	$content		the QIF content
+	 *
+	 * @assert () == "^\n"
 	 **************************************************************************/
 	public function getQIFTransactionFooter() {
 		try {
@@ -671,6 +680,8 @@ class CSV2OFX {
 	 *
 	 * @param 	string 	$timeStamp	the time in mmddyy_hhmmss format
 	 * @return 	string	$content	the OFX content
+	 *
+	 * @assert (20120101, 'ENG', '20120101_111111') == "<OFX>\n\t<SIGNONMSGSRSV1>\n\t\t<SONRS>\n\t\t\t<STATUS>\n\t\t\t\t<CODE>0</CODE>\n\t\t\t\t<SEVERITY>INFO</SEVERITY>\n\t\t\t</STATUS>\n\t\t\t<DTSERVER>20120101</DTSERVER>\n\t\t\t<LANGUAGE>ENG</LANGUAGE>\n\t\t</SONRS>\n\t</SIGNONMSGSRSV1>\n\t<BANKMSGSRSV1><STMTTRNRS>\n\t\t<TRNUID>20120101_111111</TRNUID>\n\t\t<STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>\n"
 	 **************************************************************************/
 	public function getOFXTransactionHeader($timeStamp) {
 		try {
@@ -702,6 +713,8 @@ class CSV2OFX {
 	 * Gets OFX format transaction account start content
 	 *
 	 * @return 	string	$content	the OFX content
+	 *
+	 * @assert ('USD', 1, 'account', 'type', 20120101) == "\t<STMTRS>\n\t\t<CURDEF>USD</CURDEF>\n\t\t<BANKACCTFROM>\n\t\t\t<BANKID>1</BANKID>\n\t\t\t<ACCTID>account</ACCTID>\n\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t</BANKACCTFROM>\n\t\t<BANKTRANLIST>\n\t\t\t<DTSTART>20120101</DTSTART>\n\t\t\t<DTEND>20120101</DTEND>\n"
 	 **************************************************************************/
 	public function getOFXTransactionAccountStart() {
 		try {
@@ -728,6 +741,8 @@ class CSV2OFX {
 	 * Gets OFX format transaction content
 	 *
 	 * @return 	string	$content	the OFX content
+	 *
+	 * @assert ('type', 20120101, 100, 1, 'payee', 'memo') == "\t\t\t\t<STMTTRN>\n\t\t\t\t\t<TRNTYPE>type</TRNTYPE>\n\t\t\t\t\t<DTPOSTED>20120101</DTPOSTED>\n\t\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t\t\t<FITID>1</FITID>\n\t\t\t\t\t<CHECKNUM>1</CHECKNUM>\n\t\t\t\t\t<NAME>payee</NAME>\n\t\t\t\t\t<MEMO>memo</MEMO>\n\t\t\t\t</STMTTRN>\n"
 	 **************************************************************************/
 	public function getOFXTransaction() {
 		try {
@@ -753,6 +768,8 @@ class CSV2OFX {
 	 * Gets OFX format transaction account end content
 	 *
 	 * @return 	string	$content	the OFX content
+	 *
+	 * @assert (20120101) == "\t\t</BANKTRANLIST>\n\t\t<LEDGERBAL>\n\t\t\t<BALAMT>0</BALAMT>\n\t\t\t<DTASOF>20120101</DTASOF>\n\t\t</LEDGERBAL>\n\t</STMTRS>\n"
 	 **************************************************************************/
 	public function getOFXTransactionAccountEnd() {
 		try {
@@ -775,6 +792,8 @@ class CSV2OFX {
 	 * Gets OFX transfer footer
 	 *
 	 * @return 	string	$content		the OFX content
+	 *
+	 * @assert () == '</STMTTRNRS></BANKMSGSRSV1></OFX>'
 	 **************************************************************************/
 	public function getOFXTransactionFooter() {
 		try {
@@ -793,6 +812,8 @@ class CSV2OFX {
 	 *
 	 * @param 	string 	$timeStamp	the time in mmddyy_hhmmss format
 	 * @return 	string	$content	the OFX content
+	 *
+	 * @assert ('20120101_111111') == "<OFX>\n\t<SIGNONMSGSRSV1>\n\t\t<SONRS></SONRS>\n\t</SIGNONMSGSRSV1>\n\t<BANKMSGSRSV1><INTRATRNRS>\n\t\t<TRNUID>20120101_111111</TRNUID>\n\t\t<STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>\n"
 	 **************************************************************************/
 	public function getOFXTransferHeader($timeStamp) {
 		try {
@@ -818,6 +839,10 @@ class CSV2OFX {
 	 *
 	 * @param 	string 	$accountType	the account types
 	 * @return 	string	$content		the QIF content
+	 *
+	 * @assert ('USD', '20120101_111111', 1, 'account', 'type',
+		2, 'split_account', 'def_type', 100
+		1317904080) == "\t<INTRARS>\n\t\t<CURDEF>USD</CURDEF>\n\t\t<SRVRTID>20120101_111111</SRVRTID>\n\t\t<XFERINFO>\n\t\t\t<BANKACCTFROM>\n\t\t\t\t<BANKID>1</BANKID>\n\t\t\t\t<ACCTID>account</ACCTID>\n\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t</BANKACCTFROM>\n\t\t\t<BANKACCTTO>\n\t\t\t\t<BANKID>2</BANKID>\n\t\t\t\t<ACCTID>split_account</ACCTID>\n\t\t\t\t<ACCTTYPE>'def_type'</ACCTTYPE>\n\t\t\t</BANKACCTTO>\n\t\t\t<TRNAMT>100</TRNAMT>\n\t\t</XFERINFO>\n\t\t<DTPOSTED>1317904080</DTPOSTED>\n\t</INTRARS>\n"
 	 **************************************************************************/
 	public function getOFXTransfer($accountType) {
 		try {
@@ -853,6 +878,8 @@ class CSV2OFX {
 	 * Gets OFX transfer footer
 	 *
 	 * @return 	string	$content		the OFX content
+	 *
+	 * @assert () == '</INTRATRNRS></BANKMSGSRSV1></OFX>'
 	 **************************************************************************/
 	public function getOFXTransferFooter() {
 		try {
