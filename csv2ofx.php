@@ -15,7 +15,6 @@ if (strpos('@php_bin@', '@php_bin') === 0) { // not a pear install
 	define('PROJECT_DIR', '@php_dir@'.DIRECTORY_SEPARATOR.PROGRAM.DIRECTORY_SEPARATOR);
 }
 
-
 define('CUR_DIR', getcwd().DIRECTORY_SEPARATOR);
 define('TODAY', date("Ymd")); // format to yyyymmdd
 define('TIME_STAMP', date("Ymd_His")); // format to yyyymmdd_hhmmss

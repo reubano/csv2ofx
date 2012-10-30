@@ -4,3 +4,4 @@ php_errors.log
 lib_general/.php
 csv2ofx*.tgz
 package.xml
+.scripttest

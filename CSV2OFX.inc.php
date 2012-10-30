@@ -43,8 +43,8 @@ class CSV2OFX {
 	public $tranAmount;
 	public $tranDesc;
 	public $defSplitAccount = 'Orphan';
-	
-	/*************************************************************************** 
+
+	/***************************************************************************
 	 * The class constructor
 	 *
 	 * @param 	boolean $verbose	enable verbose comments
@@ -53,8 +53,8 @@ class CSV2OFX {
 		$this->source = $source;
 		$this->csvContent = $csvContent;
 		$this->verbose = $verbose;
-				
-		// set headers 
+
+		// set headers
 		// modify the 'custom' section to add support for other websites
 		// add additional case blocks if needed
 		switch($this->source) {
@@ -139,14 +139,14 @@ class CSV2OFX {
 		} //<-- end if -->
 	} //<-- end function -->
 
-	/*************************************************************************** 
+	/***************************************************************************
 	 * Set amount values
 	 *
 	 * @param 	array 	$accountTypeList	list of possible account types
 	 * @param 	string 	$defAccountType		default account type
 	 **************************************************************************/
 	public function setAmounts() {
-		try {		
+		try {
 			foreach ($this->csvContent as $key => $content) {
 				$amount = $content[$this->headAmount];
 				$amount = floatval(preg_replace("[^-0-9\.]","", $amount));
@@ -159,39 +159,39 @@ class CSV2OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/*************************************************************************** 
+	/***************************************************************************
 	 * Set account names and types
 	 *
 	 * @param 	array 	$accountTypeList	list of possible account types
 	 * @param 	string 	$defAccountType		default account type
 	 **************************************************************************/
 	public function getAccounts($accountTypeList, $defAccountType) {
-		try {		
+		try {
 			if ($this->split) {
 				$this->accounts = array_unique($this->mainAccounts);
 			} else {
 				foreach ($this->newContent as $content) {		
 					$this->accounts[] = $content[0][$this->headAccount];
 				} //<-- end for loop -->
-				
+
 				$this->accounts = array_unique($this->accounts);
 			}
-			
+
 			sort($this->accounts);
-			
+
 			$accountTypes = self::_getAccountTypes(
 				$accountTypeList, $defAccountType
 			);
-			
+
 			$this->accounts = array_combine($this->accounts, $accountTypes);
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/*************************************************************************** 
+	/***************************************************************************
 	 * Detects account types from account list
 	 *
 	 * @param 	array 	$accountTypeList	list of possible account types
@@ -202,12 +202,12 @@ class CSV2OFX {
 	private function _getAccountTypes($accountTypeList, $defAccountType) {
 			try {
 			$accountTypes = array();
-			
+
 			foreach ($this->accounts as $account) {
 				foreach ($accountTypeList as $accountType => $searchList) {
 					foreach ($searchList as $searchTerm) {
 						$found = stripos($account, $searchTerm);
-						
+
 						if ($found !== false) {
 						 	$accountTypes[] = $accountType;
 						 	// stop searching and move to next account
@@ -215,20 +215,20 @@ class CSV2OFX {
 						} //<-- end if -->
 					} //<-- end for loop through search terms -->
 				} //<-- end for loop through account types -->
-							
+
 				// if no matches found, apply default account type
 				$accountTypes[] = $defAccountType;
 			} //<-- end for loop through accounts -->
-				
+
 			return $accountTypes;
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.
 				'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/*************************************************************************** 
+	/***************************************************************************
 	 * Gets transaction IDs
 	 *
 	 * @return 	array	$this->tranIds		the transaction IDs
@@ -238,19 +238,19 @@ class CSV2OFX {
 			foreach ($this->csvContent as $content) {		
 				$this->tranIds[] = $content[$this->headTranId];
 			} //<-- end for loop -->
-			
+
 			$this->tranIds = array_unique($this->tranIds);
 			sort($this->tranIds);
 
 			return $this->tranIds;
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/*************************************************************************** 
+	/***************************************************************************
 	 * Combines similiar splits from the same account
 	 *
 	 * @param 	array 	$collapse			accounts to collapse
@@ -267,7 +267,7 @@ class CSV2OFX {
 					$previousAmount = 0;
 					$splice = array();
 
-					// loop over splits (by reference bc we are changing $split 
+					// loop over splits (by reference bc we are changing $split
 					// in place)
 					foreach ($transaction as $key => &$split) {
 						if (in_array($split[$this->headAccount], $collapse)
@@ -280,16 +280,16 @@ class CSV2OFX {
 						$previousAccount = $split[$this->headAccount];
 						$previousAmount = $split[$this->headAmount];
 					} //<-- end loop through splits -->
-					
+
 					foreach ($splice as $i => $key) {
 						array_splice($transaction, $key - $i, 1);
 					}
-					
+
 					$this->newContent[$id] = $transaction;
 				} //<-- end loop through transactions -->
-				
+
 				self::_verifySplits();
-			} catch (Exception $e) { 
+			} catch (Exception $e) {
 				throw new Exception($e->getMessage().' from '.$this->className.
 					'->'.__FUNCTION__.'() line '.__LINE__
 				);
@@ -297,7 +297,7 @@ class CSV2OFX {
 		} //<-- end if -->
 	} //<-- end function -->
 
-	/*************************************************************************** 
+	/***************************************************************************
 	 * Organizes the splits of each transaction so that the main transaction is
 	 * listed first
 	 **************************************************************************/
@@ -307,15 +307,15 @@ class CSV2OFX {
 				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
-			try {				
+			try {
 				foreach ($this->newContent as $id => $transaction) {
 					$max = 0;
 					$this->mainAccounts[$id] = 'none';
-					
+
 					foreach ($transaction as $key => $split) {
 						$amount = $split[$this->headAmount];
 						$absAmount = abs($amount);
-						
+
 						if ($absAmount > $max) {
 							$this->mainAccounts[$id] = 
 								$split[$this->headAccount];
@@ -323,24 +323,24 @@ class CSV2OFX {
 							$max = $absAmount;
 						} //<-- end if -->
 					} //<-- end foreach -->
-					
+
 					if ($this->mainAccounts[$id] == 'none') {
 						throw new Exception('Main account not found at '.
 							'transaction '.$id.' from '.$this->className.'->'
 							.__FUNCTION__.'() line '.__LINE__
 						);
 					}
-				
-					if ($mainKeys[$id] != 0) {		
+
+					if ($mainKeys[$id] != 0) {
 						$transaction = myarray::arrayMove(
 							$transaction, $mainKeys[$id]
 						);
-						
+
 						$this->newContent[$id] = $transaction;
 					} //<-- end if -->
 				} //<-- end foreach -->
 
-			} catch (Exception $e) { 
+			} catch (Exception $e) {
 				throw new Exception($e->getMessage().' from '.$this->className.
 					'->'.__FUNCTION__.'() line '.__LINE__
 				);
@@ -348,7 +348,7 @@ class CSV2OFX {
 		} //<-- end if -->
 	} //<-- end function -->
 
-	/*************************************************************************** 
+	/***************************************************************************
 	 * Sorts splits by a given field
 	 *
 	 * @param 	array 	$field	field to sort splits by
@@ -365,7 +365,7 @@ class CSV2OFX {
 						$transaction, 'AccountName'
 					);
 				}
-			} catch (Exception $e) { 
+			} catch (Exception $e) {
 				throw new Exception($e->getMessage().' from '.$this->className.
 					'->'.__FUNCTION__.'() line '.__LINE__
 				);
@@ -373,7 +373,7 @@ class CSV2OFX {
 		} //<-- end if -->
 	} //<-- end function -->
 
-	/*************************************************************************** 
+	/***************************************************************************
 	 * Verifies that the splits of each transaction sum to 0
 	 *
 	 * @return 	array	$this->newContent	csv content organized by transaction
@@ -382,12 +382,12 @@ class CSV2OFX {
 		try {
 			foreach ($this->newContent as $id => $transaction) {
 				$sum = 0;
-				
+
 				foreach ($transaction as $split) {
 					$amount = $split[$this->headAmount];
 					$sum += $amount;
 				} //<-- end foreach -->
-				
+
 				if (round(abs($sum), 2) > 0) {
 					throw new Exception('Invalid split of '.$sum.' at '.
 						'transaction '.$id.' from '.$this->className.'->'.
@@ -395,15 +395,15 @@ class CSV2OFX {
 					);
 				} //<-- end if -->
 			} //<-- end foreach -->
-			
-		} catch (Exception $e) { 
+
+		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.
 				'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/*************************************************************************** 
+	/***************************************************************************
 	 * Verifies that the splits of each transaction sum to 0
 	 *
 	 * @return 	array	$this->newContent	csv content organized by transaction
@@ -413,16 +413,16 @@ class CSV2OFX {
 			foreach ($this->csvContent as $key => $transaction) {
 					$this->newContent[$key][] = $transaction;
 			} //<-- end foreach -->
-			
+
 			return $this->newContent;
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.
 				'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
-	
-	/*************************************************************************** 
+
+	/***************************************************************************
 	 * Verifies that the splits of each transaction sum to 0
 	 *
 	 * @return 	array	$this->newContent	csv content organized by transaction
@@ -436,7 +436,7 @@ class CSV2OFX {
 			try {
 				foreach ($this->tranIds as $id) {
 					$sum = 0;
-					
+
 					foreach ($this->csvContent as $transaction) {
 						if ($transaction[$this->headTranId] == $id) {
 							$this->newContent[$id][] = $transaction;
@@ -444,7 +444,7 @@ class CSV2OFX {
 							$sum += $amount;
 						} //<-- end if -->
 					} //<-- end foreach -->
-					
+
 					if (round(abs($sum), 2) > 0) {
 						throw new Exception('Invalid split of '.$sum.' at '.
 							'transaction '.$id.' from '.$this->className.'->'.
@@ -454,7 +454,7 @@ class CSV2OFX {
 				} //<-- end foreach -->
 
 				return $this->newContent;
-			} catch (Exception $e) { 
+			} catch (Exception $e) {
 				throw new Exception($e->getMessage().' from '.$this->className.
 					'->'.__FUNCTION__.'() line '.__LINE__
 				);
@@ -463,7 +463,7 @@ class CSV2OFX {
 	} //<-- end function -->
 
 
-	/*************************************************************************** 
+	/***************************************************************************
 	 * Sets QIF format transaction variables
 	 *
 	 * @param 	string 	$transaction	the account
@@ -483,19 +483,19 @@ class CSV2OFX {
 					$this->tranAmount = '-'.$this->tranAmount;
 				}
 			}
-			
+
 			if ($this->headPayee) {
 				$this->tranPayee = $transaction[$this->headPayee];
 			} else {
 				$this->tranPayee = '';
 			}
-					
+
 			if ($this->headSplitAccount) {
 				$this->tranSplitAccount = $transaction[$this->headSplitAccount];
 			} else {
 				$this->tranSplitAccount = $this->defSplitAccount;
 			}
-			
+
 			if ($this->headDesc) {
 				$this->tranDesc = $transaction[$this->headDesc];
 			}
@@ -503,7 +503,7 @@ class CSV2OFX {
 			if ($this->headNotes) {
 				$this->tranNotes = $transaction[$this->headNotes];
 			}
-									
+
 			if ($this->headClass) {
 				$this->tranClass = $transaction[$this->headClass];
 			}
@@ -515,12 +515,12 @@ class CSV2OFX {
 			if ($this->headCheckNum) {
 				$this->tranCheckNum = $transaction[$this->headCheckNum];
 			}
-			
+
 			if ($this->headCheckNum) {
 				$this->tranCheckNum = $transaction[$this->headCheckNum];
 			}
-			
-			// if no id, create it using check number or md5 
+
+			// if no id, create it using check number or md5
 			// hash of the transaction details
 			if (!$this->tranId) {
 				if ($this->tranCheckNum) {
@@ -532,7 +532,7 @@ class CSV2OFX {
 					$this->tranId = md5($hashCombo);
 				} //<-- end if -->
 			} //<-- end if -->
-						
+
 			// create category id using an md5 hash of the category
 			if ($this->tranSplitAccount) {
 				$this->tranSplitAccountId = md5($this->tranSplitAccount);
@@ -541,18 +541,18 @@ class CSV2OFX {
 			if ($this->tranNotes) {
 				$this->tranDesc = $this->tranDesc.'/'.$this->tranNotes;
 			}
-			
+
 			if ($this->tranClass) {
 				$this->tranDesc = $this->tranDesc.'/'.$this->tranClass;
-			}						
+			}
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
-	} //<-- end function -->			
+	} //<-- end function -->
 
-	/*************************************************************************** 
+	/***************************************************************************
 	 * Gets QIF format account content
 	 *
 	 * @param 	string 	$account		the account
@@ -566,25 +566,25 @@ class CSV2OFX {
 				"N$account\n".
 				"T$accountType\n".
 				"^\n";
-			
+
 			return $content;
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/*************************************************************************** 
+	/***************************************************************************
 	 * Gets QIF format transaction content
 	 *
 	 * @param 	string 	$accountType	the account types
 	 * @return 	string	$content		the QIF content
 	 **************************************************************************/
 	public function getQIFTransactionContent($accountType) {
-		try {			
+		try {
 			$content = "!Type:$accountType\n";
-			
+
 			if ($this->tranCheckNum) {
 				$content .= "N$this->tranCheckNum\n";
 			}
@@ -592,7 +592,7 @@ class CSV2OFX {
 			$content .=
 				"D$this->tranDate\n".
 				"P$this->tranPayee\n";
-			
+
 			if ($this->split) {
 				$content .= "T$this->tranAmount\n";
 			} else {
@@ -606,55 +606,55 @@ class CSV2OFX {
 				} else {
 					$tranAmount = $this->tranAmount;
 				}
-				
+
 				$content .= "T$tranAmount\n";
 			}
-			
-			return $content;
-		} catch (Exception $e) { 
-			throw new Exception($e->getMessage().' from '.$this->className.'->'.
-				__FUNCTION__.'() line '.__LINE__
-			);
-		} //<-- end try -->
-	} //<-- end function -->					
 
-	/*************************************************************************** 
-	 * Gets QIF format split content
-	 *
-	 * @return 	string	$content		the QIF content
-	 **************************************************************************/
-	public function getQIFSplitContent() {
-		try {			
-			$content = "S$this->tranSplitAccount\n".
-				"E$this->tranDesc\n".
-				'$'."$this->tranAmount\n";			
-			
 			return $content;
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/*************************************************************************** 
+	/***************************************************************************
+	 * Gets QIF format split content
+	 *
+	 * @return 	string	$content		the QIF content
+	 **************************************************************************/
+	public function getQIFSplitContent() {
+		try {
+			$content = "S$this->tranSplitAccount\n".
+				"E$this->tranDesc\n".
+				'$'."$this->tranAmount\n";
+
+			return $content;
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage().' from '.$this->className.'->'.
+				__FUNCTION__.'() line '.__LINE__
+			);
+		} //<-- end try -->
+	} //<-- end function -->
+
+	/***************************************************************************
 	 * Gets QIF transaction footer
 	 *
 	 * @return 	string	$content		the QIF content
 	 **************************************************************************/
 	public function getQIFTransactionFooter() {
 		try {
-			// need to make variables reference $this->					
+			// need to make variables reference $this->
 			$content = "^\n";
 			return $content;
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
-	
-	/*************************************************************************** 
+
+	/***************************************************************************
 	 * Gets OFX format transaction content
 	 *
 	 * @param 	string 	$timeStamp	the time in mmddyy_hhmmss format
@@ -678,16 +678,16 @@ class CSV2OFX {
 				"\t\t<TRNUID>$timestamp</TRNUID>\n".
 				"\t\t<STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>".
 				"\n";
-			
+
 			return $content;
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/*************************************************************************** 
+	/***************************************************************************
 	 * Gets OFX format transaction account start content
 	 *
 	 * @return 	string	$content	the OFX content
@@ -705,16 +705,16 @@ class CSV2OFX {
 				"\t\t<BANKTRANLIST>\n".
 				"\t\t\t<DTSTART>$today</DTSTART>\n".
 				"\t\t\t<DTEND>$today</DTEND>\n";
-			
+
 			return $content;
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/*************************************************************************** 
+	/***************************************************************************
 	 * Gets OFX format transaction content
 	 *
 	 * @return 	string	$content	the OFX content
@@ -733,14 +733,14 @@ class CSV2OFX {
 				"\t\t\t\t</STMTTRN>\n";
 
 			return $content;
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
-	
-	/*************************************************************************** 
+
+	/***************************************************************************
 	 * Gets OFX format transaction account end content
 	 *
 	 * @return 	string	$content	the OFX content
@@ -754,33 +754,33 @@ class CSV2OFX {
 				"\t\t\t<DTASOF>$today</DTASOF>\n".
 				"\t\t</LEDGERBAL>\n".
 				"\t</STMTRS>\n";
-			
+
 			return $content;
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/*************************************************************************** 
+	/***************************************************************************
 	 * Gets OFX transfer footer
 	 *
 	 * @return 	string	$content		the OFX content
 	 **************************************************************************/
 	public function getOFXTransactionFooter() {
 		try {
-			// need to make variables reference $this->					
+			// need to make variables reference $this->
 			$content = '</STMTTRNRS></BANKMSGSRSV1></OFX>';
 			return $content;
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
-	
-	/*************************************************************************** 
+
+	/***************************************************************************
 	 * Gets OFX transfer header
 	 *
 	 * @param 	string 	$timeStamp	the time in mmddyy_hhmmss format
@@ -797,16 +797,16 @@ class CSV2OFX {
 				"\t\t<TRNUID>$timeStamp</TRNUID>\n".
 				"\t\t<STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>".
 				"\n";
-			
+
 			return $content;
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
-	
-	/*************************************************************************** 
+
+	/***************************************************************************
 	 * Gets OFX transfer start
 	 *
 	 * @param 	string 	$accountType	the account types
@@ -814,7 +814,7 @@ class CSV2OFX {
 	 **************************************************************************/
 	public function getOFXTransfer($accountType) {
 		try {
-			// need to make variables reference $this->					
+			// need to make variables reference $this->
 			$content =
 				"\t<INTRARS>\n". // Begin transfer response
 				"\t\t<CURDEF>$currency</CURDEF>\n".
@@ -834,26 +834,26 @@ class CSV2OFX {
 				"\t\t</XFERINFO>\n". // End transfer aggregate
 				"\t\t<DTPOSTED>$tranDate2</DTPOSTED>\n".
 				"\t</INTRARS>\n"; // End transfer response
-			
+
 			return $content;
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/*************************************************************************** 
+	/***************************************************************************
 	 * Gets OFX transfer footer
 	 *
 	 * @return 	string	$content		the OFX content
 	 **************************************************************************/
 	public function getOFXTransferFooter() {
 		try {
-			// need to make variables reference $this->					
+			// need to make variables reference $this->
 			$content = '</INTRATRNRS></BANKMSGSRSV1></OFX>'; // End response
 			return $content;
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
