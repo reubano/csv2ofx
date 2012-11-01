@@ -6,7 +6,6 @@
  *******************************************************************************
  */
 
-date_default_timezone_set('Africa/Nairobi');
 define('PROGRAM', pathinfo(__FILE__, PATHINFO_FILENAME));
 
 if (strpos('@php_bin@', '@php_bin') === 0) { // not a pear install
