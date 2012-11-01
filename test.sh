@@ -7,6 +7,9 @@
 # Redirect output to stderr.
 exec 2>&1
 
+# set path (necessary for gitx and git-gui)
+export PATH=$PATH:/opt/local/bin:/opt/local/sbin:/usr/local/sbin:/usr/local/bin
+
 # necessary check for initial commit
 if [ git rev-parse --verify HEAD >/dev/null 2>&1 ]; then
 	against=HEAD
@@ -21,10 +24,15 @@ IFS='
 
 # get a list of staged files
 for LINE in $(git diff-index --cached --full-index $against); do
-	# SHA=$(echo $line | cut -d' ' -f4)
+	SHA=$(echo $LINE | cut -d' ' -f4)
 	STATUS=$(echo $LINE | cut -d' ' -f5 | cut -d'	' -f1)
 	FILENAME=$(echo $LINE | cut -d' ' -f5 | cut -d'	' -f2)
 	FILEEXT=$(echo $FILENAME | sed 's/^.*\.//')
+
+	# do not check deleted files
+	if [ $STATUS == "D" ]; then
+		continue
+	fi
 
 	# only check files with proper extension
 	if [ $FILEEXT == 'php' ]; then
@@ -46,14 +54,10 @@ for LINE in $(git diff-index --cached --full-index $against); do
 		fi
 	done
 
-	# do not check deleted files
-	if [ $STATUS == "D" ]; then
-		continue
-	fi
-
-	# check the staged file content for syntax errors
+	# check the staged content for syntax errors
 	for COMMAND in $COMMANDS; do
- 		RESULT=$(eval "$COMMAND $FILENAME")
+		git cat-file -p $SHA > tmp.txt
+ 		RESULT=$(eval "$COMMAND tmp.txt")
 
 		if [ $? != 0 ]; then
 			echo "$COMMAND syntax check failed on $FILENAME"
@@ -63,6 +67,7 @@ for LINE in $(git diff-index --cached --full-index $against); do
 	done
 done
 unset IFS
+rm tmp.txt
 
 # If there are whitespace errors, print the offending file names and fail.
 # exec git diff-index --check --cached $against --
