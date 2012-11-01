@@ -598,34 +598,30 @@ class CSV2OFX {
 	 * @assert ('type', '20120101', 'payee', 100, 1) == "!Type:type\nN1\nD20120101\nPpayee\nT100\n"
 	 * @assert ('type', '20120101', 'payee', 100) == "!Type:type\nD20120101\nPpayee\nT100\n"
 	 **************************************************************************/
-	public function getQIFTransactionContent($accountType) {
+	public function getQIFTransactionContent(
+		$accountType, $tranDate, $tranPayee, $tranAmount, $tranCheckNum=null
+	) {
 		try {
 			$content = "!Type:$accountType\n";
 
-			if ($this->tranCheckNum) {
-				$content .= "N$this->tranCheckNum\n";
+			if ($tranCheckNum) {
+				$content .= "N$tranCheckNum\n";
 			}
 
 			$content .=
-				"D$this->tranDate\n".
-				"P$this->tranPayee\n";
+				"D$tranDate\n".
+				"P$tranPayee\n";
 
-			if ($this->split) {
-				$content .= "T$this->tranAmount\n";
-			} else {
-				if ($this->source == 'xero') {
-					// switch signs
-					if (substr($this->tranAmount, 0, 1) == '-') {
-						$tranAmount = substr($this->tranAmount, 1);
-					} else {
-						$tranAmount = '-'.$this->tranAmount;
-					}
+			if ($this->source == 'xero') {
+				// switch signs
+				if (substr($tranAmount, 0, 1) == '-') {
+					$tranAmount = substr($tranAmount, 1);
 				} else {
-					$tranAmount = $this->tranAmount;
+					$tranAmount = '-'.$tranAmount;
 				}
-
-				$content .= "T$tranAmount\n";
 			}
+
+			$content .= "T$tranAmount\n";
 
 			return $content;
 		} catch (Exception $e) {
@@ -643,11 +639,13 @@ class CSV2OFX {
 	 *
 	 * @assert ('account', 'desc', 100) == "Saccount\nEdesc\n$100\n"
 	 **************************************************************************/
-	public function getQIFSplitContent() {
+	public function getQIFSplitContent(
+		$tranSplitAccount, $tranDesc, $tranAmount
+	) {
 		try {
-			return "S$this->tranSplitAccount\n".
-				"E$this->tranDesc\n".
-				'$'."$this->tranAmount\n";
+			return "S$tranSplitAccount\n".
+				"E$tranDesc\n".
+				'$'."$tranAmount\n";
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
