@@ -484,8 +484,8 @@ class CSV2OFX {
 	 **************************************************************************/
 	public function setTransactionData($transaction, $timestamp) {
 		try {
-			$this->tranDate = date("m/d/y", $timestamp);
-			$this->tranDate2 = date("Ymd", $timestamp);
+			$this->tranDate = date("m/d/Y", $timestamp);
+			$this->dateStamp = date("Ymd", $timestamp);
 			$this->tranAmount = $transaction[$this->headAmount];
 
 			if ($this->headTranType) {
@@ -681,7 +681,7 @@ class CSV2OFX {
 	 *
 	 * @assert (20120101111111, 'ENG') == "<OFX>\n\t<SIGNONMSGSRSV1>\n\t\t<SONRS>\n\t\t\t<STATUS>\n\t\t\t\t<CODE>0</CODE>\n\t\t\t\t<SEVERITY>INFO</SEVERITY>\n\t\t\t</STATUS>\n\t\t\t<DTSERVER>20120101111111</DTSERVER>\n\t\t\t<LANGUAGE>ENG</LANGUAGE>\n\t\t</SONRS>\n\t</SIGNONMSGSRSV1>\n\t<BANKMSGSRSV1><STMTTRNRS>\n\t\t<TRNUID>20120101111111</TRNUID>\n\t\t<STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>\n"
 	 **************************************************************************/
-	public function getOFXTransactionHeader($timeStamp) {
+	public function getOFXTransactionHeader($timeStamp, $language) {
 		try {
 			return
 				"<OFX>\n".
@@ -691,12 +691,12 @@ class CSV2OFX {
 				"\t\t\t\t<CODE>0</CODE>\n".
 				"\t\t\t\t<SEVERITY>INFO</SEVERITY>\n".
 				"\t\t\t</STATUS>\n".
-				"\t\t\t<DTSERVER>$today</DTSERVER>\n".
+				"\t\t\t<DTSERVER>$timeStamp</DTSERVER>\n".
 				"\t\t\t<LANGUAGE>$language</LANGUAGE>\n".
 				"\t\t</SONRS>\n".
 				"\t</SIGNONMSGSRSV1>\n".
 				"\t<BANKMSGSRSV1><STMTTRNRS>\n".
-				"\t\t<TRNUID>$timestamp</TRNUID>\n".
+				"\t\t<TRNUID>$timeStamp</TRNUID>\n".
 				"\t\t<STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>".
 				"\n";
 		} catch (Exception $e) {
@@ -714,7 +714,9 @@ class CSV2OFX {
 	 *
 	 * @assert ('USD', 1, 'account', 'type', 20120101) == "\t<STMTRS>\n\t\t<CURDEF>USD</CURDEF>\n\t\t<BANKACCTFROM>\n\t\t\t<BANKID>1</BANKID>\n\t\t\t<ACCTID>account</ACCTID>\n\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t</BANKACCTFROM>\n\t\t<BANKTRANLIST>\n\t\t\t<DTSTART>20120101</DTSTART>\n\t\t\t<DTEND>20120101</DTEND>\n"
 	 **************************************************************************/
-	public function getOFXTransactionAccountStart() {
+	public function getOFXTransactionAccountStart(
+		$currency, $accountId, $account, $accountType, $dateStamp
+	) {
 		try {
 			return
 				"\t<STMTRS>\n".
@@ -725,8 +727,8 @@ class CSV2OFX {
 				"\t\t\t<ACCTTYPE>$accountType</ACCTTYPE>\n".
 				"\t\t</BANKACCTFROM>\n".
 				"\t\t<BANKTRANLIST>\n".
-				"\t\t\t<DTSTART>$today</DTSTART>\n".
-				"\t\t\t<DTEND>$today</DTEND>\n";
+				"\t\t\t<DTSTART>$dateStamp</DTSTART>\n".
+				"\t\t\t<DTEND>$dateStamp</DTEND>\n";
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -742,12 +744,14 @@ class CSV2OFX {
 	 *
 	 * @assert ('type', 20120101111111, 100, 1, 'payee', 'memo') == "\t\t\t\t<STMTTRN>\n\t\t\t\t\t<TRNTYPE>type</TRNTYPE>\n\t\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t\t\t<FITID>1</FITID>\n\t\t\t\t\t<CHECKNUM>1</CHECKNUM>\n\t\t\t\t\t<NAME>payee</NAME>\n\t\t\t\t\t<MEMO>memo</MEMO>\n\t\t\t\t</STMTTRN>\n"
 	 **************************************************************************/
-	public function getOFXTransaction() {
+	public function getOFXTransaction(
+		$tranType, $timeStamp, $tranAmount, $tranId, $tranPayee, $tranMemo
+	) {
 		try {
 			return
 				"\t\t\t\t<STMTTRN>\n".
-				"\t\t\t\t\t<TRNTYPE>$defTranType</TRNTYPE>\n".
-				"\t\t\t\t\t<DTPOSTED>$tranDate2</DTPOSTED>\n".
+				"\t\t\t\t\t<TRNTYPE>$tranType</TRNTYPE>\n".
+				"\t\t\t\t\t<DTPOSTED>$timeStamp</DTPOSTED>\n".
 				"\t\t\t\t\t<TRNAMT>$tranAmount</TRNAMT>\n".
 				"\t\t\t\t\t<FITID>$tranId</FITID>\n".
 				"\t\t\t\t\t<CHECKNUM>$tranId</CHECKNUM>\n".
@@ -769,13 +773,13 @@ class CSV2OFX {
 	 *
 	 * @assert (20120101111111) == "\t\t</BANKTRANLIST>\n\t\t<LEDGERBAL>\n\t\t\t<BALAMT>0</BALAMT>\n\t\t\t<DTASOF>20120101111111</DTASOF>\n\t\t</LEDGERBAL>\n\t</STMTRS>\n"
 	 **************************************************************************/
-	public function getOFXTransactionAccountEnd() {
+	public function getOFXTransactionAccountEnd($timeStamp) {
 		try {
 			return
 				"\t\t</BANKTRANLIST>\n".
 				"\t\t<LEDGERBAL>\n".
 				"\t\t\t<BALAMT>0</BALAMT>\n".
-				"\t\t\t<DTASOF>$today</DTASOF>\n".
+				"\t\t\t<DTASOF>$timeStamp</DTASOF>\n".
 				"\t\t</LEDGERBAL>\n".
 				"\t</STMTRS>\n";
 		} catch (Exception $e) {
@@ -840,9 +844,11 @@ class CSV2OFX {
 	 *
 	 * @assert ('USD', 20120101111111, 1, 'account', 'type', 2, 'split_account', 'def_type', 100) == "\t<INTRARS>\n\t\t<CURDEF>USD</CURDEF>\n\t\t<SRVRTID>20120101111111</SRVRTID>\n\t\t<XFERINFO>\n\t\t\t<BANKACCTFROM>\n\t\t\t\t<BANKID>1</BANKID>\n\t\t\t\t<ACCTID>account</ACCTID>\n\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t</BANKACCTFROM>\n\t\t\t<BANKACCTTO>\n\t\t\t\t<BANKID>2</BANKID>\n\t\t\t\t<ACCTID>split_account</ACCTID>\n\t\t\t\t<ACCTTYPE>'def_type'</ACCTTYPE>\n\t\t\t</BANKACCTTO>\n\t\t\t<TRNAMT>100</TRNAMT>\n\t\t</XFERINFO>\n\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t</INTRARS>\n"
 	 **************************************************************************/
-	public function getOFXTransfer($accountType) {
+	public function getOFXTransfer(
+		$currency, $timeStamp, $accountId, $account, $accountType,
+		$tranSplitAccountId, $tranSplitAccount, $tranAccountType, $tranAmount
+	) {
 		try {
-			// need to make variables reference $this->
 			return
 				"\t<INTRARS>\n". // Begin transfer response
 				"\t\t<CURDEF>$currency</CURDEF>\n".
@@ -856,11 +862,11 @@ class CSV2OFX {
 				"\t\t\t<BANKACCTTO>\n".
 				"\t\t\t\t<BANKID>$tranSplitAccountId</BANKID>\n".
 				"\t\t\t\t<ACCTID>$tranSplitAccount</ACCTID>\n".
-				"\t\t\t\t<ACCTTYPE>$defAccountType</ACCTTYPE>\n".
+				"\t\t\t\t<ACCTTYPE>$tranAccountType</ACCTTYPE>\n".
 				"\t\t\t</BANKACCTTO>\n".
 				"\t\t\t<TRNAMT>$tranAmount</TRNAMT>\n".
 				"\t\t</XFERINFO>\n". // End transfer aggregate
-				"\t\t<DTPOSTED>$tranDate2</DTPOSTED>\n".
+				"\t\t<DTPOSTED>$timeStamp</DTPOSTED>\n".
 				"\t</INTRARS>\n"; // End transfer response
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
