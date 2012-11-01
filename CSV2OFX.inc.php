@@ -50,7 +50,7 @@ class CSV2OFX {
 	 *
 	 * @param 	boolean $verbose	enable verbose comments
 	 **************************************************************************/
-	function __construct($source, $csvContent, $verbose = FALSE) {
+	function __construct($source='mint', $csvContent=null, $verbose=FALSE) {
 		$this->source = $source;
 		$this->csvContent = $csvContent;
 		$this->verbose = $verbose;
