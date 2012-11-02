@@ -26,15 +26,15 @@ class MyArray {
 
 	/**
 	 ***************************************************************************
-	 * Searches an array for the nth occurance of a given value 
+	 * Searches an array for the nth occurance of a given value
 	 * type and returns the corresponding key if successful.
 	 *
-	 * @param string $needle   the type of element to find (i.e. 'numeric' 
+	 * @param string $needle   the type of element to find (i.e. 'numeric'
 	 *						   or 'string')
 	 * @param array  $haystack the array to search
-	 * @param int    $n 	   the nth element to find 
+	 * @param int    $n 	   the nth element to find
 	 *
-	 * @return array array of the key(s) of the found element(s) 
+	 * @return array array of the key(s) of the found element(s)
 	 * @throws Exception if it can't find enough elements
 	 * @throws Exception if $needle is invalid
 	 *
@@ -51,39 +51,39 @@ class MyArray {
 		} else {
 			try {
 				$i = 0; // needle element counter
-				
+
 				$main = function ($value, $key, $comparison) use (
 					&$i, &$needleKeys, $needle, $n
 				) {
 					if ($i < $n) {
 						if (call_user_func($comparison, $value)) {
 							$i++;
-							
+
 							if ($i == $n) {
 								$needleKeys[] = $key;
 							}
 						}
 					}
 				}; //<-- end closure -->
-								
+
 				switch ($needle) {
 					case 'numeric':
 						array_walk($haystack, $main, 'is_numeric');
 						break;
-						
+
 					case 'string':
 						array_walk($haystack, $main, 'is_string');
 						break;
-						
+
 					default:
 						throw new Exception(
 							'Wrong search type entered. Please type '.
 							'\'numeric\' or \'string\'.'
 						);
 				} //<-- end switch -->
-				
-				return $needleKeys;			
-			} catch (Exception $e) { 
+
+				return $needleKeys;
+			} catch (Exception $e) {
 				throw new Exception(
 					$e->getMessage().' from '.$this->_className.'->'.__FUNCTION__.
 					'() line '.__LINE__
@@ -91,38 +91,38 @@ class MyArray {
 			} //<-- end try -->
 		} //<-- end if -->
 	} //<-- end function -->
-	
+
 	/**
 	 ***************************************************************************
 	 * Writes an array to a csv file
 	 *
-	 * @param string  $content		  the data to write to the file 
+	 * @param string  $content		  the data to write to the file
 	 * @param string  $csvFile		  the file path
 	 * @param string  $fieldDelimiter the csv field delimiter
-	 * @param boolean $overWrite	  over write file if exists 
+	 * @param boolean $overWrite	  over write file if exists
 	 *
 	 * @return boolean	true
-	 * @throws Exception if $csvFile exists or is non-empty 
+	 * @throws Exception if $csvFile exists or is non-empty
 	 **************************************************************************/
 	public function array2CSV(
 		$content, $csvFile, $fieldDelimiter=',', $overWrite=false
-	) {	
+	) {
 		if (file_exists($csvFile) && !$overWrite) {
 			throw new Exception(
 				'File '.$csvFile.' already exists from '.$this->_className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
-			try {	
+			try {
 				$handle = fopen($csvFile, 'w');
 				array_walk($content, 'fputcsv', $handle, $fieldDelimiter);
-				
+
 				if ($this->_verbose) {
 					fwrite(STDOUT, "wrote $count lines to $csvFile!\n");
-				} //<-- end if -->				
-								
+				} //<-- end if -->
+
 				return fclose($handle);
-			} catch (Exception $e) { 
+			} catch (Exception $e) {
 				throw new Exception(
 					$e->getMessage().' from '.$this->_className.'->'.
 					__FUNCTION__.'() line '.__LINE__
@@ -133,17 +133,17 @@ class MyArray {
 
 	/**
 	 ***************************************************************************
-	 * Recursively replaces all occurrences of $needle with $replace on 
+	 * Recursively replaces all occurrences of $needle with $replace on
 	 * elements in an array
-	 * 
+	 *
 	 * @param array  $content the array to perform the replacement on
-	 * @param string $needle  the value being searched for (an array may 
+	 * @param string $needle  the value being searched for (an array may
 	 *						  be used to designate multiple needles)
-	 * @param string $replace the replacement value that replaces $needle 
-	 *						  (an array may be used to designate multiple 
+	 * @param string $replace the replacement value that replaces $needle
+	 *						  (an array may be used to designate multiple
 	 *						  replacements)
-	 *								
-	 * @return array $newContent new array with replaced values	
+	 *
+	 * @return array $newContent new array with replaced values
 	 *
 	 * @assert (array('one', 'two', 'three'), 'two', 2) == array('one', 2, 'three')
 	 **************************************************************************/
@@ -154,10 +154,10 @@ class MyArray {
 			) {
 				$haystack = str_replace($needle, $replace, $haystack);
 			};
-			
-			array_walk_recursive($content, $main);	
+
+			array_walk_recursive($content, $main);
 			return $content;
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception(
 				$e->getMessage().' from '.$this->_className.'->'.__FUNCTION__.
 				'() line '.__LINE__
@@ -168,9 +168,9 @@ class MyArray {
 	/**
 	 ***************************************************************************
 	 * Move a given element to the beginning of an array
-	 * 
+	 *
 	 * @param array  $content the array to perform the move on
-	 * @param string $key 	   the key of the element to move 
+	 * @param string $key 	   the key of the element to move
 	 *
 	 * @return array $content  the moved array
 	 *
@@ -188,23 +188,23 @@ class MyArray {
 				array_splice($content, $key, 1);
 				array_unshift($content, $append);
 				return $content;
-			} catch (Exception $e) { 
+			} catch (Exception $e) {
 				throw new Exception(
 					$e->getMessage().' from '.$this->_className.'->'.
 					__FUNCTION__.'() line '.__LINE__
 				);
 			} //<-- end try -->
 		} //<-- end if -->
-	} //<-- end function -->			
+	} //<-- end function -->
 
 	/**
 	 ***************************************************************************
 	 * Sort a multidimensional array by the value of a given subkey
-	 * 
-	 * @param array  $array the array to sort
-	 * @param string $key	 the subkey to sort by 
 	 *
-	 * @return array $content the sorted array	
+	 * @param array  $array the array to sort
+	 * @param string $key	 the subkey to sort by
+	 *
+	 * @return array $content the sorted array
 	 *
 	 * @assert (array(array('sort' => 'one'), array('sort' => 'alpha')), 'sort') == array(array('sort' => 'alpha'), array('sort' => 'one'))
 	 **************************************************************************/
@@ -219,22 +219,22 @@ class MyArray {
 				$cmp = function (array $a, array $b) use ($key) {
 					return strcmp($a[$key], $b[$key]);
 				};
-				
+
 				usort($array, $cmp);
-				return $array; 
-			} catch (Exception $e) { 
+				return $array;
+			} catch (Exception $e) {
 				throw new Exception(
 					$e->getMessage().' from '.$this->_className.'->'.
 					__FUNCTION__.'() line '.__LINE__
 				);
 			} //<-- end try -->
 		} //<-- end if -->
-	} //<-- end function -->			
+	} //<-- end function -->
 	/**
 	 ***************************************************************************
 	 * Creates an array by using one array for keys and another for its values
-	 * Truncates/fills values if the number of elements for each array isn't 
-	 * equal. 
+	 * Truncates/fills values if the number of elements for each array isn't
+	 * equal.
 	 *
 	 * @param array $keys	the keys
 	 * @param array $values	the values
@@ -244,21 +244,21 @@ class MyArray {
 	 *
 	 * @assert (array(1, 2, 3), array(2, 3, 4, 5)) == array(1 => 2, 2 => 3, 3 => 4)
 	 **************************************************************************/
-	public function arraySafeCombine($keys, $values) { 
+	public function arraySafeCombine($keys, $values) {
 		try {
-			$combinedArray = array(); 
+			$combinedArray = array();
 			$keyCount = count($keys);
 			$valueCount = count($values);
 			$difference = $keyCount - $valueCount;
-			
+
 			if ($difference > 0) {
 				$values = array_pad($values, $difference, 0);
 			} else {
 				$values = array_slice($values, 0, $keyCount, true);
 			}
-			
+
 			return array_combine($keys, $values);
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception(
 				$e->getMessage().' from '.$this->_className.'->'.__FUNCTION__.
 				'() line '.__LINE__
@@ -268,7 +268,7 @@ class MyArray {
 
 	/**
 	 ***************************************************************************
-	 * Case insensitive array search. 
+	 * Case insensitive array search.
 	 *
 	 * @param mixed $needle	  the value to search for
 	 * @param array $haystack the array to search
@@ -283,7 +283,7 @@ class MyArray {
 			return in_array(
 				strtolower($needle), array_map('strtolower', $haystack)
 			);
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception(
 				$e->getMessage().' from '.$this->_className.'->'.__FUNCTION__.
 				'() line '.__LINE__
@@ -302,13 +302,13 @@ class MyArray {
 	 * @return array $content  the hashed array
 	 *
 	 * supported algorithms:
-	 * adler32; crc32; crc32b; gost; haval128,3; haval128,4; haval128,5; 
-	 * haval160,3; haval160,4; haval160,5; haval192,3; haval192,4; haval192,5; 
-	 * haval224,3; haval224,4; haval224,5; haval256,3; haval256,4; haval256,5; 
-	 * md2; md4; md5; ripemd128; ripemd160; ripemd256; ripemd320; sha1; sha256; 
-	 * sha384; sha512; snefru; tiger128,3; tiger128,4; tiger160,3; tiger160,4; 
+	 * adler32; crc32; crc32b; gost; haval128,3; haval128,4; haval128,5;
+	 * haval160,3; haval160,4; haval160,5; haval192,3; haval192,4; haval192,5;
+	 * haval224,3; haval224,4; haval224,5; haval256,3; haval256,4; haval256,5;
+	 * md2; md4; md5; ripemd128; ripemd160; ripemd256; ripemd320; sha1; sha256;
+	 * sha384; sha512; snefru; tiger128,3; tiger128,4; tiger160,3; tiger160,4;
 	 * tiger192,3; tiger192,4; whirlpool
-	 * 
+	 *
 	 * @assert (array('two'), 0) == array('b8a9f715dbb64fd5c56e7783c6820a61')
 	 **************************************************************************/
 	public function arrayHash($content, $hashKey, $algo = 'md5') {
@@ -318,20 +318,20 @@ class MyArray {
 					$value = hash($algo, $value);
 				}
 			};
-			
+
 			array_walk_recursive($content, $hash);
 			return $content;
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception(
 				$e->getMessage().' from '.$this->_className.'->'.
 				__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
-	
+
 	/**
 	 ***************************************************************************
-	 * Delete elements of a multidimensional array if all the 
+	 * Delete elements of a multidimensional array if all the
 	 * sub-arrays are empty
 	 *
 	 * @param array $content multi-dimensional array
@@ -348,18 +348,18 @@ class MyArray {
 				$this->_className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
-			try {				
+			try {
 				$notAllNull = function ($content) {
 					$rednull = function ($a, $b) {
 						return (!empty($a) || !empty($b));
 					};
-					
+
 					return array_reduce($content, $rednull);
 				};
-	
+
 				return array_filter($content, $notAllNull);
-				
-			} catch (Exception $e) { 
+
+			} catch (Exception $e) {
 				throw new Exception(
 					$e->getMessage().' from '.$this->_className.'->'.
 					__FUNCTION__.'() line '.__LINE__
@@ -370,7 +370,7 @@ class MyArray {
 
 	/**
 	 ***************************************************************************
-	 * Adds elements to a multidimensional array so that each 
+	 * Adds elements to a multidimensional array so that each
 	 * sub-array is as long as the first sub-array
 	 *
 	 * @param array $content multi-dimensional array
@@ -387,22 +387,22 @@ class MyArray {
 				$this->_className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
-			try {				
+			try {
 				$count = count(current($content));
-				
+
 				$lengthen = function (&$item, $keys) use ($count) {
 					$num = $count - count($item);
-					
+
 					if ($num > 0) {
 						for ($i = 0; $i < $num; $i++) {
 							array_push($item, '');
 						} //<-- end for -->
 					}
 				};
-				
+
 				array_walk($content, $lengthen);
 				return $content;
-			} catch (Exception $e) { 
+			} catch (Exception $e) {
 				throw new Exception(
 					$e->getMessage().' from '.$this->_className.'->'.
 					__FUNCTION__.'() line '.__LINE__
@@ -410,10 +410,10 @@ class MyArray {
 			} //<-- end try -->
 		} //<-- end if -->
 	} //<-- end function -->
-	
+
 	/**
 	 ***************************************************************************
-	 * Performs array_combine() on a multi-dimensional array using the first 
+	 * Performs array_combine() on a multi-dimensional array using the first
 	 * element for the keys and the remaining elements as the values
 	 *
 	 * @param array $content original array
@@ -431,7 +431,7 @@ class MyArray {
 				$this->_className.'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} else {
-			try {				
+			try {
 				$maxValues = count(current($content));
 				$newKeys = current($content); // get key names
 
@@ -440,15 +440,15 @@ class MyArray {
 						throw new Exception('Array '.$key.' is wrong size');
 					}
 				};
-				
+
 				$combine = function (&$values, $key) use ($newKeys) {
 					$values = array_combine($newKeys, $values);
 				};
-				
-				array_walk($content, $checkSize);				
+
+				array_walk($content, $checkSize);
 				array_walk($content, $combine);
 				return $content;
-			} catch (Exception $e) { 
+			} catch (Exception $e) {
 				throw new Exception(
 					$e->getMessage().' from '.$this->_className.'->'.
 					__FUNCTION__.'() line '.__LINE__
@@ -456,17 +456,17 @@ class MyArray {
 			} //<-- end try -->
 		} //<-- end if -->
 	} //<-- end function -->
-	
+
 	/**
 	 ***************************************************************************
-	 * Performs a number or date format on the elements of a given key in a 
+	 * Performs a number or date format on the elements of a given key in a
 	 * multi-dimensional array for import into a sqlite database
-	 *	 
+	 *
 	 * @param array  $content	the array to format
 	 * @param string $formatKey	the key whose values you want to format
-	 * @param string $format	the type of format to apply the (i.e. 'number' 
+	 * @param string $format	the type of format to apply the (i.e. 'number'
 	 *							or 'date')
-	 *								
+	 *
 	 * @return array $content  the formatted array
 	 * @throws Exception if $content is not a multi-dimensional array
 	 * @throws Exception if $format is invalid
@@ -487,31 +487,31 @@ class MyArray {
 						$number = number_format($number, 2, '.', '');
 					}
 				};
-				
+
 				$dateFormat = function (&$date, $key) use ($formatKey) {
 					if ($key == $formatKey) {
 						$date = date("Y-m-d", strtotime($date));
 					}
 				};
-								
+
 				switch ($format) {
 					case 'number':
 						array_walk_recursive($content, $numFormat);
 						break;
-						
+
 					case 'date':
 						array_walk_recursive($content, $dateFormat);
 						break;
-						
+
 					default:
 						throw new Exception(
 							'Wrong format entered. Please type'.' \'number\' '.
 							'or \'date\'.'
 						);
 				} //<-- end switch -->
-				
+
 				return $content;
-			} catch (Exception $e) { 
+			} catch (Exception $e) {
 				throw new Exception(
 					$e->getMessage().' from '.$this->_className.'->'.
 					__FUNCTION__.'() line '.__LINE__
@@ -523,8 +523,8 @@ class MyArray {
 	/**
 	 ***************************************************************************
 	 * Recusively makes elements of an array xml compliant
-	 * 
-	 * @param array $content the content to clean 
+	 *
+	 * @param array $content the content to clean
 	 *
 	 * @return array the cleaned content
 	 * @throws Exception if $content is empty
@@ -549,9 +549,9 @@ class MyArray {
 						return str_replace($invalidText, $validText, $item);
 					}
 				}; //<-- end closure -->
-				
+
 				return array_map($main, $content);
-			} catch (Exception $e) { 
+			} catch (Exception $e) {
 				throw new Exception(
 					$e->getMessage().' from '.$this->_className.'->'.
 					__FUNCTION__.'() line '.__LINE__
