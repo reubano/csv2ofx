@@ -433,8 +433,8 @@ class MyArray {
 		} else {
 			try {				
 				$maxValues = count(current($content));
-				$newKeys = $content[0]; // get key names
-				
+				$newKeys = current($content); // get key names
+
 				$checkSize = function ($values, $key) use ($maxValues) {
 					if (count($values) != $maxValues) {
 						throw new Exception('Array '.$key.' is wrong size');
