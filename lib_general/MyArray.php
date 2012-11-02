@@ -350,8 +350,8 @@ class MyArray {
 		} else {
 			try {				
 				$notAllNull = function ($content) {
-					$rednull = function ($a, $b) {	
-						return(!empty($a) || !empty($b));
+					$rednull = function ($a, $b) {
+						return (!empty($a) || !empty($b));
 					};
 					
 					return array_reduce($content, $rednull);
