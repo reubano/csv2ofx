@@ -3,10 +3,6 @@
  * purpose: contains csv2ofx functions
  ******************************************************************************/
 
-// include files
-$thisProjectDir	= dirname(__FILE__);
-require_once $thisProjectDir.'/lib_general/MyArray.php';
-
 //<-- begin class -->
 class OFX {
 	protected $className = __CLASS__;	// class name
