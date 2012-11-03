@@ -327,7 +327,7 @@ class CSV2OFX {
 					__FUNCTION__.'() line '.__LINE__
 				);
 			} else {
-				return;
+				return true;
 			}; //<-- end if -->
 
 		} catch (Exception $e) {
@@ -345,10 +345,10 @@ class CSV2OFX {
 	 **************************************************************************/
 	public function makeSplits($csvContent=null) {
 		try {
-			$headId = $this->headId;
+			$headId = isset($this->headId) ? $this->headId : null;
 
 			$main = function ($content, $key) use (&$splitContent, $headId) {
-				$id = isset($content[$headId]) ? $content[$headId] : $key;
+				$id = $headId ? $content[$headId] : $key;
 				$splitContent[$id][] = $content;
 			};
 
