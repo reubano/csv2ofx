@@ -303,57 +303,8 @@ class CSV2OFX {
 		} //<-- end if -->
 	} //<-- end function -->
 
-	/**
-	 ***************************************************************************
-	 * Organizes the splits of each transaction so that the main transaction is
-	 * listed first
-	 **************************************************************************/
-	public function organizeSplits() {
-		if (!($this->newContent)) {
-			throw new Exception('$newContent not set! Run verifySplits() from '.
-				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
-			);
-		} else {
-			try {
-				foreach ($this->newContent as $id => $transaction) {
-					$max = 0;
-					$this->mainAccounts[$id] = 'none';
 
-					foreach ($transaction as $key => $split) {
-						$amount = $split[$this->headAmount];
-						$absAmount = abs($amount);
 
-						if ($absAmount > $max) {
-							$this->mainAccounts[$id] =
-								$split[$this->headAccount];
-							$mainKeys[$id] = $key;
-							$max = $absAmount;
-						} //<-- end if -->
-					} //<-- end foreach -->
-
-					if ($this->mainAccounts[$id] == 'none') {
-						throw new Exception('Main account not found at '.
-							'transaction '.$id.' from '.$this->className.'->'
-							.__FUNCTION__.'() line '.__LINE__
-						);
-					}
-
-					if ($mainKeys[$id] != 0) {
-						$transaction = myarray::arrayMove(
-							$transaction, $mainKeys[$id]
-						);
-
-						$this->newContent[$id] = $transaction;
-					} //<-- end if -->
-				} //<-- end foreach -->
-
-			} catch (Exception $e) {
-				throw new Exception($e->getMessage().' from '.$this->className.
-					'->'.__FUNCTION__.'() line '.__LINE__
-				);
-			} //<-- end try -->
-		} //<-- end if -->
-	} //<-- end function -->
 
 	/**
 	 ***************************************************************************
@@ -434,44 +385,6 @@ class CSV2OFX {
 
 	/**
 	 ***************************************************************************
-	 * Verifies that the splits of each transaction sum to 0
-	 *
-	 * @return 	array	$this->newContent	csv content organized by transaction
-	 **************************************************************************/
-	public function verifySplits() {
-		if (!($this->tranIds)) {
-			throw new Exception('$tranIds not set! Run setTranIds() from '.
-				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
-			);
-		} else {
-			try {
-				foreach ($this->tranIds as $id) {
-					$sum = 0;
-
-					foreach ($this->csvContent as $transaction) {
-						if ($transaction[$this->headTranId] == $id) {
-							$this->newContent[$id][] = $transaction;
-							$amount = $transaction[$this->headAmount];
-							$sum += $amount;
-						} //<-- end if -->
-					} //<-- end foreach -->
-
-					if (round(abs($sum), 2) > 0) {
-						throw new Exception('Invalid split of '.$sum.' at '.
-							'transaction '.$id.' from '.$this->className.'->'.
-							__FUNCTION__.'() line '.__LINE__
-						);
-					} //<-- end if -->
-				} //<-- end foreach -->
-
-				return $this->newContent;
-			} catch (Exception $e) {
-				throw new Exception($e->getMessage().' from '.$this->className.
-					'->'.__FUNCTION__.'() line '.__LINE__
-				);
-			} //<-- end try -->
-		} //<-- end if -->
-	} //<-- end function -->
 
 
 	/**
