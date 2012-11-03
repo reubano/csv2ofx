@@ -312,25 +312,30 @@ class CSV2OFX {
 	 ***************************************************************************
 	 * Verifies that the splits of each transaction sum to 0
 	 *
-	 * @return 	array	$this->newContent	csv content organized by transaction
+	 * @return 	boolean	true on success
 	 **************************************************************************/
-	private function _verifySplits() {
+	private function verifySplits($splitContent) {
 		try {
-			foreach ($this->newContent as $id => $transaction) {
-				$sum = 0;
+			$headAmount = $this->headAmount;
 
-				foreach ($transaction as $split) {
-					$amount = $split[$this->headAmount];
-					$sum += $amount;
-				} //<-- end foreach -->
+			$verify = function ($transaction) use ($headAmount) {
+				$sum = function ($a, $b) {
+					return round(sum($a[$headAmount], $b[$headAmount]), 2);
+				};
 
-				if (round(abs($sum), 2) > 0) {
-					throw new Exception('Invalid split of '.$sum.' at '.
-						'transaction '.$id.' from '.$this->className.'->'.
-						__FUNCTION__.'() line '.__LINE__
-					);
-				} //<-- end if -->
-			} //<-- end foreach -->
+				return array_reduce($transaction, $sum);
+			};
+
+			$result = array_filter($splitContent, $verify);
+
+			if ($result) {
+				throw new Exception('Invalid split of '.$result.' at '.
+					'transaction '.$result.' from '.$this->className.'->'.
+					__FUNCTION__.'() line '.__LINE__
+				);
+			} else {
+				return;
+			}; //<-- end if -->
 
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.
