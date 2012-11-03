@@ -23,14 +23,14 @@ class String {
 			fwrite(STDOUT, "$this->_className class constructor set.\n");
 		} //<-- end if -->
 	} //<-- end function -->
-			
+
 	/**
 	 ***************************************************************************
-	 * Parses each line of an array of raw csv data into an array 
+	 * Parses each line of an array of raw csv data into an array
 	 *
 	 * @param array $csvContent		 csv content (each array should contain one
 	 * 								 line of csv data)
-	 * @param string $fieldDelimiter the csv field delimiter 
+	 * @param string $fieldDelimiter the csv field delimiter
 	 *
 	 * @return array $arrContent	 array of csv data
 	 * @throws Exception if $csvFile does not exist
@@ -54,15 +54,15 @@ class String {
 	 * Converts an array to string while adding an extra string to the beginning
 	 * and end of each element
 	 *
-	 * @param array  $content 	array to convert 
-	 * @param string $extra  	string to add to the beginning and end of 
+	 * @param array  $content 	array to convert
+	 * @param string $extra  	string to add to the beginning and end of
 	 *							each array element
-	 * @param string $delimiter	character to seperate each arrayelement 
+	 * @param string $delimiter	character to seperate each arrayelement
 	 *
 	 * @return string $content	content formatted on 1 line with the extra
 	 *							string added to the beginning and end of
 	 *							each array element
-	 * @throws Exception if $content is not an array 
+	 * @throws Exception if $content is not an array
 	 *
 	 * @assert (array('one', 'two')) == "'one' 'two'"
 	 **************************************************************************/
@@ -75,8 +75,8 @@ class String {
 		} else {
 			try {
 				return $extra.implode($extra.$delimiter.$extra, $content).
-					$extra; // array to string	
-			} catch (Exception $e) { 
+					$extra; // array to string
+			} catch (Exception $e) {
 				throw new Exception(
 					$e->getMessage().' from '.$this->_className.'->'.
 					__FUNCTION__.'() line '.__LINE__
@@ -88,7 +88,7 @@ class String {
 	/**
 	 ***************************************************************************
 	 * Converts line endings to LF line endings
-	 * 
+	 *
 	 * @param string $content data to process
 	 *
 	 * @return string $content data with LF line endings
@@ -101,7 +101,7 @@ class String {
 			$content = str_replace("\r\n", "\n", $content);
 			$content = str_replace("\r", "\n", $content);
 			return $content;
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception(
 				$e->getMessage().' from '.$this->_className.'->'.__FUNCTION__.
 				'() line '.__LINE__
@@ -113,7 +113,7 @@ class String {
 	 ***************************************************************************
 	 * Returns an array from a multiline string
 	 *
-	 * @param string $content    a multiline string 
+	 * @param string $content    a multiline string
 	 * @param string $lineEnding a the line ending ("\n", "\r\n", or "\r")
 	 *
 	 * @return array $content array (one element from each line in the
@@ -121,7 +121,7 @@ class String {
 	 *
 	 * @assert ("one\ntwo\nthree") == array('one', 'two', 'three')
 	 **************************************************************************/
-	public function lines2Array($content, $lineEnding="\n") {		
+	public function lines2Array($content, $lineEnding="\n") {
 		try {
 			$content = explode($lineEnding, $content); // turn string to array
 			$last = array_pop($content);
@@ -131,7 +131,7 @@ class String {
 			}
 
 			return $content;
-		} catch (Exception $e) { 
+		} catch (Exception $e) {
 			throw new Exception(
 				$e->getMessage().' from '.$this->_className.'->'.__FUNCTION__.
 				'() line '.__LINE__
