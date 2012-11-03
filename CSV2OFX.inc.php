@@ -346,17 +346,22 @@ class CSV2OFX {
 
 	/**
 	 ***************************************************************************
-	 * Verifies that the splits of each transaction sum to 0
 	 *
-	 * @return 	array	$this->newContent	csv content organized by transaction
+	 *
+	 * @return 	array	$splitContent	csv content organized by transaction
 	 **************************************************************************/
-	public function makeSplits() {
+	public function makeSplits($csvContent=null) {
 		try {
-			foreach ($this->csvContent as $key => $transaction) {
-					$this->newContent[$key][] = $transaction;
-			} //<-- end foreach -->
+			$headId = $this->headId;
 
-			return $this->newContent;
+			$main = function ($content, $key) use (&$splitContent, $headId) {
+				$id = isset($content[$headId]) ? $content[$headId] : $key;
+				$splitContent[$id][] = $content;
+			};
+
+			$csvContent = $csvContent ?: $this->csvContent;
+			array_walk($csvContent, $main);
+			return $splitContent;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.
 				'->'.__FUNCTION__.'() line '.__LINE__
