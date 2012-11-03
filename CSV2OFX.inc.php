@@ -216,28 +216,18 @@ class CSV2OFX {
 	 * @return 	array	$accountTypes		the resulting account types
 	 * @throws 	Exception if $tags is empty
 	 **************************************************************************/
-	private function _getAccountTypes($accountTypeList, $defAccountType) {
-			try {
-			$accountTypes = array();
+	public function getAccountTypes($accounts, $typeList, $defType='n/a') {
+		try {
+			$main = function ($account) use ($typeList, $defType) {
+				$search = function ($searchList, $accountType) use ($account) {
+					if (in_array($account, $searchList)) return $accountType;
+				};
 
-			foreach ($this->accounts as $account) {
-				foreach ($accountTypeList as $accountType => $searchList) {
-					foreach ($searchList as $searchTerm) {
-						$found = stripos($account, $searchTerm);
+				array_walk($typeList, $search);
+				return $defType; // if no match found
+			}; //<-- end for loop -->
 
-						if ($found !== false) {
-						 	$accountTypes[] = $accountType;
-						 	// stop searching and move to next account
-						 	continue 3;
-						} //<-- end if -->
-					} //<-- end for loop through search terms -->
-				} //<-- end for loop through account types -->
-
-				// if no matches found, apply default account type
-				$accountTypes[] = $defAccountType;
-			} //<-- end for loop through accounts -->
-
-			return $accountTypes;
+			return array_map($main, $accounts);
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.
 				'->'.__FUNCTION__.'() line '.__LINE__
