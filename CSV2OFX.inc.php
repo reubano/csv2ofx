@@ -15,7 +15,6 @@ class CSV2OFX {
 	public $split;
 	public $newContent;
 	public $accounts = array();
-	public $mainAccounts;
 	public $csvContent;
 	public $headAccount;
 	public $headAccountId;
@@ -29,20 +28,6 @@ class CSV2OFX {
 	public $headClass;
 	public $headId;
 	public $headCheckNum;
-	public $tranCheckNum;
-	public $tranType;
-	public $tranNotes;
-	public $tranId;
-	public $tranIds = array();
-	public $tranDate;
-	public $tranDate2;
-	public $tranPayee;
-	public $tranClass;
-	public $tranSplitAccount;
-	public $tranSplitAccountId;
-	public $tranAmount;
-	public $tranDesc;
-	public $defSplitAccount = 'Orphan';
 
 	/**
 	 ***************************************************************************
