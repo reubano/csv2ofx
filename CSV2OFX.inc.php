@@ -276,36 +276,33 @@ class CSV2OFX {
 
 	/**
 	 ***************************************************************************
+	 * Returns the split in a transaction with the largest absolute value
 	 *
-	 **************************************************************************/
-
-
-
-
-	/**
-	 ***************************************************************************
-	 * Sorts splits by a given field
+	 * @param array $splitContent return value of makeSplits();
+	 * @param array $collapse	  accounts to collapse
 	 *
-	 * @param 	array 	$field	field to sort splits by
+	 * @return array $splitContent collapsed content;
+	 *
+	 * @assert (array(array(array('Account Name' => 'account1', 'Amount' => 100), array('Account Name' => 'account1', 'Amount' => 200)) == array(array(array('Account Name' => 'account1', 'Amount' => 300)))
 	 **************************************************************************/
-	public function sortSplits($field) {
-		if (!($this->newContent)) {
-			throw new Exception('$newContent not set! Run verifySplits() from '.
-				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
+	public function getMaxSplitAmounts($splitContent) {
+		try {
+			$headAmount = $this->headAmount;
+
+			$reduce = function ($item) {
+				$maxAbs = function ($a, $b) use ($headAmount) {
+					return max(abs($a[$headAmount]), abs($b[$headAmount]));
+				};
+
+				return array_reduce($item, $maxAbs);
+			};
+
+			return array_map($reduce, $splitContent);
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage().' from '.$this->className.
+				'->'.__FUNCTION__.'() line '.__LINE__
 			);
-		} else {
-			try {
-				foreach ($this->newContent as $id => &$transaction) {
-					$transaction = myarray::arraySortBySubValue(
-						$transaction, 'AccountName'
-					);
-				}
-			} catch (Exception $e) {
-				throw new Exception($e->getMessage().' from '.$this->className.
-					'->'.__FUNCTION__.'() line '.__LINE__
-				);
-			} //<-- end try -->
-		} //<-- end if -->
+		} //<-- end try -->
 	} //<-- end function -->
 
 	/**
