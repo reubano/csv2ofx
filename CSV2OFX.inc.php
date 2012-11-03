@@ -27,7 +27,7 @@ class CSV2OFX {
 	public $headNotes;
 	public $headSplitAccount;
 	public $headClass;
-	public $headTranId;
+	public $headId;
 	public $headCheckNum;
 	public $tranCheckNum;
 	public $tranType;
@@ -79,7 +79,7 @@ class CSV2OFX {
 				$this->headNotes 	= 'Product';
 				$this->headClass 	= 'Resource';
 				$this->headSplitAccount = 'AccountName';
-				$this->headTranId 	= 'JournalNumber';
+				$this->headId 	= 'JournalNumber';
 				$this->headCheckNum = 'Reference';
 				$this->split		= TRUE;
 				break;
@@ -94,7 +94,7 @@ class CSV2OFX {
 				$this->headNotes 	= 'Memo';
 				$this->headSplitAccount = 'Category';
 				$this->headClass 	= 'Classification';
-				$this->headTranId 	= 'Transaction Id';
+				$this->headId 	= 'Transaction Id';
 				$this->split		= FALSE;
 				break;
 
@@ -103,7 +103,7 @@ class CSV2OFX {
 				$this->headDate 	= 'Date';
 				$this->headAmount 	= 'Amount';
 				$this->headPayee 	= 'Narration';
-				$this->headTranId 	= 'Reference Number';
+				$this->headId 	= 'Reference Number';
 				$this->split		= FALSE;
 				break;
 
@@ -115,7 +115,7 @@ class CSV2OFX {
 				$this->headCheckNum = 'Num';
 				$this->headDesc 	= 'Reference';
 				$this->headSplitAccount = 'Category';
-				$this->headTranId 	= 'Row';
+				$this->headId 	= 'Row';
 				$this->split		= FALSE;
 				break;
 
@@ -130,7 +130,7 @@ class CSV2OFX {
 				$this->headNotes 	= 'Field';
 				$this->headSplitAccount = 'Field';
 				$this->headClass 	= 'Field';
-				$this->headTranId 	= 'Field';
+				$this->headId 	= 'Field';
 				$this->headCheckNum = 'Field';
 				$this->split		= FALSE;
 			} //<-- end switch -->
@@ -371,91 +371,58 @@ class CSV2OFX {
 
 	/**
 	 ***************************************************************************
-
-
-	/**
-	 ***************************************************************************
 	 * Sets QIF format transaction variables
 	 *
-	 * @param 	string 	$transaction	the account
-	 * @param 	string 	$timestamp		the account types
-	 * @return 	string	$content		the QIF content
+	 * @param 	array 	$transaction	the transaction
+	 * @param 	string 	$timeStamp		the time stamp
+	 * @return 	array	the QIF content
 	 **************************************************************************/
-	public function setTransactionData($transaction, $timestamp) {
+	public function getTransactionData(
+		$tr, $timeStamp, $defSplitAccount='Orphan'
+	) {
 		try {
-			$this->tranDate = date("m/d/Y", $timestamp);
-			$this->dateStamp = date("Ymd", $timestamp);
-			$this->tranAmount = $transaction[$this->headAmount];
+// 			$amount = $tr[$this->headAmount];
+//
+// 			if ($this->headTranType && ($tr[$this->headTranType] == 'debit')) {
+// 				$amount = '-'.$amount;
+// 			}
 
-			if ($this->headTranType) {
-				$this->tranType = $transaction[$this->headTranType];
+			$amount = ($tr[$this->headTranType] == 'debit')
+				? '-'.$tr[$this->headAmount]
+				: $tr[$this->headAmount];
 
-				if ($this->tranType == 'debit') {
-					$this->tranAmount = '-'.$this->tranAmount;
-				}
-			}
+			$payee = isset($this->headPayee) ? $tr[$this->headPayee] : '';
+			$desc = isset($this->headDesc) ? $tr[$this->headDesc] : null;
+			$notes = isset($this->headNotes) ? $tr[$this->headNotes] : null;
+			$class = isset($this->headClass) ? $tr[$this->headClass] : null;
+			$id = isset($this->headId) ? $tr[$this->headId] : null;
 
-			if ($this->headPayee) {
-				$this->tranPayee = $transaction[$this->headPayee];
-			} else {
-				$this->tranPayee = '';
-			}
+			$checkNum = isset($this->headCheckNum)
+				? $tr[$this->headCheckNum]
+				: null;
 
-			if ($this->headSplitAccount) {
-				$this->tranSplitAccount = $transaction[$this->headSplitAccount];
-			} else {
-				$this->tranSplitAccount = $this->defSplitAccount;
-			}
+			$splitAccount = isset($this->headSplitAccount)
+				? $tr[$this->headSplitAccount]
+				: $defSplitAccount;
 
-			if ($this->headDesc) {
-				$this->tranDesc = $transaction[$this->headDesc];
-			}
+			$splitAccountId = md5($splitAccount);
 
-			if ($this->headNotes) {
-				$this->tranNotes = $transaction[$this->headNotes];
-			}
-
-			if ($this->headClass) {
-				$this->tranClass = $transaction[$this->headClass];
-			}
-
-			if ($this->headTranId) {
-				$this->tranId = $transaction[$this->headTranId];
-			}
-
-			if ($this->headCheckNum) {
-				$this->tranCheckNum = $transaction[$this->headCheckNum];
-			}
-
-			if ($this->headCheckNum) {
-				$this->tranCheckNum = $transaction[$this->headCheckNum];
-			}
+			// qif doesn't support notes or class so add them to description
+			$desc .= $notes ?: '';
+			$desc .= $class ?: '';
 
 			// if no id, create it using check number or md5
 			// hash of the transaction details
-			if (!$this->tranId) {
-				if ($this->tranCheckNum) {
-					$this->tranId = $this->tranCheckNum;
-				} else {
-					$hashCombo = $this->tranDate.$this->tranAmount.
-						$this->tranPayee.$this->tranSplitAccount.
-						$this->tranDesc;
-					$this->tranId = md5($hashCombo);
-				} //<-- end if -->
-			} //<-- end if -->
+			$id = $id ?: $checkNum;
+			$id = $id ?: md5($timeStamp.$amount.$payee.$splitAccount.$desc);
 
-			// create category id using an md5 hash of the category
-			if ($this->tranSplitAccount) {
-				$this->tranSplitAccountId = md5($this->tranSplitAccount);
-			}
+			return array(
+				'amount' => $amount, 'payee' => $payee, 'desc' => $desc,
+				'id' => $id, 'checkNum' => $checkNum,
+				'splitAccount' => $splitAccount,
+				'splitAccountId' => $splitAccountId
+			);
 
-			if ($this->tranNotes) {
-				$this->tranDesc = $this->tranDesc.'/'.$this->tranNotes;
-			}
-
-			if ($this->tranClass) {
-				$this->tranDesc = $this->tranDesc.'/'.$this->tranClass;
-			}
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
