@@ -127,10 +127,13 @@ class CSV2OFX {
 
 	/**
 	 ***************************************************************************
-	 * Set amount values
+	 * Cleans amount values by removing commas and converting to float
 	 *
-	 * @param 	array 	$accountTypeList	list of possible account types
-	 * @param 	string 	$defAccountType		default account type
+	 * @param array $csvContent csv content
+	 *
+	 * @return array $csvContent cleaned csv content
+	 *
+	 * @assert (array(array('amount' => 1,000.00))) == array(array('amount' => 1000.00))
 	 **************************************************************************/
 	public function cleanAmounts($csvContent=null) {
 		try {
@@ -154,10 +157,15 @@ class CSV2OFX {
 
 	/**
 	 ***************************************************************************
-	 * Set account names and types
+	 * Get main accounts (if passed $findAmounts, it returns the account of the
+	 * split matching the given amount)
 	 *
-	 * @param 	array 	$accountTypeList	list of possible account types
-	 * @param 	string 	$defAccountType		default account type
+	 * @param array $splitContent return value of makeSplits();
+	 * @param array $findAmounts  split amounts to find
+	 *
+	 * @return array main accounts
+	 *
+	 * @assert (array(array(array('Account Name' => 'account1'), array('Account Name' => 'account2'), array(array('Account Name' => 'account3'), array('Account Name' => 'account4'))))) == array('account1', 'account3')
 	 **************************************************************************/
 	public function getAccounts($splitContent, $findAmounts=null) {
 		try {
@@ -194,12 +202,15 @@ class CSV2OFX {
 
 	/**
 	 ***************************************************************************
-	 * Detects account types from account list
+	 * Detects account types of given account names
 	 *
-	 * @param 	array 	$accountTypeList	list of possible account types
-	 * @param 	string 	$defAccountType		default account type
-	 * @return 	array	$accountTypes		the resulting account types
-	 * @throws 	Exception if $tags is empty
+	 * @param 	array  $accounts account names
+	 * @param 	array  $typeList account types and matching account names
+	 * @param 	string $defType	 default account type
+	 *
+	 * @return 	array the resulting account types
+	 *
+	 * @assert (array('cash', 'checking', 'savings'), array('Bank' => array('checking', 'savings'), 'Cash' => array('cash'))) == array('Cash', 'Bank', 'Bank')
 	 **************************************************************************/
 	public function getAccountTypes($accounts, $typeList, $defType='n/a') {
 		try {
@@ -229,7 +240,7 @@ class CSV2OFX {
 	 *
 	 * @return array $splitContent collapsed content;
 	 *
-	 * @assert (array(array(array('Account Name' => 'account1', 'Amount' => 100), array('Account Name' => 'account1', 'Amount' => 200)) == array(array(array('Account Name' => 'account1', 'Amount' => 300)))
+	 * @assert (array(array(array('Account Name' => 'account1', 'Amount' => 100), array('Account Name' => 'account1', 'Amount' => 200)))) == array(array(array('Account Name' => 'account1', 'Amount' => 300)))
 	 **************************************************************************/
 	public function collapseSplits($splitContent, $collapse) {
 		try {
@@ -268,7 +279,7 @@ class CSV2OFX {
 	 *
 	 * @return array $splitContent collapsed content;
 	 *
-	 * @assert (array(array(array('Account Name' => 'account1', 'Amount' => 100), array('Account Name' => 'account1', 'Amount' => 200)) == array(array(array('Account Name' => 'account1', 'Amount' => 300)))
+	 * @assert (array(array(array('Amount' => 100), array('Amount' => 200)), array('Amount' => -300), array('Amount' => 200))) == array(array(array('Amount' => 200)), array('Amount' => -300))
 	 **************************************************************************/
 	public function getMaxSplitAmounts($splitContent) {
 		try {
