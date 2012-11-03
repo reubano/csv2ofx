@@ -8,7 +8,7 @@ $thisProjectDir	= dirname(__FILE__);
 require_once $thisProjectDir.'/lib_general/MyArray.php';
 
 //<-- begin class -->
-class CSV2OFX {
+class OFX {
 	protected $className = __CLASS__;	// class name
 	protected $verbose;
 	protected $source;
