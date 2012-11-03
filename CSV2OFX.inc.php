@@ -305,7 +305,11 @@ class CSV2OFX {
 	 ***************************************************************************
 	 * Verifies that the splits of each transaction sum to 0
 	 *
+	 * @param array $splitContent return value of makeSplits();
+	 *
 	 * @return 	boolean	true on success
+	 *
+	 * @assert (array(array(array('Amount' => 100), array('Amount' => -100)), array('Amount' => -300), array('Amount' => 200), array('Amount' => 100))) == true
 	 **************************************************************************/
 	private function verifySplits($splitContent) {
 		try {
@@ -339,9 +343,11 @@ class CSV2OFX {
 
 	/**
 	 ***************************************************************************
-	 *
+	 * @param array $csvContent csv content
 	 *
 	 * @return 	array	$splitContent	csv content organized by transaction
+	 *
+	 * @assert (array(array('Amount' => 1,000.00, 'Date' => '06/12/10', 'Category' => 'Checking', 'Account Name' => 'account'))) == array(array(array('Amount' => 1,000.00, 'Date' => '06/12/10', 'Category' => 'Checking', 'Account Name' => 'account')))
 	 **************************************************************************/
 	public function makeSplits($csvContent=null) {
 		try {
@@ -366,9 +372,13 @@ class CSV2OFX {
 	 ***************************************************************************
 	 * Sets QIF format transaction variables
 	 *
-	 * @param 	array 	$transaction	the transaction
-	 * @param 	string 	$timeStamp		the time stamp
+	 * @param 	array 	$tr		   		 the transaction
+	 * @param 	string 	$timeStamp 		 the time stamp
+	 * @param 	string 	$defSplitAccount the default split account
+	 *
 	 * @return 	array	the QIF content
+	 *
+	 * @assert (array('Transaction Type' => 'debit', 'Amount' => 1000.00, 'Description' => 'payee', 'Original Description' => 'description', 'Notes' => 'notes', 'Date' => '06/12/10', 'Category' => 'Checking', 'Account Name' => 'account'), 20120610111111) == array('amount' => 1000.00, 'payee' => 'payee', 'desc' => 'description', 'id' => '', 'checkNum' => '', 'type' => 'debit', 'splitAccount' => 'Checking', 'splitAccountId' => '');
 	 **************************************************************************/
 	public function getTransactionData(
 		$tr, $timeStamp, $defSplitAccount='Orphan'
