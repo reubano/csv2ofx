@@ -475,11 +475,7 @@ class CSV2OFX {
 	 **************************************************************************/
 	public function getQIFTransactionHeader($account, $accountType) {
 		try {
-			return
-				"!Account\n".
-				"N$account\n".
-				"T$accountType\n".
-				"^\n";
+			return "!Account\nN$account\nT$accountType\n^\n";
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -538,13 +534,9 @@ class CSV2OFX {
 	 *
 	 * @assert ('account', 'desc', 100) == "Saccount\nEdesc\n$100\n"
 	 **************************************************************************/
-	public function getQIFSplitContent(
-		$tranSplitAccount, $tranDesc, $tranAmount
-	) {
+	public function getQIFSplitContent($splitAccount, $data) {
 		try {
-			return "S$tranSplitAccount\n".
-				"E$tranDesc\n".
-				'$'."$tranAmount\n";
+			return "S$splitAccount\nE$data[desc]\n\$$data[amount]\n";
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
