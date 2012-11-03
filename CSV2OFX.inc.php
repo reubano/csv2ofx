@@ -460,31 +460,18 @@ class CSV2OFX {
 	 * @assert ('type', '01/01/12', 'payee', 100, 1) == "!Type:type\nN1\nD01/01/12\nPpayee\nT100\n"
 	 * @assert ('type', '01/01/12', 'payee', 100) == "!Type:type\nD01/01/12\nPpayee\nT100\n"
 	 **************************************************************************/
-	public function getQIFTransactionContent(
-		$accountType, $tranDate, $tranPayee, $tranAmount, $tranCheckNum=null
-	) {
+	public function getQIFTransactionContent($accountType, $data) {
 		try {
+			// switch signs if source is xero
+			$amount = $data['amount'];
+			$newAmount = (substr($amount, 0, 1) == '-')
+				? substr($amount, 1)
+				: '-'.$amount;
+
+			$amount = ($this->source == 'xero') ? $newAmount : $amount;
 			$content = "!Type:$accountType\n";
-
-			if ($tranCheckNum) {
-				$content .= "N$tranCheckNum\n";
-			}
-
-			$content .=
-				"D$tranDate\n".
-				"P$tranPayee\n";
-
-			if ($this->source == 'xero') {
-				// switch signs
-				if (substr($tranAmount, 0, 1) == '-') {
-					$tranAmount = substr($tranAmount, 1);
-				} else {
-					$tranAmount = '-'.$tranAmount;
-				}
-			}
-
-			$content .= "T$tranAmount\n";
-
+			$content .= isset($data['checkNum']) ? "N$data[checkNum]\n" : '';
+			$content .= "D$data[date]\nP$data[payee]\nT$amount\n";
 			return $content;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
