@@ -483,7 +483,6 @@ class CSV2OFX {
 	 **************************************************************************/
 	public function getQIFTransactionFooter() {
 		try {
-			// need to make variables reference $this->
 			return "^\n";
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
