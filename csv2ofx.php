@@ -18,8 +18,8 @@ if (strpos('@php_bin@', '@php_bin') === 0) { // not a pear install
 }
 
 define('CUR_DIR', getcwd().DIRECTORY_SEPARATOR);
-define('TODAY', date("Ymd")); // format to yyyymmdd
-define('TIME_STAMP', date("Ymd_His")); // format to yyyymmdd_hhmmss
+define('DATE_STAMP', date('Ymd')); // format to yyyymmdd
+define('TIME_STAMP', date('Ymd_His')); // format to yyyymmdd_hhmmss
 define('XML_FILE', PROJECT_DIR.PROGRAM.'.xml');
 
 require PROJECT_DIR.'Autoload.php';
@@ -58,8 +58,8 @@ try {
 	$delimiter = $result->options['delimiter'];
 	$mapping = $result->options['mapping'];
 	$primary = $result->options['primary'];
-	$startDate = strtotime($result->options['start']);
-	$endDate = strtotime($result->options['end']);
+	$start = date('YmdHis', strtotime($result->options['start']));
+	$end = date('YmdHis', strtotime($result->options['end']));
 	$collAccts = explode(',', $result->options['collapse']);
 	$currency = $result->options['currency'];
 	$language = $result->options['language'];
