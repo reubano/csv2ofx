@@ -363,16 +363,9 @@ class CSV2OFX {
 		$tr, $timeStamp, $defSplitAccount='Orphan'
 	) {
 		try {
-// 			$amount = $tr[$this->headAmount];
-//
-// 			if ($this->headTranType && ($tr[$this->headTranType] == 'debit')) {
-// 				$amount = '-'.$amount;
-// 			}
-
-			$amount = ($tr[$this->headTranType] == 'debit')
-				? '-'.$tr[$this->headAmount]
-				: $tr[$this->headAmount];
-
+			$type = $tr[$this->headTranType];
+			$amount = $tr[$this->headAmount];
+			$amount = ($type == 'debit') ? '-'.$amount : $amount;
 			$payee = isset($this->headPayee) ? $tr[$this->headPayee] : '';
 			$desc = isset($this->headDesc) ? $tr[$this->headDesc] : null;
 			$notes = isset($this->headNotes) ? $tr[$this->headNotes] : null;
@@ -400,7 +393,7 @@ class CSV2OFX {
 
 			return array(
 				'amount' => $amount, 'payee' => $payee, 'desc' => $desc,
-				'id' => $id, 'checkNum' => $checkNum,
+				'id' => $id, 'checkNum' => $checkNum, 'type' => $type,
 				'splitAccount' => $splitAccount,
 				'splitAccountId' => $splitAccountId
 			);
