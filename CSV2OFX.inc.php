@@ -564,19 +564,17 @@ class CSV2OFX {
 	 *
 	 * @assert ('type', 20120101111111, 100, 1, 'payee', 'memo') == "\t\t\t\t<STMTTRN>\n\t\t\t\t\t<TRNTYPE>type</TRNTYPE>\n\t\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t\t\t<FITID>1</FITID>\n\t\t\t\t\t<CHECKNUM>1</CHECKNUM>\n\t\t\t\t\t<NAME>payee</NAME>\n\t\t\t\t\t<MEMO>memo</MEMO>\n\t\t\t\t</STMTTRN>\n"
 	 **************************************************************************/
-	public function getOFXTransaction(
-		$tranType, $timeStamp, $tranAmount, $tranId, $tranPayee, $tranMemo
-	) {
+	public function getOFXTransaction($timeStamp, $data) {
 		try {
 			return
 				"\t\t\t\t<STMTTRN>\n".
-				"\t\t\t\t\t<TRNTYPE>$tranType</TRNTYPE>\n".
+				"\t\t\t\t\t<TRNTYPE>$data[type]</TRNTYPE>\n".
 				"\t\t\t\t\t<DTPOSTED>$timeStamp</DTPOSTED>\n".
-				"\t\t\t\t\t<TRNAMT>$tranAmount</TRNAMT>\n".
-				"\t\t\t\t\t<FITID>$tranId</FITID>\n".
-				"\t\t\t\t\t<CHECKNUM>$tranId</CHECKNUM>\n".
-				"\t\t\t\t\t<NAME>$tranPayee</NAME>\n".
-				"\t\t\t\t\t<MEMO>$tranMemo</MEMO>\n".
+				"\t\t\t\t\t<TRNAMT>$data[amount]</TRNAMT>\n".
+				"\t\t\t\t\t<FITID>$data[id]</FITID>\n".
+				"\t\t\t\t\t<CHECKNUM>$data[id]</CHECKNUM>\n".
+				"\t\t\t\t\t<NAME>$data[payee]</NAME>\n".
+				"\t\t\t\t\t<MEMO>$data[memo]</MEMO>\n".
 				"\t\t\t\t</STMTTRN>\n";
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
@@ -665,8 +663,7 @@ class CSV2OFX {
 	 * @assert ('USD', 20120101111111, 1, 'account', 'type', 2, 'split_account', 'def_type', 100) == "\t<INTRARS>\n\t\t<CURDEF>USD</CURDEF>\n\t\t<SRVRTID>20120101111111</SRVRTID>\n\t\t<XFERINFO>\n\t\t\t<BANKACCTFROM>\n\t\t\t\t<BANKID>1</BANKID>\n\t\t\t\t<ACCTID>account</ACCTID>\n\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t</BANKACCTFROM>\n\t\t\t<BANKACCTTO>\n\t\t\t\t<BANKID>2</BANKID>\n\t\t\t\t<ACCTID>split_account</ACCTID>\n\t\t\t\t<ACCTTYPE>'def_type'</ACCTTYPE>\n\t\t\t</BANKACCTTO>\n\t\t\t<TRNAMT>100</TRNAMT>\n\t\t</XFERINFO>\n\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t</INTRARS>\n"
 	 **************************************************************************/
 	public function getOFXTransfer(
-		$currency, $timeStamp, $accountId, $account, $accountType,
-		$tranSplitAccountId, $tranSplitAccount, $tranAccountType, $tranAmount
+		$currency, $timeStamp, $accountId, $account, $accountType
 	) {
 		try {
 			return
@@ -680,11 +677,11 @@ class CSV2OFX {
 				"\t\t\t\t<ACCTTYPE>$accountType</ACCTTYPE>\n".
 				"\t\t\t</BANKACCTFROM>\n".
 				"\t\t\t<BANKACCTTO>\n".
-				"\t\t\t\t<BANKID>$tranSplitAccountId</BANKID>\n".
-				"\t\t\t\t<ACCTID>$tranSplitAccount</ACCTID>\n".
-				"\t\t\t\t<ACCTTYPE>$tranAccountType</ACCTTYPE>\n".
+				"\t\t\t\t<BANKID>$data[splitAccountId]</BANKID>\n".
+				"\t\t\t\t<ACCTID>$data[splitAccount]</ACCTID>\n".
+				"\t\t\t\t<ACCTTYPE>$accountType</ACCTTYPE>\n".
 				"\t\t\t</BANKACCTTO>\n".
-				"\t\t\t<TRNAMT>$tranAmount</TRNAMT>\n".
+				"\t\t\t<TRNAMT>$data[amount]</TRNAMT>\n".
 				"\t\t</XFERINFO>\n". // End transfer aggregate
 				"\t\t<DTPOSTED>$timeStamp</DTPOSTED>\n".
 				"\t</INTRARS>\n"; // End transfer response
