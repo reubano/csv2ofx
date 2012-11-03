@@ -174,25 +174,32 @@ class CSV2OFX {
 	 * @param 	array 	$accountTypeList	list of possible account types
 	 * @param 	string 	$defAccountType		default account type
 	 **************************************************************************/
-	public function getAccounts($accountTypeList, $defAccountType) {
+	public function getAccounts($splitContent, $findAmounts=null) {
 		try {
-			if ($this->split) {
-				$this->accounts = array_unique($this->mainAccounts);
-			} else {
-				foreach ($this->newContent as $content) {
-					$this->accounts[] = $content[0][$this->headAccount];
-				} //<-- end for loop -->
+			$account = $this->headAccount;
+			$amount = $this->headAmount;
 
-				$this->accounts = array_unique($this->accounts);
-			}
+			$byCurrent = function ($transaction) use ($account) {
+				$split = current($transaction);
+				return $split[$account];
+			}; //<-- end for loop -->
 
-			sort($this->accounts);
+			$byAmount = function ($transaction, $findAmount) use (
+				$account, $amount
+			) {
+				$filter = function ($split) use ($amount) {
+					return ($split[$amount] == $findAmount);
+				};
 
-			$accountTypes = self::_getAccountTypes(
-				$accountTypeList, $defAccountType
-			);
+				return array_filter($transaction, $filter);
+			}; //<-- end for loop -->
 
-			$this->accounts = array_combine($this->accounts, $accountTypes);
+			$splitContent = $findAmounts
+				? array_map($byAmount, $splitContent, findAmounts)
+				: $splitContent;
+
+			return array_map($byCurrent, $splitContent);
+
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
