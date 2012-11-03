@@ -11,7 +11,10 @@ define('PROGRAM', pathinfo(__FILE__, PATHINFO_FILENAME));
 if (strpos('@php_bin@', '@php_bin') === 0) { // not a pear install
 	define('PROJECT_DIR', dirname(__FILE__).DIRECTORY_SEPARATOR);
 } else {
-	define('PROJECT_DIR', '@php_dir@'.DIRECTORY_SEPARATOR.PROGRAM.DIRECTORY_SEPARATOR);
+	define(
+		'PROJECT_DIR', '@php_dir@'.DIRECTORY_SEPARATOR.PROGRAM.
+		DIRECTORY_SEPARATOR
+	);
 }
 
 define('CUR_DIR', getcwd().DIRECTORY_SEPARATOR);
