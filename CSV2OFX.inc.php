@@ -147,13 +147,19 @@ class CSV2OFX {
 	 * @param 	array 	$accountTypeList	list of possible account types
 	 * @param 	string 	$defAccountType		default account type
 	 **************************************************************************/
-	public function setAmounts() {
+	public function cleanAmounts($csvContent=null) {
 		try {
-			foreach ($this->csvContent as $key => $content) {
-				$amount = $content[$this->headAmount];
-				$amount = floatval(preg_replace("[^-0-9\.]","", $amount));
-				$this->csvContent[$key][$this->headAmount] = $amount;
-			} //<-- end for loop -->
+			$headAmount = $this->headAmount;
+
+			$main = function (&$content) use ($headAmount) {
+				// remove all non-numeric chars and convert to float number
+				$amount = preg_replace('[^-0-9\.]', '', $content[$headAmount]);
+				$content[$headAmount] = floatval($amount);
+			};
+
+			$csvContent = $csvContent ?: $this->csvContent;
+			array_walk($csvContent, $main);
+			return $csvContent;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
