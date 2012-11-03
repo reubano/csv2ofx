@@ -61,15 +61,12 @@ try {
 	$collAccts = explode(',', $result->options['collapse']);
 	$currency = $result->options['currency'];
 	$language = $result->options['language'];
-
-	if ($result->options['qif']) {
-		$type = 'qif';
-	} else {
-		$type = 'ofx';
-	}
-
-	$accountType = $result->options['accountType'];
-	$accountTypeList = $accountTypeList[$type];
+	$overwrite = $result->options['overwrite'];
+	$transfer = $result->options['transfer'];
+	$qif = $result->options['qif'];
+	$type = $qif ? 'qif' : 'ofx';
+	$defType = $result->options['accountType'] ?: $defType[$type];
+	$typeList = $typeList[$type];
 	$ext = $ext[$type];
 
 	switch ($dest){
