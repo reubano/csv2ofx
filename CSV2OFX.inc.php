@@ -237,74 +237,47 @@ class CSV2OFX {
 
 	/**
 	 ***************************************************************************
-	 * Gets transaction IDs
+	 * Combines splits with the same account
 	 *
-	 * @return 	array	$this->tranIds		the transaction IDs
+	 * @param array $splitContent return value of makeSplits();
+	 * @param array $collapse	  accounts to collapse
+	 *
+	 * @return array $splitContent collapsed content;
+	 *
+	 * @assert (array(array(array('Account Name' => 'account1', 'Amount' => 100), array('Account Name' => 'account1', 'Amount' => 200)) == array(array(array('Account Name' => 'account1', 'Amount' => 300)))
 	 **************************************************************************/
-	public function setTranIds() {
+	public function collapseSplits($splitContent, $collapse) {
 		try {
-			foreach ($this->csvContent as $content) {
-				$this->tranIds[] = $content[$this->headTranId];
-			} //<-- end for loop -->
+			$headAmount = $this->headAmount;
+			$headAccount = $this->headAccount;
 
-			$this->tranIds = array_unique($this->tranIds);
-			sort($this->tranIds);
+			$main = function (&$content, $id) use ($headAccount, $collapse) {
+				$add = function ($prev, $split) use ($headAccount, $collapse) {
+					$account = $split[$headAccount];
 
-			return $this->tranIds;
+					if (in_array($account, $collapse)
+						&& $account == $prev[$headAccount]
+					) {
+						return ($split[$headAmount] + $prev[$headAmount]);
+					} //<-- end if -->
+				};
+
+				array_reduce($content, $add);
+			};
+
+			array_walk($splitContent, $main);
+			return $splitContent;
 		} catch (Exception $e) {
-			throw new Exception($e->getMessage().' from '.$this->className.'->'.
-				__FUNCTION__.'() line '.__LINE__
+			throw new Exception($e->getMessage().' from '.$this->className.
+				'->'.__FUNCTION__.'() line '.__LINE__
 			);
 		} //<-- end try -->
 	} //<-- end function -->
 
 	/**
 	 ***************************************************************************
-	 * Combines similiar splits from the same account
 	 *
-	 * @param 	array 	$collapse			accounts to collapse
 	 **************************************************************************/
-	public function collapseSplits($collapse) {
-		if (!($this->newContent)) {
-			throw new Exception('$newContent not set! Run verifySplits() from '.
-				$this->className.'->'.__FUNCTION__.'() line '.__LINE__
-			);
-		} else {
-			try {
-				foreach ($this->newContent as $id => $transaction) {
-					$previousAccount = '';
-					$previousAmount = 0;
-					$splice = array();
-
-					// loop over splits (by reference bc we are changing $split
-					// in place)
-					foreach ($transaction as $key => &$split) {
-						if (in_array($split[$this->headAccount], $collapse)
-							&& $split[$this->headAccount] == $previousAccount
-						) {
-							$split[$this->headAmount] += $previousAmount;
-							$splice[] = $key - 1;
-						} //<-- end if -->
-
-						$previousAccount = $split[$this->headAccount];
-						$previousAmount = $split[$this->headAmount];
-					} //<-- end loop through splits -->
-
-					foreach ($splice as $i => $key) {
-						array_splice($transaction, $key - $i, 1);
-					}
-
-					$this->newContent[$id] = $transaction;
-				} //<-- end loop through transactions -->
-
-				self::_verifySplits();
-			} catch (Exception $e) {
-				throw new Exception($e->getMessage().' from '.$this->className.
-					'->'.__FUNCTION__.'() line '.__LINE__
-				);
-			} //<-- end try -->
-		} //<-- end if -->
-	} //<-- end function -->
 
 
 
