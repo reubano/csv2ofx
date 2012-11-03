@@ -24,7 +24,7 @@ define('XML_FILE', PROJECT_DIR.PROGRAM.'.xml');
 
 require PROJECT_DIR.'Autoload.php';
 
-$accountList = array('ofx' => 'CHECKING', 'qif' => 'Bank');
+$defType = array('ofx' => 'CHECKING', 'qif' => 'Bank');
 $ofxList = array(
 	'CHECKING' => array('checking'),
 	'SAVINGS' => array('savings'),
@@ -38,10 +38,8 @@ $bankList = array(
 );
 
 $qifList = array('Bank' => $bankList, 'Cash' => array('cash'));
-$accountTypeList = array('ofx' => $ofxList, 'qif' => $qifList);
-
+$typeList = array('ofx' => $ofxList, 'qif' => $qifList);
 $ext = array('ofx' => 'ofx', 'qif' => 'qif');
-
 
 // create the parser from xml file
 $parser = Console_CommandLine::fromXmlFile(XML_FILE);
