@@ -113,19 +113,37 @@ try {
 	array_shift($csvContent);
 
 	$csv2ofx = new csv2ofx($mapping, $csvContent, $result->options['verbose']);
-	$csv2ofx->setAmounts();
+	$csv2ofx->csvContent = $csv2ofx->cleanAmounts();
+	$splitContent = $csv2ofx->makeSplits();
 
 	if ($csv2ofx->split) {
-		$csv2ofx->setTranIds();
-		$csv2ofx->verifySplits();
-		$csv2ofx->sortSplits($csv2ofx->headAccount);
-		$csv2ofx->collapseSplits($collAccts);
-		$csv2ofx->organizeSplits();
+		// verify splits
+		$csv2ofx->verifySplits($splitContent);
+
+		// sort splits by account name
+		$function = array('myarray', 'arraySortBySubValue');
+		$field = array_fill(0, count($splitContent), $csv2ofx->headAccount);
+		$splitContent = array_map($function, $splitContent, $field);
+
+		// combine splits of collapsable accounts
+		$splitContent = $csv2ofx->collapseSplits($splitContent, $collAccts);
+
+		// get accounts and keys
+		$maxAmounts = $csv2ofx->getMaxSplitAmounts($splitContent);
+		$accounts = $csv2ofx->getAccounts($splitContent, $maxAmounts);
+		$keys = array_keys($accounts);
+
+		// move main splits to beginning of transaction array
+		$function = array('myarray', 'arrayMove');
+		$field = array_fill(0, count($splitContent), $keys);
+		$splitContent = array_map($function, $splitContent, $field);
 	} else { // not a split transaction
-		$csv2ofx->makeSplits();
+		$accounts = $csv2ofx->getAccounts($splitContent);
 	} //<-- end if split -->
 
-	$csv2ofx->getAccounts($accountTypeList, $accountType[$type]);
+	$accountTypes = $csv2ofx->getAccountTypes($accounts, $typeList, $defType);
+	$accounts = array_combine($accounts, $accountTypes);
+	$uniqueAccounts = array_unique(sort($accounts));
 
 	// variable mode setting
 	if ($result->options['variables']) {
