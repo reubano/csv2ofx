@@ -201,11 +201,11 @@ class OFX {
 	 ***************************************************************************
 	 * Detects account types of given account names
 	 *
-	 * @param 	array  $accounts account names
-	 * @param 	array  $typeList account types and matching account names
-	 * @param 	string $defType	 default account type
+	 * @param array  $accounts account names
+	 * @param array  $typeList account types and matching account names
+	 * @param string $defType	 default account type
 	 *
-	 * @return 	array the resulting account types
+	 * @return array the resulting account types
 	 *
 	 * @assert (array('cash', 'checking', 'savings'), array('Bank' => array('checking', 'savings'), 'Cash' => array('cash'))) == array('Cash', 'Bank', 'Bank')
 	 **************************************************************************/
