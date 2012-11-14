@@ -277,15 +277,15 @@ class OFX {
 	 *
 	 * @return array $splitContent collapsed content;
 	 *
-	 * @assert (array(array(array('Amount' => 100), array('Amount' => 200)), array('Amount' => -300), array('Amount' => 200))) == array(array(array('Amount' => 200)), array('Amount' => -300))
+	 * @assert (array(array(array('Amount' => 350), array('Amount' => -400)), array(array('Amount' => 100), array('Amount' => -400), array('Amount' => 300)))) == array(400, 400)
 	 **************************************************************************/
 	public function getMaxSplitAmounts($splitContent) {
 		try {
-			$headAmount = $this->headAmount;
+			$hAmount = $this->headAmount;
 
-			$reduce = function ($item) {
-				$maxAbs = function ($a, $b) use ($headAmount) {
-					return max(abs($a[$headAmount]), abs($b[$headAmount]));
+			$reduce = function ($item) use ($hAmount) {
+				$maxAbs = function ($a, $b) use ($hAmount) {
+					return max(abs($a), abs($b[$hAmount]));
 				};
 
 				return array_reduce($item, $maxAbs);
@@ -376,7 +376,7 @@ class OFX {
 	 *
 	 * @return 	array	the QIF content
 	 *
-	 * @assert (array('Transaction Type' => 'debit', 'Amount' => 1000.00, 'Description' => 'payee', 'Original Description' => 'description', 'Notes' => 'notes', 'Date' => '06/12/10', 'Category' => 'Checking', 'Account Name' => 'account'), 20120610111111) == array('amount' => 1000.00, 'payee' => 'payee', 'desc' => 'description', 'id' => '', 'checkNum' => '', 'type' => 'debit', 'splitAccount' => 'Checking', 'splitAccountId' => '');
+	 * @assert (array('Transaction Type' => 'debit', 'Amount' => 1000.00, 'Description' => 'payee', 'Original Description' => 'description', 'Notes' => 'notes', 'Date' => '06/12/10', 'Category' => 'Checking', 'Account Name' => 'account'), 20120610111111) == array('amount' => '-1000', 'payee' => 'payee', 'desc' => 'description notes', 'id' => '370141bf77924d568817f7864c56419a', 'checkNum' => null, 'type' => 'debit', 'splitAccount' => 'Checking', 'splitAccountId' => '195917574edc9b6bbeb5be9785b6a479')
 	 **************************************************************************/
 	public function getTransactionData(
 		$tr, $timeStamp, $defSplitAccount='Orphan'
@@ -402,8 +402,8 @@ class OFX {
 			$splitAccountId = md5($splitAccount);
 
 			// qif doesn't support notes or class so add them to description
-			$desc .= $notes ?: '';
-			$desc .= $class ?: '';
+			$desc .= $notes ? ' '.$notes : '';
+			$desc .= $class ? ' '.$class : '';
 
 			// if no id, create it using check number or md5
 			// hash of the transaction details
@@ -678,16 +678,16 @@ class OFX {
 	 * @param 	string $accountType	the account types
 	 * @return 	string the QIF content
 	 *
-	 * @assert ('USD', 20120101111111, 1, 'account', 'type', 2, 'split_account', 'def_type', 100) == "\t<INTRARS>\n\t\t<CURDEF>USD</CURDEF>\n\t\t<SRVRTID>20120101111111</SRVRTID>\n\t\t<XFERINFO>\n\t\t\t<BANKACCTFROM>\n\t\t\t\t<BANKID>1</BANKID>\n\t\t\t\t<ACCTID>account</ACCTID>\n\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t</BANKACCTFROM>\n\t\t\t<BANKACCTTO>\n\t\t\t\t<BANKID>2</BANKID>\n\t\t\t\t<ACCTID>split_account</ACCTID>\n\t\t\t\t<ACCTTYPE>'def_type'</ACCTTYPE>\n\t\t\t</BANKACCTTO>\n\t\t\t<TRNAMT>100</TRNAMT>\n\t\t</XFERINFO>\n\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t</INTRARS>\n"
+	 * @assert ('USD', 20120101111111, 1, 'account', 'type', array('splitAccountId' => 2, 'splitAccount' => 'split_account', 'amount' => 100)) == "\t<INTRARS>\n\t\t<CURDEF>USD</CURDEF>\n\t\t<SRVRTID>20120101111111</SRVRTID>\n\t\t<XFERINFO>\n\t\t\t<BANKACCTFROM>\n\t\t\t\t<BANKID>1</BANKID>\n\t\t\t\t<ACCTID>account</ACCTID>\n\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t</BANKACCTFROM>\n\t\t\t<BANKACCTTO>\n\t\t\t\t<BANKID>2</BANKID>\n\t\t\t\t<ACCTID>split_account</ACCTID>\n\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t</BANKACCTTO>\n\t\t\t<TRNAMT>100</TRNAMT>\n\t\t</XFERINFO>\n\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t</INTRARS>\n"
 	 **************************************************************************/
 	public function getOFXTransfer(
-		$currency, $timeStamp, $accountId, $account, $accountType
+		$currency, $timeStamp, $accountId, $account, $accountType, $data
 	) {
 		try {
 			return
 				"\t<INTRARS>\n". // Begin transfer response
 				"\t\t<CURDEF>$currency</CURDEF>\n".
-				"\t\t<SRVRTID>$timestamp</SRVRTID>\n".
+				"\t\t<SRVRTID>$timeStamp</SRVRTID>\n".
 				"\t\t<XFERINFO>\n". // Begin transfer aggregate
 				"\t\t\t<BANKACCTFROM>\n".
 				"\t\t\t\t<BANKID>$accountId</BANKID>\n".
