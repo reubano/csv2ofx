@@ -129,21 +129,22 @@ class OFX {
 	 *
 	 * @return array $csvContent cleaned csv content
 	 *
-	 * @assert (array(array('amount' => 1,000.00))) == array(array('amount' => 1000.00))
+	 * @assert (array(array('Amount' => '$1,000.00'))) == array(array('Amount' => 1000.00))
 	 **************************************************************************/
 	public function cleanAmounts($csvContent=null) {
 		try {
 			$headAmount = $this->headAmount;
 
-			$main = function (&$content) use ($headAmount) {
-				// remove all non-numeric chars and convert to float number
-				$amount = preg_replace('[^-0-9\.]', '', $content[$headAmount]);
+			$main = function ($content) use ($headAmount) {
+				// remove all non-numeric chars and convert to float
+				$amount = $content[$headAmount];
+				$amount = preg_replace("/[^-0-9\.]/", "", $amount);
 				$content[$headAmount] = floatval($amount);
+				return $content;
 			};
 
 			$csvContent = $csvContent ?: $this->csvContent;
-			array_walk($csvContent, $main);
-			return $csvContent;
+			return array_map($main, $csvContent);
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
