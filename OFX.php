@@ -161,7 +161,7 @@ class OFX {
 	 *
 	 * @return array main accounts
 	 *
-	 * @assert (array(array(array('Account Name' => 'account1'), array('Account Name' => 'account2'), array(array('Account Name' => 'account3'), array('Account Name' => 'account4'))))) == array('account1', 'account3')
+	 * @assert (array(array(array('Account Name' => 'account1'), array('Account Name' => 'account2')), array(array('Account Name' => 'account3'), array('Account Name' => 'account4')))) == array('account1', 'account3')
 	 **************************************************************************/
 	public function getAccounts($splitContent, $findAmounts=null) {
 		try {
@@ -343,7 +343,7 @@ class OFX {
 	 *
 	 * @return 	array	$splitContent	csv content organized by transaction
 	 *
-	 * @assert (array(array('Amount' => 1,000.00, 'Date' => '06/12/10', 'Category' => 'Checking', 'Account Name' => 'account'))) == array(array(array('Amount' => 1,000.00, 'Date' => '06/12/10', 'Category' => 'Checking', 'Account Name' => 'account')))
+	 * @assert (array(array('Amount' => 1,000.00, 'Date' => '06/12/10', 'Category' => 'Checking', 'Account Name' => 'account1'), array('Amount' => 1,000.00, 'Date' => '06/12/10', 'Category' => 'Checking', 'Account Name' => 'account2'))) == array(array(array('Amount' => 1,000.00, 'Date' => '06/12/10', 'Category' => 'Checking', 'Account Name' => 'account1')), array(array('Amount' => 1,000.00, 'Date' => '06/12/10', 'Category' => 'Checking', 'Account Name' => 'account2')))
 	 **************************************************************************/
 	public function makeSplits($csvContent=null) {
 		try {
@@ -430,7 +430,7 @@ class OFX {
 	 * @param 	string 	$accountType	the account types
 	 * @return 	string	$content		the QIF content
 	 *
-	 * @assert ('account', 'type') == "!Account\nN$account\nT$type\n^\n"
+	 * @assert ('account', 'type') == "!Account\nNaccount\nTtype\n^\n"
 	 **************************************************************************/
 	public function getQIFTransactionHeader($account, $accountType) {
 		try {
@@ -449,8 +449,8 @@ class OFX {
 	 * @param 	string 	$accountType	the account types
 	 * @return 	string	$content		the QIF content
 	 *
-	 * @assert ('type', '01/01/12', 'payee', 100, 1) == "!Type:type\nN1\nD01/01/12\nPpayee\nT100\n"
-	 * @assert ('type', '01/01/12', 'payee', 100) == "!Type:type\nD01/01/12\nPpayee\nT100\n"
+	 * @assert ('type', array('payee' => 'payee', 'amount' => 100, 'checkNum' => 1, 'date' => '01/01/12')) == "!Type:type\nN1\nD01/01/12\nPpayee\nT100\n"
+	 * @assert ('type', array('payee' => 'payee', 'amount' => 100, 'date' => '01/01/12')) == "!Type:type\nD01/01/12\nPpayee\nT100\n"
 	 **************************************************************************/
 	public function getQIFTransactionContent($accountType, $data) {
 		try {
@@ -478,7 +478,7 @@ class OFX {
 	 *
 	 * @return 	string the QIF content
 	 *
-	 * @assert ('account', 'desc', 100) == "Saccount\nEdesc\n$100\n"
+	 * @assert ('account', array('desc' => 'desc', 'amount' => 100)) == "Saccount\nEdesc\n$100\n"
 	 **************************************************************************/
 	public function getQIFSplitContent($splitAccount, $data) {
 		try {
@@ -578,7 +578,7 @@ class OFX {
 	 *
 	 * @return 	string the OFX content
 	 *
-	 * @assert ('type', 20120101111111, 100, 1, 'payee', 'memo') == "\t\t\t\t<STMTTRN>\n\t\t\t\t\t<TRNTYPE>type</TRNTYPE>\n\t\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t\t\t<FITID>1</FITID>\n\t\t\t\t\t<CHECKNUM>1</CHECKNUM>\n\t\t\t\t\t<NAME>payee</NAME>\n\t\t\t\t\t<MEMO>memo</MEMO>\n\t\t\t\t</STMTTRN>\n"
+	 * @assert (20120101111111, array('type' => 'type', 'amount' => 100, 'id' => 1, 'payee' => 'payee', 'memo' => 'memo')) == "\t\t\t\t<STMTTRN>\n\t\t\t\t\t<TRNTYPE>type</TRNTYPE>\n\t\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t\t\t<FITID>1</FITID>\n\t\t\t\t\t<CHECKNUM>1</CHECKNUM>\n\t\t\t\t\t<NAME>payee</NAME>\n\t\t\t\t\t<MEMO>memo</MEMO>\n\t\t\t\t</STMTTRN>\n"
 	 **************************************************************************/
 	public function getOFXTransaction($timeStamp, $data) {
 		try {
