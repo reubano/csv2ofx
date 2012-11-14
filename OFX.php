@@ -212,12 +212,13 @@ class OFX {
 	public function getAccountTypes($accounts, $typeList, $defType='n/a') {
 		try {
 			$main = function ($account) use ($typeList, $defType) {
-				$search = function ($searchList, $accountType) use ($account) {
-					if (in_array($account, $searchList)) return $accountType;
+				$search = function ($list, $type) use ($account, &$match) {
+					$match = in_array($account, $list) ? $type : $match;
 				};
 
+				$match = null;
 				array_walk($typeList, $search);
-				return $defType; // if no match found
+				return $match ?: $defType;
 			}; //<-- end for loop -->
 
 			return array_map($main, $accounts);
