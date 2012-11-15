@@ -247,11 +247,9 @@ class MyArray {
 			$valueCount = count($values);
 			$difference = $keyCount - $valueCount;
 
-			if ($difference > 0) {
-				$values = array_pad($values, $difference, 0);
-			} else {
-				$values = array_slice($values, 0, $keyCount, true);
-			}
+			$values = ($difference > 0)
+				? array_pad($values, $difference, 0)
+				: array_slice($values, 0, $keyCount, true);
 
 			return array_combine($keys, $values);
 		} catch (Exception $e) {
