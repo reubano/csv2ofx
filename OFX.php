@@ -174,13 +174,13 @@ class OFX {
 				return $split[$account];
 			}; //<-- end for loop -->
 
-			$byAmount = function ($transaction, $findAmount) use (
-				$account, $amount
-			) {
-				$filter = function ($split) use ($amount) {
-					return ($split[$amount] == $findAmount);
-				};
+			$filter = function ($split) use ($amount) {
+				return ($split[$amount] == $findAmount);
+			};
 
+			$byAmount = function ($transaction, $findAmount) use (
+				$account, $filter
+			) {
 				return array_filter($transaction, $filter);
 			}; //<-- end for loop -->
 
