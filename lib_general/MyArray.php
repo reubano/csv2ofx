@@ -147,9 +147,7 @@ class MyArray {
 	 **************************************************************************/
 	public function arraySubstitute($content, $needle, $replace) {
 		try {
-			$main = function (&$haystack, $key) use (
-				$needle, $replace
-			) {
+			$main = function (&$haystack) use ($needle, $replace) {
 				$haystack = str_replace($needle, $replace, $haystack);
 			};
 
