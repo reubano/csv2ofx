@@ -274,9 +274,8 @@ class MyArray {
 	 **************************************************************************/
 	public function inArray($needle, $haystack) {
 		try {
-			return in_array(
-				strtolower($needle), array_map('strtolower', $haystack)
-			);
+			$lower = array_map('strtolower', $haystack);
+			return in_array(strtolower($needle), $lower);
 		} catch (Exception $e) {
 			throw new Exception(
 				$e->getMessage().' from '.$this->_className.'->'.__FUNCTION__.
