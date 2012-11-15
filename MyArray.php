@@ -340,11 +340,11 @@ class MyArray {
 			);
 		} else {
 			try {
-				$notAllNull = function ($content) {
-					$rednull = function ($a, $b) {
-						return (!empty($a) || !empty($b));
-					};
+				$rednull = function ($a, $b) {
+					return (!empty($a) || !empty($b));
+				};
 
+				$notAllNull = function ($content) use ($rednull) {
 					return array_reduce($content, $rednull);
 				};
 
