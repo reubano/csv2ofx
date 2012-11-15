@@ -307,9 +307,7 @@ class MyArray {
 	public function arrayHash($content, $hashKey, $algo = 'md5') {
 		try {
 			$hash = function (&$value, $key) use ($hashKey, $algo) {
-				if ($key == $hashKey) {
-					$value = hash($algo, $value);
-				}
+				$value = ($key == $hashKey) ? hash($algo, $value) : $value;
 			};
 
 			array_walk_recursive($content, $hash);
@@ -482,9 +480,8 @@ class MyArray {
 				};
 
 				$dateFormat = function (&$date, $key) use ($formatKey) {
-					if ($key == $formatKey) {
-						$date = date("Y-m-d", strtotime($date));
-					}
+					$newDate = date("Y-m-d", strtotime($date));
+					$date = ($key == $formatKey) ? $newDate : $date;
 				};
 
 				switch ($format) {
@@ -536,11 +533,11 @@ class MyArray {
 				$validText = array('&amp;', '&lt;', '&gt;', ' ', ' ');
 
 				$main = function ($item) use (&$main, $invalidText, $validText) {
-					if (is_array($item)) {
-						return array_map($main, $item);
-					} else {
-						return str_replace($invalidText, $validText, $item);
-					}
+					$return = is_array($item)
+						? array_map($main, $item)
+						: str_replace($invalidText, $validText, $item);
+
+					return $return;
 				}; //<-- end closure -->
 
 				return array_map($main, $content);
