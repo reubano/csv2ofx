@@ -52,16 +52,14 @@ class MyArray {
 			try {
 				$i = 0; // needle element counter
 
-				$main = function ($value, $key, $comparison) use (
-					&$i, &$needleKeys, $needle, $n
+				$main = function ($value, $key, $cmp) use (
+					&$i, &$nKeys, $needle, $n
 				) {
-					if ($i < $n) {
-						if (call_user_func($comparison, $value)) {
-							$i++;
+					if ($i < $n && call_user_func($cmp, $value)) {
+						$i++;
 
-							if ($i == $n) {
-								$needleKeys[] = $key;
-							}
+						if ($i == $n) {
+							$nKeys[] = $key;
 						}
 					}
 				}; //<-- end closure -->
@@ -82,11 +80,11 @@ class MyArray {
 						);
 				} //<-- end switch -->
 
-				return $needleKeys;
+				return $nKeys;
 			} catch (Exception $e) {
 				throw new Exception(
-					$e->getMessage().' from '.$this->_className.'->'.__FUNCTION__.
-					'() line '.__LINE__
+					$e->getMessage().' from '.$this->_className.'->'.
+					__FUNCTION__.'() line '.__LINE__
 				);
 			} //<-- end try -->
 		} //<-- end if -->
