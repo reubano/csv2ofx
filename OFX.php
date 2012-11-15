@@ -283,11 +283,11 @@ class OFX {
 		try {
 			$hAmount = $this->headAmount;
 
-			$reduce = function ($item) use ($hAmount) {
-				$maxAbs = function ($a, $b) use ($hAmount) {
-					return max(abs($a), abs($b[$hAmount]));
-				};
+			$maxAbs = function ($a, $b) use ($hAmount) {
+				return max(abs($a), abs($b[$hAmount]));
+			};
 
+			$reduce = function ($item) use ($maxAbs) {
 				return array_reduce($item, $maxAbs);
 			};
 
@@ -313,11 +313,11 @@ class OFX {
 		try {
 			$headAmount = $this->headAmount;
 
-			$verify = function ($transaction) use ($headAmount) {
-				$sum = function ($a, $b) {
-					return round(sum($a[$headAmount], $b[$headAmount]), 2);
-				};
+			$sum = function ($a, $b) {
+				return round(sum($a[$headAmount], $b[$headAmount]), 2);
+			};
 
+			$verify = function ($transaction) use ($sum) {
 				return array_reduce($transaction, $sum);
 			};
 
