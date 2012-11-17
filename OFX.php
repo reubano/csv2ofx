@@ -189,7 +189,6 @@ class OFX {
 				: $splitContent;
 
 			return array_map($byCurrent, $splitContent);
-
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
