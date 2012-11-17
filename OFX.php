@@ -233,34 +233,53 @@ class OFX {
 	 ***************************************************************************
 	 * Combines splits with the same account
 	 *
-	 * @param array $splitContent return value of makeSplits();
-	 * @param array $collapse	  accounts to collapse
+	 * @param array $content return value of makeSplits();
+	 * @param array $collapse accounts to collapse
 	 *
-	 * @return array $splitContent collapsed content;
+	 * @return array $content collapsed content;
 	 *
-	 * @assert (array(array(array('Account Name' => 'account1', 'Amount' => 100), array('Account Name' => 'account1', 'Amount' => 200)))) == array(array(array('Account Name' => 'account1', 'Amount' => 300)))
+	 * @assert (array(array(array('Account Name' => 'account1', 'Amount' => 200), array('Account Name' => 'account1', 'Amount' => 200), array('Account Name' => 'account1', 'Amount' => 200))), array('account1')) == array(array(array('Account Name' => 'account1', 'Amount' => 600)))
 	 **************************************************************************/
-	public function collapseSplits($splitContent, $collapse) {
+	public function collapseSplits($content, $collapse) {
 		try {
-			$headAmount = $this->headAmount;
-			$headAccount = $this->headAccount;
+			$hAm = $this->headAmount;
+			$hAc = $this->headAccount;
 
-			$main = function (&$content, $id) use ($headAccount, $collapse) {
-				$add = function ($prev, $split) use ($headAccount, $collapse) {
-					$account = $split[$headAccount];
+			$sum = function (&$split, $key, &$previous) use (
+				&$splice, $collapse, $hAm, $hAc
+			) {
+				$found = in_array($split[$hAc], $collapse);
 
-					if (in_array($account, $collapse)
-						&& $account == $prev[$headAccount]
-					) {
-						return ($split[$headAmount] + $prev[$headAmount]);
-					} //<-- end if -->
-				};
+				if ($found && $split[$hAc] == $previous['act']) {
+					$split[$hAm] += $previous['amt'];
+					$splice[] = $key - 1;
+				} //<-- end if -->
 
-				array_reduce($content, $add);
+				$previous['act'] = $split[$hAc];
+				$previous['amt'] = $split[$hAm];
 			};
 
-			array_walk($splitContent, $main);
-			return $splitContent;
+// 			$reduce = function ($i, $key) use (&$transaction) {
+// 				array_splice($transaction, $key - $i, 1);
+// 			};
+
+			$main = function (&$transaction) use ($sum) {
+				$previous = array('act' => null, 'amt' => 0);
+				array_walk($transaction, $sum, $previous);
+			};
+
+			array_walk($content, $main);
+			$splice = $splice; // closure below doesn't work without this
+
+			$reduce = function (&$transaction) use ($splice) {
+				foreach ($splice as $key => $i) {
+					array_splice($transaction, $key - $i, 1);
+				};
+			};
+
+			array_walk($content, $reduce);
+
+			return $content;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.
 				'->'.__FUNCTION__.'() line '.__LINE__
