@@ -267,17 +267,14 @@ class OFX {
 				array_walk($transaction, $sum, $previous);
 			};
 
-			array_walk($content, $main);
-			$splice = $splice; // closure below doesn't work without this
-
-			$reduce = function (&$transaction) use ($splice) {
-				foreach ($splice as $key => $i) {
-					array_splice($transaction, $key - $i, 1);
+			$reduce = function (&$transaction, $key, $splice) {
+				foreach ($splice as $num => $i) {
+					array_splice($transaction, $num - $i, 1);
 				};
 			};
 
-			array_walk($content, $reduce);
-
+			array_walk($content, $main);
+			array_walk($content, $reduce, $splice);
 			return $content;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.
