@@ -391,16 +391,15 @@ class OFX {
 	 *
 	 * @return 	array	the QIF content
 	 *
-	 * @assert (array('Transaction Type' => 'debit', 'Amount' => 1000.00, 'Description' => 'payee', 'Original Description' => 'description', 'Notes' => 'notes', 'Date' => '06/12/10', 'Category' => 'Checking', 'Account Name' => 'account'), 20120610111111) == array('amount' => '-1000', 'payee' => 'payee', 'desc' => 'description notes', 'id' => '370141bf77924d568817f7864c56419a', 'checkNum' => null, 'type' => 'debit', 'splitAccount' => 'Checking', 'splitAccountId' => '195917574edc9b6bbeb5be9785b6a479')
+	 * @assert (array('Transaction Type' => 'debit', 'Amount' => 1000.00, 'Date' => '06/12/10', 'Description' => 'payee', 'Original Description' => 'description', 'Notes' => 'notes', 'Category' => 'Checking', 'Account Name' => 'account')) == array('Amount' => '-1000', 'Payee' => 'payee', 'Date' => '06/12/10', 'Desc' => 'description notes', 'Id' => '4fe86d9de995225b174fb3116ca6b1f4', 'CheckNum' => null, 'Type' => 'debit', 'SplitAccount' => 'Checking', 'SplitAccountId' => '195917574edc9b6bbeb5be9785b6a479')
 	 **************************************************************************/
-	public function getTransactionData(
-		$tr, $timeStamp, $defSplitAccount='Orphan'
-	) {
+	public function getTransactionData($tr, $defSplitAccount='Orphan') {
 		try {
-			$type = $tr[$this->headTranType];
 			$amount = $tr[$this->headAmount];
+			$type = isset($this->headTranType) ? $tr[$this->headTranType] : null;
 			$amount = ($type == 'debit') ? '-'.$amount : $amount;
-			$payee = isset($this->headPayee) ? $tr[$this->headPayee] : '';
+			$date = date('m/d/y', strtotime($tr[$this->headDate]));
+			$payee = isset($this->headPayee) ? $tr[$this->headPayee] : null;
 			$desc = isset($this->headDesc) ? $tr[$this->headDesc] : null;
 			$notes = isset($this->headNotes) ? $tr[$this->headNotes] : null;
 			$class = isset($this->headClass) ? $tr[$this->headClass] : null;
@@ -423,13 +422,13 @@ class OFX {
 			// if no id, create it using check number or md5
 			// hash of the transaction details
 			$id = $id ?: $checkNum;
-			$id = $id ?: md5($timeStamp.$amount.$payee.$splitAccount.$desc);
+			$id = $id ?: md5($date.$amount.$payee.$splitAccount.$desc);
 
 			return array(
-				'amount' => $amount, 'payee' => $payee, 'desc' => $desc,
-				'id' => $id, 'checkNum' => $checkNum, 'type' => $type,
-				'splitAccount' => $splitAccount,
-				'splitAccountId' => $splitAccountId
+				'Amount' => $amount, 'Payee' => $payee, 'Date' => $date,
+				'Desc' => $desc, 'Id' => $id, 'CheckNum' => $checkNum,
+				'Type' => $type, 'SplitAccount' => $splitAccount,
+				'SplitAccountId' => $splitAccountId
 			);
 
 		} catch (Exception $e) {
