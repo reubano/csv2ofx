@@ -469,21 +469,21 @@ class OFX {
 	 * @param 	string 	$accountType	the account types
 	 * @return 	string	$content		the QIF content
 	 *
-	 * @assert ('type', array('payee' => 'payee', 'amount' => 100, 'checkNum' => 1, 'date' => '01/01/12')) == "!Type:type\nN1\nD01/01/12\nPpayee\nT100\n"
-	 * @assert ('type', array('payee' => 'payee', 'amount' => 100, 'date' => '01/01/12')) == "!Type:type\nD01/01/12\nPpayee\nT100\n"
+	 * @assert ('type', array('Payee' => 'payee', 'Amount' => 100, 'CheckNum' => 1, 'Date' => '01/01/12')) == "!Type:type\nN1\nD01/01/12\nPpayee\nT100\n"
+	 * @assert ('type', array('Payee' => 'payee', 'Amount' => 100, 'Date' => '01/01/12')) == "!Type:type\nD01/01/12\nPpayee\nT100\n"
 	 **************************************************************************/
 	public function getQIFTransactionContent($accountType, $data) {
 		try {
 			// switch signs if source is xero
-			$amount = $data['amount'];
+			$amount = $data['Amount'];
 			$newAmount = (substr($amount, 0, 1) == '-')
 				? substr($amount, 1)
 				: '-'.$amount;
 
 			$amount = ($this->source == 'xero') ? $newAmount : $amount;
 			$content = "!Type:$accountType\n";
-			$content .= isset($data['checkNum']) ? "N$data[checkNum]\n" : '';
-			$content .= "D$data[date]\nP$data[payee]\nT$amount\n";
+			$content .= isset($data['CheckNum']) ? "N$data[CheckNum]\n" : '';
+			$content .= "D$data[Date]\nP$data[Payee]\nT$amount\n";
 			return $content;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
@@ -498,11 +498,11 @@ class OFX {
 	 *
 	 * @return 	string the QIF content
 	 *
-	 * @assert ('account', array('desc' => 'desc', 'amount' => 100)) == "Saccount\nEdesc\n$100\n"
+	 * @assert ('account', array('Desc' => 'desc', 'Amount' => 100)) == "Saccount\nEdesc\n$100\n"
 	 **************************************************************************/
 	public function getQIFSplitContent($splitAccount, $data) {
 		try {
-			return "S$splitAccount\nE$data[desc]\n\$$data[amount]\n";
+			return "S$splitAccount\nE$data[Desc]\n\$$data[Amount]\n";
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -598,19 +598,19 @@ class OFX {
 	 *
 	 * @return 	string the OFX content
 	 *
-	 * @assert (20120101111111, array('type' => 'type', 'amount' => 100, 'id' => 1, 'payee' => 'payee', 'memo' => 'memo')) == "\t\t\t\t<STMTTRN>\n\t\t\t\t\t<TRNTYPE>type</TRNTYPE>\n\t\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t\t\t<FITID>1</FITID>\n\t\t\t\t\t<CHECKNUM>1</CHECKNUM>\n\t\t\t\t\t<NAME>payee</NAME>\n\t\t\t\t\t<MEMO>memo</MEMO>\n\t\t\t\t</STMTTRN>\n"
+	 * @assert (20120101111111, array('Type' => 'type', 'Amount' => 100, 'Id' => 1, 'Payee' => 'payee', 'Memo' => 'memo')) == "\t\t\t\t<STMTTRN>\n\t\t\t\t\t<TRNTYPE>type</TRNTYPE>\n\t\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t\t\t<FITID>1</FITID>\n\t\t\t\t\t<CHECKNUM>1</CHECKNUM>\n\t\t\t\t\t<NAME>payee</NAME>\n\t\t\t\t\t<MEMO>memo</MEMO>\n\t\t\t\t</STMTTRN>\n"
 	 **************************************************************************/
 	public function getOFXTransaction($timeStamp, $data) {
 		try {
 			return
 				"\t\t\t\t<STMTTRN>\n".
-				"\t\t\t\t\t<TRNTYPE>$data[type]</TRNTYPE>\n".
+				"\t\t\t\t\t<TRNTYPE>$data[Type]</TRNTYPE>\n".
 				"\t\t\t\t\t<DTPOSTED>$timeStamp</DTPOSTED>\n".
-				"\t\t\t\t\t<TRNAMT>$data[amount]</TRNAMT>\n".
-				"\t\t\t\t\t<FITID>$data[id]</FITID>\n".
-				"\t\t\t\t\t<CHECKNUM>$data[id]</CHECKNUM>\n".
-				"\t\t\t\t\t<NAME>$data[payee]</NAME>\n".
-				"\t\t\t\t\t<MEMO>$data[memo]</MEMO>\n".
+				"\t\t\t\t\t<TRNAMT>$data[Amount]</TRNAMT>\n".
+				"\t\t\t\t\t<FITID>$data[Id]</FITID>\n".
+				"\t\t\t\t\t<CHECKNUM>$data[Id]</CHECKNUM>\n".
+				"\t\t\t\t\t<NAME>$data[Payee]</NAME>\n".
+				"\t\t\t\t\t<MEMO>$data[Memo]</MEMO>\n".
 				"\t\t\t\t</STMTTRN>\n";
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
@@ -696,7 +696,7 @@ class OFX {
 	 * @param 	string $accountType	the account types
 	 * @return 	string the QIF content
 	 *
-	 * @assert ('USD', 20120101111111, 1, 'account', 'type', array('splitAccountId' => 2, 'splitAccount' => 'split_account', 'amount' => 100)) == "\t<INTRARS>\n\t\t<CURDEF>USD</CURDEF>\n\t\t<SRVRTID>20120101111111</SRVRTID>\n\t\t<XFERINFO>\n\t\t\t<BANKACCTFROM>\n\t\t\t\t<BANKID>1</BANKID>\n\t\t\t\t<ACCTID>account</ACCTID>\n\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t</BANKACCTFROM>\n\t\t\t<BANKACCTTO>\n\t\t\t\t<BANKID>2</BANKID>\n\t\t\t\t<ACCTID>split_account</ACCTID>\n\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t</BANKACCTTO>\n\t\t\t<TRNAMT>100</TRNAMT>\n\t\t</XFERINFO>\n\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t</INTRARS>\n"
+	 * @assert ('USD', 20120101111111, 1, 'account', 'type', array('SplitAccountId' => 2, 'SplitAccount' => 'split_account', 'Amount' => 100)) == "\t<INTRARS>\n\t\t<CURDEF>USD</CURDEF>\n\t\t<SRVRTID>20120101111111</SRVRTID>\n\t\t<XFERINFO>\n\t\t\t<BANKACCTFROM>\n\t\t\t\t<BANKID>1</BANKID>\n\t\t\t\t<ACCTID>account</ACCTID>\n\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t</BANKACCTFROM>\n\t\t\t<BANKACCTTO>\n\t\t\t\t<BANKID>2</BANKID>\n\t\t\t\t<ACCTID>split_account</ACCTID>\n\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t</BANKACCTTO>\n\t\t\t<TRNAMT>100</TRNAMT>\n\t\t</XFERINFO>\n\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t</INTRARS>\n"
 	 **************************************************************************/
 	public function getOFXTransfer(
 		$currency, $timeStamp, $accountId, $account, $accountType, $data
@@ -713,11 +713,11 @@ class OFX {
 				"\t\t\t\t<ACCTTYPE>$accountType</ACCTTYPE>\n".
 				"\t\t\t</BANKACCTFROM>\n".
 				"\t\t\t<BANKACCTTO>\n".
-				"\t\t\t\t<BANKID>$data[splitAccountId]</BANKID>\n".
-				"\t\t\t\t<ACCTID>$data[splitAccount]</ACCTID>\n".
+				"\t\t\t\t<BANKID>$data[SplitAccountId]</BANKID>\n".
+				"\t\t\t\t<ACCTID>$data[SplitAccount]</ACCTID>\n".
 				"\t\t\t\t<ACCTTYPE>$accountType</ACCTTYPE>\n".
 				"\t\t\t</BANKACCTTO>\n".
-				"\t\t\t<TRNAMT>$data[amount]</TRNAMT>\n".
+				"\t\t\t<TRNAMT>$data[Amount]</TRNAMT>\n".
 				"\t\t</XFERINFO>\n". // End transfer aggregate
 				"\t\t<DTPOSTED>$timeStamp</DTPOSTED>\n".
 				"\t</INTRARS>\n"; // End transfer response
