@@ -112,7 +112,7 @@ try {
 	$csvContent = $array->arrayInsertKey($csvContent);
 	array_shift($csvContent);
 
-	$csv2ofx = new csv2ofx($mapping, $csvContent, $result->options['verbose']);
+	$csv2ofx = new ofx($mapping, $csvContent, $result->options['verbose']);
 	$csv2ofx->csvContent = $csv2ofx->cleanAmounts();
 	$splitContent = $csv2ofx->makeSplits();
 
@@ -121,7 +121,7 @@ try {
 		$csv2ofx->verifySplits($splitContent);
 
 		// sort splits by account name
-		$function = array('myarray', 'arraySortBySubValue');
+		$function = array($myarray, 'arraySortBySubValue');
 		$field = array_fill(0, count($splitContent), $csv2ofx->headAccount);
 		$splitContent = array_map($function, $splitContent, $field);
 
@@ -134,7 +134,7 @@ try {
 		$keys = array_keys($accounts);
 
 		// move main splits to beginning of transaction array
-		$function = array('myarray', 'arrayMove');
+		$function = array($myarray, 'arrayMove');
 		$field = array_fill(0, count($splitContent), $keys);
 		$splitContent = array_map($function, $splitContent, $field);
 	} else { // not a split transaction
@@ -142,8 +142,8 @@ try {
 	} //<-- end if split -->
 
 	$accountTypes = $csv2ofx->getAccountTypes($accounts, $typeList, $defType);
-	$accounts = array_combine($accounts, $accountTypes);
-	$uniqueAccounts = array_unique(sort($accounts));
+	$uniqueAccounts = array_combine($accounts, $accountTypes);
+ 	asort($uniqueAccounts);
 
 	// variable mode setting
 	if ($result->options['variables']) {
@@ -151,10 +151,91 @@ try {
 		exit(0);
 	}
 
+	// sub routines
+	$subQIF = function ($transaction, $key, $accountInfo) use (&$content, $csv2ofx, $start, $end) {
+		$accountType = $accountInfo[0];
+		$account = $accountInfo[1];
+
+		// if transaction doesn't match the account name, skip it
+		$firstSplit = current($transaction);
+		if ($firstSplit[$csv2ofx->headAccount] != $account) return;
+
+		// if transaction is not in the specified date range, skip it
+		$date = $firstSplit[$csv2ofx->headDate];
+		$timeStamp = date('YmdHis', strtotime($date));
+		if ($timeStamp <= $start || $timeStamp >= $end) return;
+
+		// if this is a transfer from the primary account, skip it
+		$splitAccount = $csv2ofx->headSplitAccount
+			? $firstSplit[$csv2ofx->headSplitAccount]
+			: $csv2ofx->defSplitAccount;
+
+		if ($csv2ofx->split && $splitAccount == $primary) return;
+
+		// get data
+		$function = array($csv2ofx, 'getTransactionData');
+		$data = $csv2ofx->split
+			? array_map($function, $transaction)
+			: $csv2ofx->getTransactionData($firstSplit);
+
+		// load content
+		$content .= $csv2ofx->getQIFTransactionContent($accountType, $data);
+		$function = array($csv2ofx, 'getQIFSplitContent');
+		$fill = array_fill(0, count($transaction), $data);
+		$content .= $csv2ofx->split
+			? implode('', array_map($function, $transaction, $fill))
+			: $csv2ofx->getQIFSplitContent($splitAccount, $data);
+
+		$content .= $csv2ofx->getQIFTransactionFooter();
+	}; //<-- end closure -->
+
+	$subOFX = function ($transaction, $key, $accountInfo) use (&$content, $csv2ofx, $start, $end) {
+		$accountType = $accountInfo[0];
+		$account = $accountInfo[1];
+
+		// if transaction doesn't match the account name, skip it
+		if ($transaction[$csv2ofx->headAccount] != $account) return;
+
+		// if this is a transfer from the primary account, skip it
+		$splitAccount = $transaction[$csv2ofx->headSplitAccount];
+		if ($splitAccount == $primary) return;
+
+		// else, business as usual
+		$date = $firstSplit[$csv2ofx->headDate];
+		$timeStamp = date('YmdHis', strtotime($date));
+
+		// if transaction is not in the specified date range, skip it
+		if ($timeStamp <= $start || $timeStamp >= $end) return;
+		$data = $csv2ofx->getTransactionData($transaction);
+
+		$content .= $transfer
+			? $csv2ofx->getOFXTransfer($account, $accountType)
+			: $csv2ofx->getOFXTransaction();
+	}; //<-- end closure -->
+
+	$mainQIF = function ($accountType, $account) use (&$content, $subQIF, $csv2ofx, $splitContent) {
+		$content .= $csv2ofx->getQIFTransactionHeader($account, $accountType);
+		array_walk($splitContent, $subQIF, array($accountType, $account));
+	}; //<-- end closure -->
+
+	$mainOFX = function ($accountType, $account) use (&$content, $subOFX, $csv2ofx) {
+		$content .= $transfer
+			? ''
+			: $csv2ofx->getOFXTransactionAccountStart(
+				$currency, md5($account), $account, $accountType, DATE_STAMP
+			);
+
+		array_walk($csvContent, $subOFX, array($accountType, $account));
+
+		$content .= $transfer
+			? ''
+			: $csv2ofx->getOFXTransactionAccountEnd($timeStamp);
+	}; //<-- end closure -->
+
 	$csvContent = $qif ? $csvContent : $array->xmlize($csvContent);
 	$ofxContent = $transfer
-		? $csv2ofx->getOFXTransferHeader($timeStamp)
-		: $csv2ofx->getOFXTransactionHeader($timeStamp);
+		? $csv2ofx->getOFXTransferHeader(TIME_STAMP)
+		: $csv2ofx->getOFXTransactionHeader(TIME_STAMP);
 
 	$content = $qif ? '' : $ofxContent;
 
@@ -167,89 +248,6 @@ try {
 		: $csv2ofx->getOFXTransactionFooter();
 
 	$content .= $qif ? '' : $ofxContent;
-
-// 	if ($qif) {
-// 		foreach ($uniqueAccounts as $account => $accountType) {
-	$mainQIF = function ($accountType, $account) use (&$content) {
-		$content .= $csv2ofx->getQIFTransactionHeader($account, $accountType);
-
-		// loop through each transaction
-		foreach ($csv2ofx->newContent as $transaction) {
-			// if transaction doesn't match the account name, skip it
-			$firstSplit = current($transaction);
-			if ($firstSplit[$csv2ofx->headAccount] != $account) continue;
-
-			// if transaction is not in the specified date range, skip it
-			$date = $firstSplit[$csv2ofx->headDate];
-			$timeStamp = date('YmdHis', strtotime($date));
-			if ($timeStamp <= $start || $timeStamp >= $end) continue;
-
-			// if this is a transfer from the primary account, skip it
-			$splitAccount = $csv2ofx->headSplitAccount
-				? $firstSplit[$csv2ofx->headSplitAccount]
-				: $csv2ofx->defSplitAccount;
-
-			if ($csv2ofx->split && $splitAccount == $primary) continue;
-
-			// get data
-			$function = array('csv2ofx', 'getTransactionData');
-			$fill = array_fill(0, count($transaction), $timeStamp);
-			$data = $csv2ofx->split
-				? $csv2ofx->getTransactionData($firstSplit, $timeStamp)
-				: array_map($function, $transaction, $fill);
-
-			// load content
-			$content .= $csv2ofx->getQIFTransactionContent($accountType);
-			$function = array('csv2ofx', 'getQIFSplitContent');
-			$fill = array_fill(0, count($transaction), $timeStamp);
-			$content .= $csv2ofx->split
-				? $csv2ofx->getQIFSplitContent($splitAccount, $data)
-				: implode('', array_map($function, $transaction, $fill));
-
-			$content .= $csv2ofx->getQIFTransactionFooter();
-		} //<-- end loop through transactions -->
-	}; //<-- end loop through accounts -->
-// 	} else { // it's ofx
-		// loop through each account
-// 		foreach ($uniqueAccounts as $account => $accountType) {
-	$mainOFX = function ($accountType, $account) use (&$content) {
-		$content .= $transfer
-			? ''
-			: $csv2ofx->getOFXTransactionAccountStart(
-				$currency, md5($account), $account, $accountType, DATE_STAMP
-			);
-
-		// loop through each transaction
-		foreach ($csvContent as $transaction) {
-			// if transaction doesn't match the account name, skip it
-			if ($transaction[$csv2ofx->headAccount] != $account) continue;
-
-			// if this is a transfer from the primary account, skip it
-			$splitAccount = $transaction[$csv2ofx->headSplitAccount];
-			if ($splitAccount == $primary) continue;
-
-			// else, business as usual
-			$date = $firstSplit[$csv2ofx->headDate];
-			$timeStamp = date('YmdHis', strtotime($date));
-
-			// if transaction is not in the specified date range, skip it
-			if ($timeStamp <= $start || $timeStamp >= $end) continue;
-			$data = $csv2ofx->getTransactionData($transaction, $timeStamp);
-
-			$content .= $transfer
-				? $csv2ofx->getOFXTransfer($account, $accountType)
-				: $csv2ofx->getOFXTransaction();
-		}; //<-- end for loop through transactions -->
-
-		$content .= $transfer
-			? ''
-			: $csv2ofx->getOFXTransactionAccountEnd($timeStamp);
-	}; //<-- end foreach loop through accounts -->
-
-// 		$content .= $transfer
-// 			? $csv2ofx->getOFXTransferFooter()
-// 			: $csv2ofx->getOFXTransactionFooter();
-// 	} //<-- end if qif -->
 
 	$stdout ? print($content) : $file->write2file($content, $dest, $overwrite);
 	exit(0);
