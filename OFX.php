@@ -206,12 +206,16 @@ class OFX {
 	 *
 	 * @return array the resulting account types
 	 *
-	 * @assert (array('cash', 'checking', 'unsavings'), array('Bank' => array('checking', 'savings'), 'Cash' => array('cash'))) == array('Cash', 'Bank', 'n/a')
+	 * @assert (array('somecash', 'checking account', 'other'), array('Bank' => array('checking', 'savings'), 'Cash' => array('cash'))) == array('Cash', 'Bank', 'n/a')
 	 **************************************************************************/
 	public function getAccountTypes($accounts, $typeList, $defType='n/a') {
 		try {
 			$search = function ($list, $type, $account) use (&$match) {
-				$match = in_array($account, $list) ? $type : $match;
+				$haystack = array_fill(0, count($list), $account);
+				$newList = array_map('stripos', $haystack, $list);
+				$zero = in_array(0, $newList, TRUE);
+				$filtered = count(array_filter($newList));
+				$match = ($zero || $filtered) ? $type : $match;
 			};
 
 			$main = function ($account) use ($typeList, $search, $defType, &$match) {
