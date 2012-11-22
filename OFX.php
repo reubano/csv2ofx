@@ -505,15 +505,12 @@ class OFX {
 	public function getQIFTransactionContent($accountType, $data) {
 		try {
 			// switch signs if source is xero
-			$amount = $data['Amount'];
-			$newAmount = (substr($amount, 0, 1) == '-')
-				? substr($amount, 1)
-				: '-'.$amount;
-
-			$amount = ($this->source == 'xero') ? $newAmount : $amount;
+			$amt = $data['Amount'];
+// 			$newAmt = (substr($amt, 0, 1) == '-') ? substr($amt, 1) : '-'.$amt;
+// 			$amt = ($this->source == 'xero') ? $newAmt : $amt;
 			$content = "!Type:$accountType\n";
 			$content .= isset($data['CheckNum']) ? "N$data[CheckNum]\n" : '';
-			$content .= "D$data[Date]\nP$data[Payee]\nT$amount\n";
+			$content .= "D$data[Date]\nP$data[Payee]\nT$amt\n";
 			return $content;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
@@ -532,7 +529,11 @@ class OFX {
 	 **************************************************************************/
 	public function getQIFSplitContent($splitAccount, $data) {
 		try {
-			return "S$splitAccount\nE$data[Desc]\n\$$data[Amount]\n";
+			// switch signs if source is xero
+			$amt = $data['Amount'];
+			$newAmt = (substr($amt, 0, 1) == '-') ? substr($amt, 1) : '-'.$amt;
+			$amt = ($this->source == 'xero') ? $newAmt : $amt;
+			return "S$splitAccount\nE$data[Desc]\n\$$amt\n";
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
