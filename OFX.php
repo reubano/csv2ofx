@@ -234,6 +234,34 @@ class OFX {
 
 	/**
 	 ***************************************************************************
+	 * Gets split accounts
+	 *
+	 * @param array $transaction array of splits;
+	 *
+	 * @return array $accounts the resulting split account names
+	 *
+	 * @assert (array(array('Account Name' => 'Accounts Receivable', 'Amount' => 200), array('Account Name' => 'Accounts Receivable', 'Amount' => 300), array('Account Name' => 'Sales', 'Amount' => 400))) == array('Accounts Receivable', 'Sales')
+	 **************************************************************************/
+	public function getSplitAccounts($transaction) {
+		try {
+			$hAc = $this->headAccount;
+
+			$main = function ($split) use ($hAc) {
+				return $split[$hAc];
+			}; //<-- end for loop -->
+
+			$accounts = array_map($main, $transaction);
+			array_shift($accounts);
+			return $accounts;
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage().' from '.$this->className.
+				'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} //<-- end try -->
+	} //<-- end function -->
+
+	/**
+	 ***************************************************************************
 	 * Combines splits with the same account
 	 *
 	 * @param array $content return value of makeSplits();
