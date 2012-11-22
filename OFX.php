@@ -450,8 +450,10 @@ class OFX {
 			$splitAccountId = md5($splitAccount);
 
 			// qif doesn't support notes or class so add them to description
-			$desc .= $notes ? ' '.$notes : '';
-			$desc .= $class ? ' '.$class : '';
+			$sep = $desc ? ' ' : '';
+			$desc .= $notes ? $sep.$notes : null;
+			$sep = $desc ? ' ' : '';
+			$desc .= $class ? $sep.$class : null;
 
 			// if no id, create it using check number or md5
 			// hash of the transaction details
