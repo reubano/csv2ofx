@@ -121,24 +121,27 @@ try {
 		$csv2ofx->verifySplits($splitContent);
 
 		// sort splits by account name
-		$function = array($myarray, 'arraySortBySubValue');
+		$function = array($array, 'arraySortBySubValue');
 		$field = array_fill(0, count($splitContent), $csv2ofx->headAccount);
 		$splitContent = array_map($function, $splitContent, $field);
 
 		// combine splits of collapsable accounts
-		$splitContent = $csv2ofx->collapseSplits($splitContent, $collAccts);
+		$splitContent = $collAccts
+			? $csv2ofx->collapseSplits($splitContent, $collAccts)
+			: $splitContent;
 
 		// get accounts and keys
 		$maxAmounts = $csv2ofx->getMaxSplitAmounts($splitContent);
-		$accounts = $csv2ofx->getAccounts($splitContent, $maxAmounts);
-		$keys = array_keys($accounts);
+		$accountInfo = $csv2ofx->getAccounts($splitContent, $maxAmounts);
+		$accounts = $accountInfo['accounts'];
+		$keys = $accountInfo['keys'];
 
 		// move main splits to beginning of transaction array
-		$function = array($myarray, 'arrayMove');
-		$field = array_fill(0, count($splitContent), $keys);
-		$splitContent = array_map($function, $splitContent, $field);
+		$function = array($array, 'arrayMove');
+		$splitContent = array_map($function, $splitContent, $keys);
 	} else { // not a split transaction
-		$accounts = $csv2ofx->getAccounts($splitContent);
+		$accountInfo = $csv2ofx->getAccounts($splitContent);
+		$accounts = $accountInfo['accounts'];
 	} //<-- end if split -->
 
 	$accountTypes = $csv2ofx->getAccountTypes($accounts, $typeList, $defType);
@@ -152,7 +155,9 @@ try {
 	}
 
 	// sub routines
-	$subQIF = function ($transaction, $key, $accountInfo) use (&$content, $csv2ofx, $start, $end) {
+	$subQIF = function ($transaction, $key, $accountInfo) use (
+		&$content, $csv2ofx, $start, $end, $primary
+	) {
 		$accountType = $accountInfo[0];
 		$account = $accountInfo[1];
 
@@ -179,11 +184,18 @@ try {
 			: $csv2ofx->getTransactionData($firstSplit);
 
 		// load content
-		$content .= $csv2ofx->getQIFTransactionContent($accountType, $data);
-		$function = array($csv2ofx, 'getQIFSplitContent');
-		$fill = array_fill(0, count($transaction), $data);
 		$content .= $csv2ofx->split
-			? implode('', array_map($function, $transaction, $fill))
+			? $csv2ofx->getQIFTransactionContent($accountType, $data[0])
+			: $csv2ofx->getQIFTransactionContent($accountType, $data);
+
+		$function = array($csv2ofx, 'getQIFSplitContent');
+		$csv2ofx->split ? array_shift($data) : '';
+		$splitAccounts = $csv2ofx->split
+			? $csv2ofx->getSplitAccounts($transaction)
+			: null;
+
+			$content .= $csv2ofx->split
+			? implode('', array_map($function, $splitAccounts, $data))
 			: $csv2ofx->getQIFSplitContent($splitAccount, $data);
 
 		$content .= $csv2ofx->getQIFTransactionFooter();
@@ -232,6 +244,7 @@ try {
 			: $csv2ofx->getOFXTransactionAccountEnd($timeStamp);
 	}; //<-- end closure -->
 
+	// main routines
 	$csvContent = $qif ? $csvContent : $array->xmlize($csvContent);
 	$ofxContent = $transfer
 		? $csv2ofx->getOFXTransferHeader(TIME_STAMP)

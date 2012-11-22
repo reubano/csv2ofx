@@ -1,0 +1,52 @@
+!Account
+NAccounts Receivable
+TBank
+^
+!Type:Bank
+NINV-0001
+D11/23/10
+PSales
+T149000
+SSales
+EBicycle Office
+$113000
+SSales
+ECharger Office
+$36000
+^
+!Type:Bank
+NINV-0003
+D11/24/10
+PCharger-baisikeli (distributor price)
+T30000
+SSales
+ECharger Office
+$30000
+^
+!Type:Bank
+NINV-0006
+D11/25/10
+PCharger-baisikeli (distributor price)
+T30000
+SSales
+ECharger John
+$30000
+^
+!Type:Bank
+NINV-0198
+D11/25/10
+PBicycle
+T113000
+SSales
+EBicycle John
+$113000
+^
+!Type:Bank
+N
+D12/14/10
+PTransfer
+T-209000
+SPetty Cash (TZS)
+E
+$-209000
+^

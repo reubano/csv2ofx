@@ -162,33 +162,39 @@ class OFX {
 	 *
 	 * @return array main accounts
 	 *
-	 * @assert (array(array(array('Account Name' => 'account1'), array('Account Name' => 'account2')), array(array('Account Name' => 'account3'), array('Account Name' => 'account4')))) == array('account1', 'account3')
+	 * @assert (array(array(array('Account Name' => 'account1'), array('Account Name' => 'account2')), array(array('Account Name' => 'account3'), array('Account Name' => 'account4')))) == array('accounts' => array('account1', 'account3'), 'keys' => array(0, 0))
+	 * @assert (array(array(array('Account Name' => 'account1', 'Amount' => -200), array('Account Name' => 'account2', 'Amount' => 200)), array(array('Account Name' => 'account3', 'Amount' => 400), array('Account Name' => 'account4', 'Amount' => -400))), array(200, 400)) == array('accounts' => array('account1', 'account3'), 'keys' => array(0, 0))
 	 **************************************************************************/
 	public function getAccounts($splitContent, $findAmounts=null) {
 		try {
-			$account = $this->headAccount;
-			$amount = $this->headAmount;
+			$hAc = $this->headAccount;
+			$hAm = $this->headAmount;
 
-			$byCurrent = function ($transaction) use ($account) {
-				$split = current($transaction);
-				return $split[$account];
+			$current = function ($tr) use ($hAc) {
+				$split = current($tr);
+				return $split[$hAc];
 			}; //<-- end for loop -->
 
-			$filter = function ($split) use ($amount) {
-				return ($split[$amount] == $findAmount);
+			$cmp = function (&$split, $key, $findAmount) use ($hAm, &$newKey) {
+				$found = (abs($split[$hAm]) == $findAmount);
+				$split = $found ? $split : null;
+				$newKey = ($found && !isset($newKey)) ? $key : $newKey;
 			};
 
-			$byAmount = function ($transaction, $findAmount) use (
-				$account, $filter
-			) {
-				return array_filter($transaction, $filter);
+			$byAmount = function ($tr, $findAmount) use ($hAc, $cmp, &$newKey, &$keys) {
+				$newKey = null;
+				array_walk($tr, $cmp, $findAmount);
+				$keys[] = $newKey;
+				return array_filter($tr);
 			}; //<-- end for loop -->
 
-			$splitContent = $findAmounts
-				? array_map($byAmount, $splitContent, findAmounts)
+			$accounts = $findAmounts
+				? array_map($byAmount, $splitContent, $findAmounts)
 				: $splitContent;
 
-			return array_map($byCurrent, $splitContent);
+			$accounts = array_map($current, $accounts);
+			$keys = isset($keys) ? $keys : array_fill(0, count($accounts), 0);
+			return array('accounts' => $accounts, 'keys' => $keys);
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -234,6 +240,34 @@ class OFX {
 
 	/**
 	 ***************************************************************************
+	 * Gets split accounts
+	 *
+	 * @param array $transaction array of splits;
+	 *
+	 * @return array $accounts the resulting split account names
+	 *
+	 * @assert (array(array('Account Name' => 'Accounts Receivable', 'Amount' => 200), array('Account Name' => 'Accounts Receivable', 'Amount' => 300), array('Account Name' => 'Sales', 'Amount' => 400))) == array('Accounts Receivable', 'Sales')
+	 **************************************************************************/
+	public function getSplitAccounts($transaction) {
+		try {
+			$hAc = $this->headAccount;
+
+			$main = function ($split) use ($hAc) {
+				return $split[$hAc];
+			}; //<-- end for loop -->
+
+			$accounts = array_map($main, $transaction);
+			array_shift($accounts);
+			return $accounts;
+		} catch (Exception $e) {
+			throw new Exception($e->getMessage().' from '.$this->className.
+				'->'.__FUNCTION__.'() line '.__LINE__
+			);
+		} //<-- end try -->
+	} //<-- end function -->
+
+	/**
+	 ***************************************************************************
 	 * Combines splits with the same account
 	 *
 	 * @param array $content return value of makeSplits();
@@ -241,7 +275,7 @@ class OFX {
 	 *
 	 * @return array $content collapsed content;
 	 *
-	 * @assert (array(array(array('Account Name' => 'account1', 'Amount' => 200), array('Account Name' => 'account1', 'Amount' => 200), array('Account Name' => 'account1', 'Amount' => 200))), array('account1')) == array(array(array('Account Name' => 'account1', 'Amount' => 600)))
+	 * @assert (array(array(array('Account Name' => 'Accounts Receivable', 'Amount' => 200), array('Account Name' => 'Accounts Receivable', 'Amount' => 300), array('Account Name' => 'Sales', 'Amount' => 400)), array(array('Account Name' => 'Accounts Receivable', 'Amount' => 200), array('Account Name' => 'Accounts Receivable', 'Amount' => 300), array('Account Name' => 'Sales', 'Amount' => 400))), array('Accounts Receivable')) == array(array(array('Account Name' => 'Accounts Receivable', 'Amount' => 500), array('Account Name' => 'Sales', 'Amount' => 400)), array(array('Account Name' => 'Accounts Receivable', 'Amount' => 500), array('Account Name' => 'Sales', 'Amount' => 400)))
 	 **************************************************************************/
 	public function collapseSplits($content, $collapse) {
 		try {
@@ -262,23 +296,25 @@ class OFX {
 				$previous['amt'] = $split[$hAm];
 			};
 
-// 			$reduce = function ($i, $key) use (&$transaction) {
-// 				array_splice($transaction, $key - $i, 1);
+// 			$reduce = function ($i, $num) use (&$transaction) {
+// 				array_splice($transaction, $num - $i, 1);
 // 			};
 
-			$main = function (&$transaction) use ($sum) {
+			$main = function (&$transaction) use ($sum, &$splice) {
 				$previous = array('act' => null, 'amt' => 0);
 				array_walk($transaction, $sum, $previous);
-			};
+// 				$splice ? array_walk($splice, $reduce) : '';
 
-			$reduce = function (&$transaction, $key, $splice) {
-				foreach ($splice as $num => $i) {
-					array_splice($transaction, $num - $i, 1);
-				};
+				if ($splice) {
+					foreach ($splice as $num => $i) {
+						array_splice($transaction, $num - $i, 1);
+					};
+				}
+
+				$splice = null;
 			};
 
 			array_walk($content, $main);
-			array_walk($content, $reduce, $splice);
 			return $content;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.
@@ -326,21 +362,21 @@ class OFX {
 	 *
 	 * @return 	boolean	true on success
 	 *
-	 * @assert (array(array(array('Amount' => 100), array('Amount' => -100)), array('Amount' => -300), array('Amount' => 200), array('Amount' => 100))) == true
+	 * @assert (array(array(array('Amount' => 100), array('Amount' => -100)), array(array('Amount' => -300), array('Amount' => 200), array('Amount' => 100)))) == true
 	 **************************************************************************/
-	private function verifySplits($splitContent) {
+	public function verifySplits($splitContent) {
 		try {
-			$headAmount = $this->headAmount;
+			$hAm = $this->headAmount;
 
-			$sum = function ($a, $b) {
-				return round(sum($a[$headAmount], $b[$headAmount]), 2);
+			$sum = function ($a, $b) use ($hAm) {
+				return round(($a + $b[$hAm]), 2);
 			};
 
-			$verify = function ($transaction) use ($sum) {
-				return array_reduce($transaction, $sum);
+			$filter = function ($tr) use ($sum) {
+				return array_reduce($tr, $sum);
 			};
 
-			$result = array_filter($splitContent, $verify);
+			$result = array_filter($splitContent, $filter);
 
 			if ($result) {
 				throw new Exception('Invalid split of '.$result.' at '.
@@ -420,8 +456,10 @@ class OFX {
 			$splitAccountId = md5($splitAccount);
 
 			// qif doesn't support notes or class so add them to description
-			$desc .= $notes ? ' '.$notes : '';
-			$desc .= $class ? ' '.$class : '';
+			$sep = $desc ? ' ' : '';
+			$desc .= $notes ? $sep.$notes : null;
+			$sep = $desc ? ' ' : '';
+			$desc .= $class ? $sep.$class : null;
 
 			// if no id, create it using check number or md5
 			// hash of the transaction details
@@ -448,7 +486,7 @@ class OFX {
 	 *
 	 * @param 	string 	$account		the account
 	 * @param 	string 	$accountType	the account types
-	 * @return 	string	$content		the QIF content
+	 * @return 	string	the QIF content
 	 *
 	 * @assert ('account', 'type') == "!Account\nNaccount\nTtype\n^\n"
 	 **************************************************************************/
@@ -475,15 +513,12 @@ class OFX {
 	public function getQIFTransactionContent($accountType, $data) {
 		try {
 			// switch signs if source is xero
-			$amount = $data['Amount'];
-			$newAmount = (substr($amount, 0, 1) == '-')
-				? substr($amount, 1)
-				: '-'.$amount;
-
-			$amount = ($this->source == 'xero') ? $newAmount : $amount;
+			$amt = $data['Amount'];
+// 			$newAmt = (substr($amt, 0, 1) == '-') ? substr($amt, 1) : '-'.$amt;
+// 			$amt = ($this->source == 'xero') ? $newAmt : $amt;
 			$content = "!Type:$accountType\n";
 			$content .= isset($data['CheckNum']) ? "N$data[CheckNum]\n" : '';
-			$content .= "D$data[Date]\nP$data[Payee]\nT$amount\n";
+			$content .= "D$data[Date]\nP$data[Payee]\nT$amt\n";
 			return $content;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
@@ -502,7 +537,11 @@ class OFX {
 	 **************************************************************************/
 	public function getQIFSplitContent($splitAccount, $data) {
 		try {
-			return "S$splitAccount\nE$data[Desc]\n\$$data[Amount]\n";
+			// switch signs if source is xero
+			$amt = $data['Amount'];
+			$newAmt = (substr($amt, 0, 1) == '-') ? substr($amt, 1) : '-'.$amt;
+			$amt = ($this->source == 'xero') ? $newAmt : $amt;
+			return "S$splitAccount\nE$data[Desc]\n\$$amt\n";
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
