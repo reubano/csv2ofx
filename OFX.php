@@ -356,21 +356,21 @@ class OFX {
 	 *
 	 * @return 	boolean	true on success
 	 *
-	 * @assert (array(array(array('Amount' => 100), array('Amount' => -100)), array('Amount' => -300), array('Amount' => 200), array('Amount' => 100))) == true
+	 * @assert (array(array(array('Amount' => 100), array('Amount' => -100)), array(array('Amount' => -300), array('Amount' => 200), array('Amount' => 100)))) == true
 	 **************************************************************************/
-	private function verifySplits($splitContent) {
+	public function verifySplits($splitContent) {
 		try {
-			$headAmount = $this->headAmount;
+			$hAm = $this->headAmount;
 
-			$sum = function ($a, $b) {
-				return round(sum($a[$headAmount], $b[$headAmount]), 2);
+			$sum = function ($a, $b) use ($hAm) {
+				return round(($a + $b[$hAm]), 2);
 			};
 
-			$verify = function ($transaction) use ($sum) {
-				return array_reduce($transaction, $sum);
+			$filter = function ($tr) use ($sum) {
+				return array_reduce($tr, $sum);
 			};
 
-			$result = array_filter($splitContent, $verify);
+			$result = array_filter($splitContent, $filter);
 
 			if ($result) {
 				throw new Exception('Invalid split of '.$result.' at '.
