@@ -1,0 +1,40 @@
+!Account
+NChecking
+TBank
+^
+!Type:Bank
+D06/12/10
+PAccount Transfer
+T-1000
+SSavings
+EAccount Transfer
+$-1000
+^
+!Type:Bank
+D06/13/10
+PAccount Transfer
+T2000
+SSavings
+EAccount Transfer
+$2000
+^
+!Type:Bank
+D06/14/10
+PAccount Transfer
+T-2000
+SSavings
+EAccount Transfer
+$-2000
+^
+!Account
+NSavings
+TBank
+^
+!Type:Bank
+D06/12/10
+PAccount Transfer
+T-1000
+SChecking
+EAccount Transfer
+$-1000
+^
