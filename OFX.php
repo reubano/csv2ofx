@@ -269,7 +269,7 @@ class OFX {
 	 *
 	 * @return array $content collapsed content;
 	 *
-	 * @assert (array(array(array('Account Name' => 'account1', 'Amount' => 200), array('Account Name' => 'account1', 'Amount' => 200), array('Account Name' => 'account1', 'Amount' => 200))), array('account1')) == array(array(array('Account Name' => 'account1', 'Amount' => 600)))
+	 * @assert (array(array(array('Account Name' => 'Accounts Receivable', 'Amount' => 200), array('Account Name' => 'Accounts Receivable', 'Amount' => 300), array('Account Name' => 'Sales', 'Amount' => 400)), array(array('Account Name' => 'Accounts Receivable', 'Amount' => 200), array('Account Name' => 'Accounts Receivable', 'Amount' => 300), array('Account Name' => 'Sales', 'Amount' => 400))), array('Accounts Receivable')) == array(array(array('Account Name' => 'Accounts Receivable', 'Amount' => 500), array('Account Name' => 'Sales', 'Amount' => 400)), array(array('Account Name' => 'Accounts Receivable', 'Amount' => 500), array('Account Name' => 'Sales', 'Amount' => 400)))
 	 **************************************************************************/
 	public function collapseSplits($content, $collapse) {
 		try {
@@ -290,23 +290,25 @@ class OFX {
 				$previous['amt'] = $split[$hAm];
 			};
 
-// 			$reduce = function ($i, $key) use (&$transaction) {
-// 				array_splice($transaction, $key - $i, 1);
+// 			$reduce = function ($i, $num) use (&$transaction) {
+// 				array_splice($transaction, $num - $i, 1);
 // 			};
 
-			$main = function (&$transaction) use ($sum) {
+			$main = function (&$transaction) use ($sum, &$splice) {
 				$previous = array('act' => null, 'amt' => 0);
 				array_walk($transaction, $sum, $previous);
-			};
+// 				$splice ? array_walk($splice, $reduce) : '';
 
-			$reduce = function (&$transaction, $key, $splice) {
-				foreach ($splice as $num => $i) {
-					array_splice($transaction, $num - $i, 1);
-				};
+				if ($splice) {
+					foreach ($splice as $num => $i) {
+						array_splice($transaction, $num - $i, 1);
+					};
+				}
+
+				$splice = null;
 			};
 
 			array_walk($content, $main);
-			array_walk($content, $reduce, $splice);
 			return $content;
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.
