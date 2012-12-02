@@ -71,16 +71,16 @@ try {
 
 	switch ($dest){
 		case '$':
-			$stdout = TRUE;
+			$stdout = true;
 			break;
 
 		case '':
-			$stdout = FALSE;
+			$stdout = false;
 			$dest = CUR_DIR.TIME_STAMP.'_'.$mapping.'.'.$ext;
 			break;
 
 		default:
-			$stdout = FALSE;
+			$stdout = false;
 	} //<-- end switch -->
 
 	if ($result->options['debug']) {
@@ -201,7 +201,9 @@ try {
 		$content .= $csv2ofx->getQIFTransactionFooter();
 	}; //<-- end closure -->
 
-	$subOFX = function ($transaction, $key, $accountInfo) use (&$content, $csv2ofx, $start, $end) {
+	$subOFX = function ($transaction, $key, $accountInfo) use (
+		&$content, $csv2ofx, $start, $end
+	) {
 		$accountType = $accountInfo[0];
 		$account = $accountInfo[1];
 
@@ -225,12 +227,16 @@ try {
 			: $csv2ofx->getOFXTransaction();
 	}; //<-- end closure -->
 
-	$mainQIF = function ($accountType, $account) use (&$content, $subQIF, $csv2ofx, $splitContent) {
+	$mainQIF = function ($accountType, $account) use (
+		&$content, $subQIF, $csv2ofx, $splitContent
+	) {
 		$content .= $csv2ofx->getQIFTransactionHeader($account, $accountType);
 		array_walk($splitContent, $subQIF, array($accountType, $account));
 	}; //<-- end closure -->
 
-	$mainOFX = function ($accountType, $account) use (&$content, $subOFX, $csv2ofx) {
+	$mainOFX = function ($accountType, $account) use (
+		&$content, $subOFX, $csv2ofx
+	) {
 		$content .= $transfer
 			? ''
 			: $csv2ofx->getOFXTransactionAccountStart(

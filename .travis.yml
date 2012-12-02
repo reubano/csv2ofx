@@ -4,15 +4,12 @@ php:
   - 5.3
 
 before_install:
-- sudo apt-get update
-- sudo apt-get install python
+  - sudo apt-get update
+  - sudo apt-get install python
 
 before_script:
-  - pear install pear/PHP_CodeSniffer
   - easy_install scripttest
 
 script:
   - phpunit --coverage-text .
-  - phpunit --coverage-text lib_general
-  - sh test.sh
-  - python test.py
+  - python tests/test.py
