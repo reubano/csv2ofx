@@ -202,10 +202,12 @@ try {
 	}; //<-- end closure -->
 
 	$subOFX = function ($transaction, $key, $accountInfo) use (
-		&$content, $csv2ofx, $start, $end
+		&$content, &$timeStamp, $csv2ofx, $start, $end, $primary, $transfer,
+		$language, $currency
 	) {
 		$accountType = $accountInfo[0];
 		$account = $accountInfo[1];
+		$accountId = md5($account);
 
 		// if transaction doesn't match the account name, skip it
 		if ($transaction[$csv2ofx->headAccount] != $account) return;
@@ -215,7 +217,7 @@ try {
 		if ($splitAccount == $primary) return;
 
 		// else, business as usual
-		$date = $firstSplit[$csv2ofx->headDate];
+		$date = $transaction[$csv2ofx->headDate];
 		$timeStamp = date('YmdHis', strtotime($date));
 
 		// if transaction is not in the specified date range, skip it
@@ -223,8 +225,8 @@ try {
 		$data = $csv2ofx->getTransactionData($transaction);
 
 		$content .= $transfer
-			? $csv2ofx->getOFXTransfer($account, $accountType)
-			: $csv2ofx->getOFXTransaction();
+			? $csv2ofx->getOFXTransfer($currency, $timeStamp, $accountId, $account, $accountType, $data)
+			: $csv2ofx->getOFXTransaction($timeStamp, $data);
 	}; //<-- end closure -->
 
 	$mainQIF = function ($accountType, $account) use (
