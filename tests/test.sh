@@ -40,7 +40,7 @@ for LINE in $(git diff-index --cached --full-index $against); do
 		COMMANDS='php -l'
 	elif [ $FILEEXT == 'py' ]; then
 		PROGRAMS=$'pep8\npylint'
-		COMMANDS=$'pep8 --ignore=W191\npylint --rcfile=standard.rc -ry -fparseable'
+		COMMANDS=$'pep8 --ignore=W191\npylint --rcfile=tests/standard.rc -ry -fparseable'
 	else
 		continue
 	fi
@@ -60,8 +60,9 @@ for LINE in $(git diff-index --cached --full-index $against); do
  		RESULT=$(eval "$COMMAND tmp.txt")
 
 		if [ $? != 0 ]; then
-# 			echo "$COMMAND syntax check failed on $FILENAME"
+			echo "$COMMAND syntax check failed on $FILENAME"
 			for LINE in $RESULT; do echo $LINE; done
+			rm tmp.txt
 			exit 1
 		fi
 	done
