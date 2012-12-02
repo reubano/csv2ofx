@@ -11,4 +11,6 @@ before_script:
   - pear install pear/PHP_CodeSniffer
   - easy_install scripttest
 
-script: phpunit --coverage-text .
+script:
+  - phpunit --coverage-text .
+  - python test.py
