@@ -237,7 +237,8 @@ try {
 	}; //<-- end closure -->
 
 	$mainOFX = function ($accountType, $account) use (
-		&$content, $subOFX, $csv2ofx
+		&$content, $csvContent, $subOFX, $csv2ofx, $transfer, $currency,
+		$timeStamp
 	) {
 		$content .= $transfer
 			? ''
