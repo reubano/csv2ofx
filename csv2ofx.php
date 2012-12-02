@@ -71,16 +71,16 @@ try {
 
 	switch ($dest){
 		case '$':
-			$stdout = TRUE;
+			$stdout = true;
 			break;
 
 		case '':
-			$stdout = FALSE;
+			$stdout = false;
 			$dest = CUR_DIR.TIME_STAMP.'_'.$mapping.'.'.$ext;
 			break;
 
 		default:
-			$stdout = FALSE;
+			$stdout = false;
 	} //<-- end switch -->
 
 	if ($result->options['debug']) {
