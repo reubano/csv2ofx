@@ -13,4 +13,4 @@ before_script:
 
 script:
   - phpunit --coverage-text .
-  - python test.py
+  - python tests/test.py
