@@ -637,7 +637,7 @@ class OFX {
 	 *
 	 * @return 	string the OFX content
 	 *
-	 * @assert (20120101111111, array('Type' => 'type', 'Amount' => 100, 'Id' => 1, 'Payee' => 'payee', 'Memo' => 'memo')) == "\t\t\t\t<STMTTRN>\n\t\t\t\t\t<TRNTYPE>type</TRNTYPE>\n\t\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t\t\t<FITID>1</FITID>\n\t\t\t\t\t<CHECKNUM>1</CHECKNUM>\n\t\t\t\t\t<NAME>payee</NAME>\n\t\t\t\t\t<MEMO>memo</MEMO>\n\t\t\t\t</STMTTRN>\n"
+	 * @assert (20120101111111, array('Type' => 'type', 'Amount' => 100, 'Id' => 1, 'Payee' => 'payee', 'Desc' => 'memo')) == "\t\t\t\t<STMTTRN>\n\t\t\t\t\t<TRNTYPE>type</TRNTYPE>\n\t\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t\t\t<FITID>1</FITID>\n\t\t\t\t\t<CHECKNUM>1</CHECKNUM>\n\t\t\t\t\t<NAME>payee</NAME>\n\t\t\t\t\t<MEMO>memo</MEMO>\n\t\t\t\t</STMTTRN>\n"
 	 **************************************************************************/
 	public function getOFXTransaction($timeStamp, $data) {
 		try {
@@ -649,7 +649,7 @@ class OFX {
 				"\t\t\t\t\t<FITID>$data[Id]</FITID>\n".
 				"\t\t\t\t\t<CHECKNUM>$data[Id]</CHECKNUM>\n".
 				"\t\t\t\t\t<NAME>$data[Payee]</NAME>\n".
-				"\t\t\t\t\t<MEMO>$data[Memo]</MEMO>\n".
+				"\t\t\t\t\t<MEMO>$data[Desc]</MEMO>\n".
 				"\t\t\t\t</STMTTRN>\n";
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
