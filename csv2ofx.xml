@@ -93,12 +93,6 @@
 		<action>StoreString</action>
 		<help_name>name</help_name>
 	</option>
-	<option name="transfer">
-		<short_name>-t</short_name>
-		<long_name>--transfer</long_name>
-		<description>treats ofx transactions as transfers from one account to another (sets 'category' as the destination account)</description>
-		<action>StoreTrue</action>
-	</option>
 	<option name="verbose">
 		<short_name>-v</short_name>
 		<long_name>--verbose</long_name>
