@@ -735,31 +735,31 @@ class OFX {
 	 * @param 	string $accountType	the account types
 	 * @return 	string the QIF content
 	 *
-	 * @assert ('USD', 20120101111111, 1, 'account', 'type', array('SplitAccountId' => 2, 'SplitAccount' => 'split_account', 'Amount' => 100)) == "\t<INTRARS>\n\t\t<CURDEF>USD</CURDEF>\n\t\t<SRVRTID>20120101111111</SRVRTID>\n\t\t<XFERINFO>\n\t\t\t<BANKACCTFROM>\n\t\t\t\t<BANKID>1</BANKID>\n\t\t\t\t<ACCTID>account</ACCTID>\n\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t</BANKACCTFROM>\n\t\t\t<BANKACCTTO>\n\t\t\t\t<BANKID>2</BANKID>\n\t\t\t\t<ACCTID>split_account</ACCTID>\n\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t</BANKACCTTO>\n\t\t\t<TRNAMT>100</TRNAMT>\n\t\t</XFERINFO>\n\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t</INTRARS>\n"
+	 * @assert ('USD', 20120101111111, 1, 'account', 'type', array('SplitAccountId' => 2, 'SplitAccount' => 'split_account', 'Amount' => 100)) == "\t\t<INTRARS>\n\t\t\t<CURDEF>USD</CURDEF>\n\t\t\t<SRVRTID>20120101111111</SRVRTID>\n\t\t\t<XFERINFO>\n\t\t\t\t<BANKACCTFROM>\n\t\t\t\t\t<BANKID>1</BANKID>\n\t\t\t\t\t<ACCTID>account</ACCTID>\n\t\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t\t</BANKACCTFROM>\n\t\t\t\t<BANKACCTTO>\n\t\t\t\t\t<BANKID>2</BANKID>\n\t\t\t\t\t<ACCTID>split_account</ACCTID>\n\t\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t\t</BANKACCTTO>\n\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t</XFERINFO>\n\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t</INTRARS>\n"
 	 **************************************************************************/
 	public function getOFXTransfer(
 		$currency, $timeStamp, $accountId, $account, $accountType, $data
 	) {
 		try {
 			return
-				"\t<INTRARS>\n". // Begin transfer response
-				"\t\t<CURDEF>$currency</CURDEF>\n".
-				"\t\t<SRVRTID>$timeStamp</SRVRTID>\n".
-				"\t\t<XFERINFO>\n". // Begin transfer aggregate
-				"\t\t\t<BANKACCTFROM>\n".
-				"\t\t\t\t<BANKID>$accountId</BANKID>\n".
-				"\t\t\t\t<ACCTID>$account</ACCTID>\n".
-				"\t\t\t\t<ACCTTYPE>$accountType</ACCTTYPE>\n".
-				"\t\t\t</BANKACCTFROM>\n".
-				"\t\t\t<BANKACCTTO>\n".
-				"\t\t\t\t<BANKID>$data[SplitAccountId]</BANKID>\n".
-				"\t\t\t\t<ACCTID>$data[SplitAccount]</ACCTID>\n".
-				"\t\t\t\t<ACCTTYPE>$accountType</ACCTTYPE>\n".
-				"\t\t\t</BANKACCTTO>\n".
-				"\t\t\t<TRNAMT>$data[Amount]</TRNAMT>\n".
-				"\t\t</XFERINFO>\n". // End transfer aggregate
-				"\t\t<DTPOSTED>$timeStamp</DTPOSTED>\n".
-				"\t</INTRARS>\n"; // End transfer response
+				"\t\t<INTRARS>\n". // Begin transfer response
+				"\t\t\t<CURDEF>$currency</CURDEF>\n".
+				"\t\t\t<SRVRTID>$timeStamp</SRVRTID>\n".
+				"\t\t\t<XFERINFO>\n". // Begin transfer aggregate
+				"\t\t\t\t<BANKACCTFROM>\n".
+				"\t\t\t\t\t<BANKID>$accountId</BANKID>\n".
+				"\t\t\t\t\t<ACCTID>$account</ACCTID>\n".
+				"\t\t\t\t\t<ACCTTYPE>$accountType</ACCTTYPE>\n".
+				"\t\t\t\t</BANKACCTFROM>\n".
+				"\t\t\t\t<BANKACCTTO>\n".
+				"\t\t\t\t\t<BANKID>$data[SplitAccountId]</BANKID>\n".
+				"\t\t\t\t\t<ACCTID>$data[SplitAccount]</ACCTID>\n".
+				"\t\t\t\t\t<ACCTTYPE>$accountType</ACCTTYPE>\n".
+				"\t\t\t\t</BANKACCTTO>\n".
+				"\t\t\t\t<TRNAMT>$data[Amount]</TRNAMT>\n".
+				"\t\t\t</XFERINFO>\n". // End transfer aggregate
+				"\t\t\t<DTPOSTED>$timeStamp</DTPOSTED>\n".
+				"\t\t</INTRARS>\n"; // End transfer response
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -773,12 +773,12 @@ class OFX {
 	 *
 	 * @return 	string the OFX content
 	 *
-	 * @assert () == '</INTRATRNRS></BANKMSGSRSV1></OFX>'
+	 * @assert () == "\t</INTRATRNRS></BANKMSGSRSV1>\n</OFX>"
 	 **************************************************************************/
 	public function getOFXTransferFooter() {
 		try {
 			// need to make variables reference $this->
-			return '</INTRATRNRS></BANKMSGSRSV1></OFX>'; // End response
+			return "\t</INTRATRNRS></BANKMSGSRSV1>\n</OFX>"; // End response
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
