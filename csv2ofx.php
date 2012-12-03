@@ -101,10 +101,12 @@ try {
 
 	// execute program
 	if (file_exists($source)) {
+		$serverDate = date('YmdHis', filemtime($source));
 		$content = $file->file2String($source);
 		$content = $string->makeLFLineEndings($content, $delimiter);
 	} else {
 		$content = $source;
+		$serverDate = TIME_STAMP;
 	} //<-- end if -->
 
 	$content = $string->lines2Array($content);
@@ -258,7 +260,7 @@ try {
 
 	// main routines
 	$csvContent = $qif ? $csvContent : $array->xmlize($csvContent);
-	$ofxContent = $csv2ofx->getOFXHeader(TIME_STAMP, $language);
+	$ofxContent = $csv2ofx->getOFXHeader($serverDate, $language);
 	$ofxContent .= $csv2ofx->getOFXResponseStart($respType);
 	$content = $qif ? '' : $ofxContent;
 
