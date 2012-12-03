@@ -752,10 +752,10 @@ class OFX {
 	 *
 	 * @assert () == "\t</INTRATRNRS></BANKMSGSRSV1>\n</OFX>"
 	 **************************************************************************/
-	public function getOFXTransferFooter() {
+	public function getOFXResponseEnd($respType='INTRATRNRS') {
 		try {
 			// need to make variables reference $this->
-			return "\t</INTRATRNRS></BANKMSGSRSV1>\n</OFX>"; // End response
+			return "\t\t</$respType>\n\t</BANKMSGSRSV1>\n</OFX>"; // End response
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
