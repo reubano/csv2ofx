@@ -630,7 +630,7 @@ class OFX {
 	 *
 	 * @return 	string the OFX content
 	 *
-	 * @assert ('USD', 1, 'account', 'type', 20120101, 20120101) == "\t<STMTRS>\n\t\t<CURDEF>USD</CURDEF>\n\t\t<BANKACCTFROM>\n\t\t\t<BANKID>1</BANKID>\n\t\t\t<ACCTID>account</ACCTID>\n\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t</BANKACCTFROM>\n\t\t<BANKTRANLIST>\n\t\t\t<DTSTART>20120101</DTSTART>\n\t\t\t<DTEND>20120101</DTEND>\n"
+	 * @assert ('USD', 1, 'account', 'type', 20120101, 20120101) == "\t\t\t<STMTRS>\n\t\t\t\t<CURDEF>USD</CURDEF>\n\t\t\t\t<BANKACCTFROM>\n\t\t\t\t\t<BANKID>1</BANKID>\n\t\t\t\t\t<ACCTID>account</ACCTID>\n\t\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t\t</BANKACCTFROM>\n\t\t\t\t<BANKTRANLIST>\n\t\t\t\t\t<DTSTART>20120101</DTSTART>\n\t\t\t\t\t<DTEND>20120101</DTEND>\n"
 	 **************************************************************************/
 	public function getOFXTransactionAccountStart(
 		$currency, $accountId, $account, $accountType, $startDate, $endDate
@@ -660,7 +660,7 @@ class OFX {
 	 *
 	 * @return 	string the OFX content
 	 *
-	 * @assert (20120101111111, array('Type' => 'type', 'Amount' => 100, 'Id' => 1, 'CheckNum' => 1, 'Payee' => 'payee', 'Desc' => 'memo')) == "\t\t\t\t<STMTTRN>\n\t\t\t\t\t<TRNTYPE>type</TRNTYPE>\n\t\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t\t\t<FITID>1</FITID>\n\t\t\t\t\t<CHECKNUM>1</CHECKNUM>\n\t\t\t\t\t<NAME>payee</NAME>\n\t\t\t\t\t<MEMO>memo</MEMO>\n\t\t\t\t</STMTTRN>\n"
+	 * @assert (20120101111111, array('Type' => 'type', 'Amount' => 100, 'Id' => 1, 'CheckNum' => 1, 'Payee' => 'payee', 'Desc' => 'memo')) == "\t\t\t\t\t<STMTTRN>\n\t\t\t\t\t\t<TRNTYPE>type</TRNTYPE>\n\t\t\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t\t\t\t<FITID>1</FITID>\n\t\t\t\t\t\t<CHECKNUM>1</CHECKNUM>\n\t\t\t\t\t\t<NAME>payee</NAME>\n\t\t\t\t\t\t<MEMO>memo</MEMO>\n\t\t\t\t\t</STMTTRN>\n"
 	 **************************************************************************/
 	public function getOFXTransaction($timeStamp, $data) {
 		try {
@@ -687,7 +687,7 @@ class OFX {
 	 *
 	 * @return 	string the OFX content
 	 *
-	 * @assert (150, 20120101111111) == "\t\t</BANKTRANLIST>\n\t\t<LEDGERBAL>\n\t\t\t<BALAMT>150</BALAMT>\n\t\t\t<DTASOF>20120101111111</DTASOF>\n\t\t</LEDGERBAL>\n\t</STMTRS>\n"
+	 * @assert (150, 20120101111111) == "\t\t\t\t</BANKTRANLIST>\n\t\t\t\t<LEDGERBAL>\n\t\t\t\t\t<BALAMT>150</BALAMT>\n\t\t\t\t\t<DTASOF>20120101111111</DTASOF>\n\t\t\t\t</LEDGERBAL>\n\t\t\t</STMTRS>\n"
 	 **************************************************************************/
 	public function getOFXTransactionAccountEnd($balance=null, $timeStamp=null) {
 		try {
@@ -712,7 +712,7 @@ class OFX {
 	 * @param 	string $accountType	the account types
 	 * @return 	string the QIF content
 	 *
-	 * @assert ('USD', 20120101111111, 1, 'account', 'type', array('SplitAccountId' => 2, 'SplitAccount' => 'split_account', 'Amount' => 100)) == "\t\t<INTRARS>\n\t\t\t<CURDEF>USD</CURDEF>\n\t\t\t<SRVRTID>20120101111111</SRVRTID>\n\t\t\t<XFERINFO>\n\t\t\t\t<BANKACCTFROM>\n\t\t\t\t\t<BANKID>1</BANKID>\n\t\t\t\t\t<ACCTID>account</ACCTID>\n\t\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t\t</BANKACCTFROM>\n\t\t\t\t<BANKACCTTO>\n\t\t\t\t\t<BANKID>2</BANKID>\n\t\t\t\t\t<ACCTID>split_account</ACCTID>\n\t\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t\t</BANKACCTTO>\n\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t</XFERINFO>\n\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t</INTRARS>\n"
+	 * @assert ('USD', 20120101111111, 1, 'account', 'type', array('SplitAccountId' => 2, 'SplitAccount' => 'split_account', 'Amount' => 100)) == "\t\t\t<INTRARS>\n\t\t\t\t<CURDEF>USD</CURDEF>\n\t\t\t\t<SRVRTID>20120101111111</SRVRTID>\n\t\t\t\t<XFERINFO>\n\t\t\t\t\t<BANKACCTFROM>\n\t\t\t\t\t\t<BANKID>1</BANKID>\n\t\t\t\t\t\t<ACCTID>account</ACCTID>\n\t\t\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t\t\t</BANKACCTFROM>\n\t\t\t\t\t<BANKACCTTO>\n\t\t\t\t\t\t<BANKID>2</BANKID>\n\t\t\t\t\t\t<ACCTID>split_account</ACCTID>\n\t\t\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t\t\t</BANKACCTTO>\n\t\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t\t</XFERINFO>\n\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t</INTRARS>\n"
 	 **************************************************************************/
 	public function getOFXTransfer(
 		$currency, $timeStamp, $accountId, $account, $accountType, $data
@@ -750,7 +750,7 @@ class OFX {
 	 *
 	 * @return 	string the OFX content
 	 *
-	 * @assert () == "\t</INTRATRNRS></BANKMSGSRSV1>\n</OFX>"
+	 * @assert () == "\t\t</INTRATRNRS>\n\t</BANKMSGSRSV1>\n</OFX>"
 	 **************************************************************************/
 	public function getOFXResponseEnd($respType='INTRATRNRS') {
 		try {
