@@ -719,24 +719,24 @@ class OFX {
 	) {
 		try {
 			return
-				"\t\t<INTRARS>\n". // Begin transfer response
-				"\t\t\t<CURDEF>$currency</CURDEF>\n".
-				"\t\t\t<SRVRTID>$timeStamp</SRVRTID>\n".
-				"\t\t\t<XFERINFO>\n". // Begin transfer aggregate
-				"\t\t\t\t<BANKACCTFROM>\n".
-				"\t\t\t\t\t<BANKID>$accountId</BANKID>\n".
-				"\t\t\t\t\t<ACCTID>$account</ACCTID>\n".
-				"\t\t\t\t\t<ACCTTYPE>$accountType</ACCTTYPE>\n".
-				"\t\t\t\t</BANKACCTFROM>\n".
-				"\t\t\t\t<BANKACCTTO>\n".
-				"\t\t\t\t\t<BANKID>$data[SplitAccountId]</BANKID>\n".
-				"\t\t\t\t\t<ACCTID>$data[SplitAccount]</ACCTID>\n".
-				"\t\t\t\t\t<ACCTTYPE>$accountType</ACCTTYPE>\n".
-				"\t\t\t\t</BANKACCTTO>\n".
-				"\t\t\t\t<TRNAMT>$data[Amount]</TRNAMT>\n".
-				"\t\t\t</XFERINFO>\n". // End transfer aggregate
-				"\t\t\t<DTPOSTED>$timeStamp</DTPOSTED>\n".
-				"\t\t</INTRARS>\n"; // End transfer response
+				"\t\t\t<INTRARS>\n". // Begin transfer response
+				"\t\t\t\t<CURDEF>$currency</CURDEF>\n".
+				"\t\t\t\t<SRVRTID>$timeStamp</SRVRTID>\n".
+				"\t\t\t\t<XFERINFO>\n". // Begin transfer aggregate
+				"\t\t\t\t\t<BANKACCTFROM>\n".
+				"\t\t\t\t\t\t<BANKID>$accountId</BANKID>\n".
+				"\t\t\t\t\t\t<ACCTID>$account</ACCTID>\n".
+				"\t\t\t\t\t\t<ACCTTYPE>$accountType</ACCTTYPE>\n".
+				"\t\t\t\t\t</BANKACCTFROM>\n".
+				"\t\t\t\t\t<BANKACCTTO>\n".
+				"\t\t\t\t\t\t<BANKID>$data[SplitAccountId]</BANKID>\n".
+				"\t\t\t\t\t\t<ACCTID>$data[SplitAccount]</ACCTID>\n".
+				"\t\t\t\t\t\t<ACCTTYPE>$accountType</ACCTTYPE>\n".
+				"\t\t\t\t\t</BANKACCTTO>\n".
+				"\t\t\t\t\t<TRNAMT>$data[Amount]</TRNAMT>\n".
+				"\t\t\t\t</XFERINFO>\n". // End transfer aggregate
+				"\t\t\t\t<DTPOSTED>$timeStamp</DTPOSTED>\n".
+				"\t\t\t</INTRARS>\n"; // End transfer response
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
