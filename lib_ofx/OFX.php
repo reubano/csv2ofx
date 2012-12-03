@@ -602,22 +602,21 @@ class OFX {
 	 ***************************************************************************
 	 * Gets OFX format transaction content
 	 *
+	 * @param 	string $timeStamp	the time in mmddyy_hhmmss format
 	 * @return 	string the OFX content
 	 *
-	 * @assert (20120101111111, array('Type' => 'type', 'Amount' => 100, 'Id' => 1, 'Payee' => 'payee', 'Desc' => 'memo')) == "\t\t\t\t<STMTTRN>\n\t\t\t\t\t<TRNTYPE>type</TRNTYPE>\n\t\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t\t\t<FITID>1</FITID>\n\t\t\t\t\t<CHECKNUM>1</CHECKNUM>\n\t\t\t\t\t<NAME>payee</NAME>\n\t\t\t\t\t<MEMO>memo</MEMO>\n\t\t\t\t</STMTTRN>\n"
+	 * @assert () == "\t<BANKMSGSRSV1>\n\t\t<INTRATRNRS>\n\t\t\t<TRNUID></TRNUID>\n\t\t\t<STATUS>\n\t\t\t\t<CODE>0</CODE>\n\t\t\t\t<SEVERITY>INFO</SEVERITY>\n\t\t\t</STATUS>\n"
 	 **************************************************************************/
-	public function getOFXTransaction($timeStamp, $data) {
+	public function getOFXResponseStart($respType='INTRATRNRS') {
 		try {
 			return
-				"\t\t\t\t<STMTTRN>\n".
-				"\t\t\t\t\t<TRNTYPE>$data[Type]</TRNTYPE>\n".
-				"\t\t\t\t\t<DTPOSTED>$timeStamp</DTPOSTED>\n".
-				"\t\t\t\t\t<TRNAMT>$data[Amount]</TRNAMT>\n".
-				"\t\t\t\t\t<FITID>$data[Id]</FITID>\n".
-				"\t\t\t\t\t<CHECKNUM>$data[Id]</CHECKNUM>\n".
-				"\t\t\t\t\t<NAME>$data[Payee]</NAME>\n".
-				"\t\t\t\t\t<MEMO>$data[Desc]</MEMO>\n".
-				"\t\t\t\t</STMTTRN>\n";
+				"\t<BANKMSGSRSV1>\n".
+				"\t\t<$respType>\n".
+				"\t\t\t<TRNUID></TRNUID>\n".
+				"\t\t\t<STATUS>\n".
+				"\t\t\t\t<CODE>0</CODE>\n".
+				"\t\t\t\t<SEVERITY>INFO</SEVERITY>\n".
+				"\t\t\t</STATUS>\n";
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -657,16 +656,24 @@ class OFX {
 
 	/**
 	 ***************************************************************************
-	 * Gets OFX transfer footer
+	 * Gets OFX format transaction content
 	 *
 	 * @return 	string the OFX content
 	 *
-	 * @assert () == '</STMTTRNRS></BANKMSGSRSV1></OFX>'
+	 * @assert (20120101111111, array('Type' => 'type', 'Amount' => 100, 'Id' => 1, 'CheckNum' => 1, 'Payee' => 'payee', 'Desc' => 'memo')) == "\t\t\t\t<STMTTRN>\n\t\t\t\t\t<TRNTYPE>type</TRNTYPE>\n\t\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t\t\t<FITID>1</FITID>\n\t\t\t\t\t<CHECKNUM>1</CHECKNUM>\n\t\t\t\t\t<NAME>payee</NAME>\n\t\t\t\t\t<MEMO>memo</MEMO>\n\t\t\t\t</STMTTRN>\n"
 	 **************************************************************************/
-	public function getOFXTransactionFooter() {
+	public function getOFXTransaction($timeStamp, $data) {
 		try {
-			// need to make variables reference $this->
-			return '</STMTTRNRS></BANKMSGSRSV1></OFX>';
+			return
+				"\t\t\t\t\t<STMTTRN>\n".
+				"\t\t\t\t\t\t<TRNTYPE>$data[Type]</TRNTYPE>\n".
+				"\t\t\t\t\t\t<DTPOSTED>$timeStamp</DTPOSTED>\n".
+				"\t\t\t\t\t\t<TRNAMT>$data[Amount]</TRNAMT>\n".
+				"\t\t\t\t\t\t<FITID>$data[Id]</FITID>\n".
+				"\t\t\t\t\t\t<CHECKNUM>$data[CheckNum]</CHECKNUM>\n".
+				"\t\t\t\t\t\t<NAME>$data[Payee]</NAME>\n".
+				"\t\t\t\t\t\t<MEMO>$data[Desc]</MEMO>\n".
+				"\t\t\t\t\t</STMTTRN>\n";
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
