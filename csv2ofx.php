@@ -40,7 +40,6 @@ $bankList = array(
 $qifList = array('Bank' => $bankList, 'Cash' => array('cash'));
 $typeList = array('ofx' => $ofxList, 'qif' => $qifList);
 $ext = array('ofx' => 'ofx', 'qif' => 'qif');
-$transfer = true;
 
 // create the parser from xml file
 $parser = Console_CommandLine::fromXmlFile(XML_FILE);
@@ -63,6 +62,7 @@ try {
 	$currency = $result->options['currency'];
 	$language = $result->options['language'];
 	$overwrite = $result->options['overwrite'];
+	$transfer = $result->options['transfer'];
 	$qif = $result->options['qif'];
 	$type = $qif ? 'qif' : 'ofx';
 	$defType = $result->options['accountType'] ?: $defType[$type];
