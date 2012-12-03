@@ -18,8 +18,7 @@ if (strpos('@php_bin@', '@php_bin') === 0) { // not a pear install
 }
 
 define('CUR_DIR', getcwd().DIRECTORY_SEPARATOR);
-define('DATE_STAMP', date('Ymd')); // format to yyyymmdd
-define('TIME_STAMP', date('Ymd_His')); // format to yyyymmdd_hhmmss
+define('TIME_STAMP', date('YmdHis')); // format to yyyymmddhhmmss
 define('XML_FILE', PROJECT_DIR.PROGRAM.'.xml');
 
 require PROJECT_DIR.'Autoload.php';
@@ -57,7 +56,9 @@ try {
 	$mapping = $result->options['mapping'];
 	$primary = $result->options['primary'];
 	$start = date('YmdHis', strtotime($result->options['start']));
+	$startDate = date('Ymd', strtotime($start));
 	$end = date('YmdHis', strtotime($result->options['end']));
+	$endDate = date('Ymd', strtotime($end));
 	$collAccts = explode(',', $result->options['collapse']);
 	$currency = $result->options['currency'];
 	$language = $result->options['language'];
@@ -238,19 +239,20 @@ try {
 
 	$mainOFX = function ($accountType, $account) use (
 		&$content, $csvContent, $subOFX, $csv2ofx, $transfer, $currency,
-		$timeStamp
+		$startDate, $endDate
 	) {
 		$content .= $transfer
 			? ''
 			: $csv2ofx->getOFXTransactionAccountStart(
-				$currency, md5($account), $account, $accountType, DATE_STAMP
+				$currency, md5($account), $account, $accountType, $startDate,
+				$endDate
 			);
 
 		array_walk($csvContent, $subOFX, array($accountType, $account));
 
 		$content .= $transfer
 			? ''
-			: $csv2ofx->getOFXTransactionAccountEnd($timeStamp);
+			: $csv2ofx->getOFXTransactionAccountEnd();
 	}; //<-- end closure -->
 
 	// main routines
