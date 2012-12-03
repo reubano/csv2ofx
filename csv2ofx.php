@@ -64,6 +64,7 @@ try {
 	$language = $result->options['language'];
 	$overwrite = $result->options['overwrite'];
 	$transfer = $result->options['transfer'];
+	$respType = $transfer ? 'INTRATRNRS' : 'STMTTRNRS';
 	$qif = $result->options['qif'];
 	$type = $qif ? 'qif' : 'ofx';
 	$defType = $result->options['accountType'] ?: $defType[$type];
@@ -233,7 +234,7 @@ try {
 	$mainQIF = function ($accountType, $account) use (
 		&$content, $subQIF, $csv2ofx, $splitContent
 	) {
-		$content .= $csv2ofx->getQIFTransactionHeader($account, $accountType);
+		$content .= $csv2ofx->getQIFAccountHeader($account, $accountType);
 		array_walk($splitContent, $subQIF, array($accountType, $account));
 	}; //<-- end closure -->
 
@@ -257,22 +258,16 @@ try {
 
 	// main routines
 	$csvContent = $qif ? $csvContent : $array->xmlize($csvContent);
-	$ofxContent = $transfer
-		? $csv2ofx->getOFXTransferHeader(TIME_STAMP)
-		: $csv2ofx->getOFXTransactionHeader(TIME_STAMP);
-
+	$ofxContent = $csv2ofx->getOFXHeader(TIME_STAMP, $language);
+	$ofxContent .= $csv2ofx->getOFXResponseStart($respType);
 	$content = $qif ? '' : $ofxContent;
 
 	$qif
 		? array_walk($uniqueAccounts, $mainQIF)
 		: array_walk($uniqueAccounts, $mainOFX);
 
-	$ofxContent = $transfer
-		? $csv2ofx->getOFXTransferFooter()
-		: $csv2ofx->getOFXTransactionFooter();
-
+	$ofxContent = $csv2ofx->getOFXResponseEnd($respType);
 	$content .= $qif ? '' : $ofxContent;
-
 	$stdout ? print($content) : $file->write2file($content, $dest, $overwrite);
 	exit(0);
 } catch (Exception $e) {
