@@ -33,14 +33,14 @@ def main():
 		script = 'php csv2ofx.php -oqm custom %s %s' % (example, tmpname)
 		env.run('%s' % script, cwd='%s' % scriptdir)
 		myhash = md5(open(tmpname).read()).hexdigest()
-		assert myhash == 'c15b2fc5fe2d0a35c4f76cb6c0297e8a'
+		assert myhash == '82acc954a74d6dafaf3406603e677648'
 
 		# test 3
 		example = os.path.join('examples', 'xero_example.csv')
 		script = 'php csv2ofx.php -oqm xero %s %s' % (example, tmpname)
 		env.run('%s' % script, cwd='%s' % scriptdir)
 		myhash = md5(open(tmpname).read()).hexdigest()
-		assert myhash == '115c849c64ccdb0ed75d9a8f87e41949'
+		assert myhash == 'f5585a5a64b320d0e0cabfc76a2ae4a7'
 
 		# test 4
 		example = os.path.join('examples', 'mint_example.csv')
@@ -49,10 +49,25 @@ def main():
 		myhash = md5(open(tmpname).read()).hexdigest()
 		assert myhash == '177fb3afec2800956cd5074ade565886'
 
+		# test 5
+		example = os.path.join('examples', 'custom_example.csv')
+		script = 'php csv2ofx.php -om custom %s %s' % (example, tmpname)
+		env.run('%s' % script, cwd='%s' % scriptdir)
+		myhash = md5(open(tmpname).read()).hexdigest()
+		assert myhash == '2ab334e87c080941e413cc89701fb8a7'
+
+		# test 6
+		example = os.path.join('examples', 'custom_example.csv')
+		script = 'php csv2ofx.php -otm custom %s %s' % (example, tmpname)
+		env.run('%s' % script, cwd='%s' % scriptdir)
+		myhash = md5(open(tmpname).read()).hexdigest()
+		assert myhash == '402a8154573033193bc16d17fdf02f62'
+
 		# cleanup
 		os.unlink(tmpname)
 	except Exception as err:
-		sys.stderr.write('ERROR: %s\n' % str(err))
+		sys.stderr.write('ERROR: %s on %s\n' % (str(err), myhash))
+		os.unlink(tmpname)
 
 	sys.exit(0)
 
