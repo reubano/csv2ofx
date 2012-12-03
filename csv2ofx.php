@@ -18,8 +18,7 @@ if (strpos('@php_bin@', '@php_bin') === 0) { // not a pear install
 }
 
 define('CUR_DIR', getcwd().DIRECTORY_SEPARATOR);
-define('DATE_STAMP', date('Ymd')); // format to yyyymmdd
-define('TIME_STAMP', date('Ymd_His')); // format to yyyymmdd_hhmmss
+define('TIME_STAMP', date('YmdHis')); // format to yyyymmddhhmmss
 define('XML_FILE', PROJECT_DIR.PROGRAM.'.xml');
 
 require PROJECT_DIR.'Autoload.php';
@@ -57,12 +56,15 @@ try {
 	$mapping = $result->options['mapping'];
 	$primary = $result->options['primary'];
 	$start = date('YmdHis', strtotime($result->options['start']));
+	$startDate = date('Ymd', strtotime($start));
 	$end = date('YmdHis', strtotime($result->options['end']));
+	$endDate = date('Ymd', strtotime($end));
 	$collAccts = explode(',', $result->options['collapse']);
 	$currency = $result->options['currency'];
 	$language = $result->options['language'];
 	$overwrite = $result->options['overwrite'];
 	$transfer = $result->options['transfer'];
+	$respType = $transfer ? 'INTRATRNRS' : 'STMTTRNRS';
 	$qif = $result->options['qif'];
 	$type = $qif ? 'qif' : 'ofx';
 	$defType = $result->options['accountType'] ?: $defType[$type];
@@ -99,10 +101,12 @@ try {
 
 	// execute program
 	if (file_exists($source)) {
+		$serverDate = date('YmdHis', filemtime($source));
 		$content = $file->file2String($source);
 		$content = $string->makeLFLineEndings($content, $delimiter);
 	} else {
 		$content = $source;
+		$serverDate = TIME_STAMP;
 	} //<-- end if -->
 
 	$content = $string->lines2Array($content);
@@ -202,10 +206,12 @@ try {
 	}; //<-- end closure -->
 
 	$subOFX = function ($transaction, $key, $accountInfo) use (
-		&$content, $csv2ofx, $start, $end
+		&$content, &$timeStamp, $csv2ofx, $start, $end, $primary, $transfer,
+		$language, $currency
 	) {
 		$accountType = $accountInfo[0];
 		$account = $accountInfo[1];
+		$accountId = md5($account);
 
 		// if transaction doesn't match the account name, skip it
 		if ($transaction[$csv2ofx->headAccount] != $account) return;
@@ -215,7 +221,7 @@ try {
 		if ($splitAccount == $primary) return;
 
 		// else, business as usual
-		$date = $firstSplit[$csv2ofx->headDate];
+		$date = $transaction[$csv2ofx->headDate];
 		$timeStamp = date('YmdHis', strtotime($date));
 
 		// if transaction is not in the specified date range, skip it
@@ -223,51 +229,47 @@ try {
 		$data = $csv2ofx->getTransactionData($transaction);
 
 		$content .= $transfer
-			? $csv2ofx->getOFXTransfer($account, $accountType)
-			: $csv2ofx->getOFXTransaction();
+			? $csv2ofx->getOFXTransfer($currency, $timeStamp, $accountId, $account, $accountType, $data)
+			: $csv2ofx->getOFXTransaction($timeStamp, $data);
 	}; //<-- end closure -->
 
 	$mainQIF = function ($accountType, $account) use (
 		&$content, $subQIF, $csv2ofx, $splitContent
 	) {
-		$content .= $csv2ofx->getQIFTransactionHeader($account, $accountType);
+		$content .= $csv2ofx->getQIFAccountHeader($account, $accountType);
 		array_walk($splitContent, $subQIF, array($accountType, $account));
 	}; //<-- end closure -->
 
 	$mainOFX = function ($accountType, $account) use (
-		&$content, $subOFX, $csv2ofx
+		&$content, $csvContent, $subOFX, $csv2ofx, $transfer, $currency,
+		$startDate, $endDate
 	) {
 		$content .= $transfer
 			? ''
 			: $csv2ofx->getOFXTransactionAccountStart(
-				$currency, md5($account), $account, $accountType, DATE_STAMP
+				$currency, md5($account), $account, $accountType, $startDate,
+				$endDate
 			);
 
 		array_walk($csvContent, $subOFX, array($accountType, $account));
 
 		$content .= $transfer
 			? ''
-			: $csv2ofx->getOFXTransactionAccountEnd($timeStamp);
+			: $csv2ofx->getOFXTransactionAccountEnd();
 	}; //<-- end closure -->
 
 	// main routines
 	$csvContent = $qif ? $csvContent : $array->xmlize($csvContent);
-	$ofxContent = $transfer
-		? $csv2ofx->getOFXTransferHeader(TIME_STAMP)
-		: $csv2ofx->getOFXTransactionHeader(TIME_STAMP);
-
+	$ofxContent = $csv2ofx->getOFXHeader($serverDate, $language);
+	$ofxContent .= $csv2ofx->getOFXResponseStart($respType);
 	$content = $qif ? '' : $ofxContent;
 
 	$qif
 		? array_walk($uniqueAccounts, $mainQIF)
 		: array_walk($uniqueAccounts, $mainOFX);
 
-	$ofxContent = $transfer
-		? $csv2ofx->getOFXTransferFooter()
-		: $csv2ofx->getOFXTransactionFooter();
-
+	$ofxContent = $csv2ofx->getOFXResponseEnd($respType);
 	$content .= $qif ? '' : $ofxContent;
-
 	$stdout ? print($content) : $file->write2file($content, $dest, $overwrite);
 	exit(0);
 } catch (Exception $e) {
