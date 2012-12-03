@@ -490,7 +490,7 @@ class OFX {
 	 *
 	 * @assert ('account', 'type') == "!Account\nNaccount\nTtype\n^\n"
 	 **************************************************************************/
-	public function getQIFTransactionHeader($account, $accountType) {
+	public function getQIFAccountHeader($account, $accountType) {
 		try {
 			return "!Account\nN$account\nT$accountType\n^\n";
 		} catch (Exception $e) {
