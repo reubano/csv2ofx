@@ -574,9 +574,9 @@ class OFX {
 	 * @param 	string $timeStamp	the time in mmddyy_hhmmss format
 	 * @return 	string the OFX content
 	 *
-	 * @assert (20120101111111) == "<OFX>\n\t<SIGNONMSGSRSV1>\n\t\t<SONRS>\n\t\t\t<STATUS>\n\t\t\t\t<CODE>0</CODE>\n\t\t\t\t<SEVERITY>INFO</SEVERITY>\n\t\t\t</STATUS>\n\t\t\t<DTSERVER>20120101111111</DTSERVER>\n\t\t\t<LANGUAGE>ENG</LANGUAGE>\n\t\t</SONRS>\n\t</SIGNONMSGSRSV1>\n\t<BANKMSGSRSV1><STMTTRNRS>\n\t\t<TRNUID>20120101111111</TRNUID>\n\t\t<STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>\n"
+	 * @assert (20120101111111) == "<OFX>\n\t<SIGNONMSGSRSV1>\n\t\t<SONRS>\n\t\t\t<STATUS>\n\t\t\t\t<CODE>0</CODE>\n\t\t\t\t<SEVERITY>INFO</SEVERITY>\n\t\t\t</STATUS>\n\t\t\t<DTSERVER>20120101111111</DTSERVER>\n\t\t\t<LANGUAGE>ENG</LANGUAGE>\n\t\t</SONRS>\n\t</SIGNONMSGSRSV1>\n"
 	 **************************************************************************/
-	public function getOFXTransactionHeader($timeStamp, $language='ENG') {
+	public function getOFXHeader($timeStamp, $language='ENG') {
 		try {
 			return
 				"<OFX>\n".
@@ -589,11 +589,7 @@ class OFX {
 				"\t\t\t<DTSERVER>$timeStamp</DTSERVER>\n".
 				"\t\t\t<LANGUAGE>$language</LANGUAGE>\n".
 				"\t\t</SONRS>\n".
-				"\t</SIGNONMSGSRSV1>\n".
-				"\t<BANKMSGSRSV1><STMTTRNRS>\n".
-				"\t\t<TRNUID>$timeStamp</TRNUID>\n".
-				"\t\t<STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>".
-				"\n";
+				"\t</SIGNONMSGSRSV1>\n";
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -601,35 +597,6 @@ class OFX {
 		} //<-- end try -->
 	} //<-- end function -->
 
-	/**
-	 ***************************************************************************
-	 * Gets OFX format transaction account start content
-	 *
-	 * @return 	string the OFX content
-	 *
-	 * @assert ('USD', 1, 'account', 'type', 20120101) == "\t<STMTRS>\n\t\t<CURDEF>USD</CURDEF>\n\t\t<BANKACCTFROM>\n\t\t\t<BANKID>1</BANKID>\n\t\t\t<ACCTID>account</ACCTID>\n\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t</BANKACCTFROM>\n\t\t<BANKTRANLIST>\n\t\t\t<DTSTART>20120101</DTSTART>\n\t\t\t<DTEND>20120101</DTEND>\n"
-	 **************************************************************************/
-	public function getOFXTransactionAccountStart(
-		$currency, $accountId, $account, $accountType, $dateStamp
-	) {
-		try {
-			return
-				"\t<STMTRS>\n".
-				"\t\t<CURDEF>$currency</CURDEF>\n".
-				"\t\t<BANKACCTFROM>\n".
-				"\t\t\t<BANKID>$accountId</BANKID>\n".
-				"\t\t\t<ACCTID>$account</ACCTID>\n".
-				"\t\t\t<ACCTTYPE>$accountType</ACCTTYPE>\n".
-				"\t\t</BANKACCTFROM>\n".
-				"\t\t<BANKTRANLIST>\n".
-				"\t\t\t<DTSTART>$dateStamp</DTSTART>\n".
-				"\t\t\t<DTEND>$dateStamp</DTEND>\n";
-		} catch (Exception $e) {
-			throw new Exception($e->getMessage().' from '.$this->className.'->'.
-				__FUNCTION__.'() line '.__LINE__
-			);
-		} //<-- end try -->
-	} //<-- end function -->
 
 	/**
 	 ***************************************************************************
@@ -660,21 +627,27 @@ class OFX {
 
 	/**
 	 ***************************************************************************
-	 * Gets OFX format transaction account end content
+	 * Gets OFX format transaction account start content
 	 *
 	 * @return 	string the OFX content
 	 *
-	 * @assert (20120101111111) == "\t\t</BANKTRANLIST>\n\t\t<LEDGERBAL>\n\t\t\t<BALAMT>0</BALAMT>\n\t\t\t<DTASOF>20120101111111</DTASOF>\n\t\t</LEDGERBAL>\n\t</STMTRS>\n"
+	 * @assert ('USD', 1, 'account', 'type', 20120101, 20120101) == "\t<STMTRS>\n\t\t<CURDEF>USD</CURDEF>\n\t\t<BANKACCTFROM>\n\t\t\t<BANKID>1</BANKID>\n\t\t\t<ACCTID>account</ACCTID>\n\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t</BANKACCTFROM>\n\t\t<BANKTRANLIST>\n\t\t\t<DTSTART>20120101</DTSTART>\n\t\t\t<DTEND>20120101</DTEND>\n"
 	 **************************************************************************/
-	public function getOFXTransactionAccountEnd($timeStamp) {
+	public function getOFXTransactionAccountStart(
+		$currency, $accountId, $account, $accountType, $startDate, $endDate
+	) {
 		try {
 			return
-				"\t\t</BANKTRANLIST>\n".
-				"\t\t<LEDGERBAL>\n".
-				"\t\t\t<BALAMT>0</BALAMT>\n".
-				"\t\t\t<DTASOF>$timeStamp</DTASOF>\n".
-				"\t\t</LEDGERBAL>\n".
-				"\t</STMTRS>\n";
+				"\t\t\t<STMTRS>\n".
+				"\t\t\t\t<CURDEF>$currency</CURDEF>\n".
+				"\t\t\t\t<BANKACCTFROM>\n".
+				"\t\t\t\t\t<BANKID>$accountId</BANKID>\n".
+				"\t\t\t\t\t<ACCTID>$account</ACCTID>\n".
+				"\t\t\t\t\t<ACCTTYPE>$accountType</ACCTTYPE>\n".
+				"\t\t\t\t</BANKACCTFROM>\n".
+				"\t\t\t\t<BANKTRANLIST>\n".
+				"\t\t\t\t\t<DTSTART>$startDate</DTSTART>\n".
+				"\t\t\t\t\t<DTEND>$endDate</DTEND>\n";
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
@@ -703,24 +676,21 @@ class OFX {
 
 	/**
 	 ***************************************************************************
-	 * Gets OFX transfer header
+	 * Gets OFX format transaction account end content
 	 *
-	 * @param 	string $timeStamp	the time in mmddyy_hhmmss format
 	 * @return 	string the OFX content
 	 *
-	 * @assert ('20120101_111111') == "<OFX>\n\t<SIGNONMSGSRSV1>\n\t\t<SONRS></SONRS>\n\t</SIGNONMSGSRSV1>\n\t<BANKMSGSRSV1><INTRATRNRS>\n\t\t<TRNUID>20120101_111111</TRNUID>\n\t\t<STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>\n"
+	 * @assert (150, 20120101111111) == "\t\t</BANKTRANLIST>\n\t\t<LEDGERBAL>\n\t\t\t<BALAMT>150</BALAMT>\n\t\t\t<DTASOF>20120101111111</DTASOF>\n\t\t</LEDGERBAL>\n\t</STMTRS>\n"
 	 **************************************************************************/
-	public function getOFXTransferHeader($timeStamp) {
+	public function getOFXTransactionAccountEnd($balance=null, $timeStamp=null) {
 		try {
 			return
-				"<OFX>\n".
-				"\t<SIGNONMSGSRSV1>\n".
-				"\t\t<SONRS></SONRS>\n".
-				"\t</SIGNONMSGSRSV1>\n".
-				"\t<BANKMSGSRSV1><INTRATRNRS>\n". // Begin response
-				"\t\t<TRNUID>$timeStamp</TRNUID>\n".
-				"\t\t<STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>".
-				"\n";
+				"\t\t\t\t</BANKTRANLIST>\n".
+				"\t\t\t\t<LEDGERBAL>\n".
+				"\t\t\t\t\t<BALAMT>$balance</BALAMT>\n".
+				"\t\t\t\t\t<DTASOF>$timeStamp</DTASOF>\n".
+				"\t\t\t\t</LEDGERBAL>\n".
+				"\t\t\t</STMTRS>\n";
 		} catch (Exception $e) {
 			throw new Exception($e->getMessage().' from '.$this->className.'->'.
 				__FUNCTION__.'() line '.__LINE__
