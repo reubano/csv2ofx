@@ -14,7 +14,7 @@
   "environment": "console",
   "license": "MIT",
 	"type": "project",
-  "keywords": ["application", "database", "finance", "converter"],
+  "keywords": ["application", "database", "finance"],
 	"repositories": [
 		{"type": "pear", "url": "pear.php.net"}
 	],
