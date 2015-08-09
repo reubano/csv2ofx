@@ -16,28 +16,28 @@ csv2ofx requires the following programs in order to run properly:
 * [PEAR](http://us2.php.net/downloads.php)
 
 ## INSTALLATION
-	
+
 	sudo pear channel-discover reubano.github.com/pear
 	sudo pear install reubano/csv2ofx
 
 ## USING csv2ofx
 ### Usage
 	csv2ofx [options] <src_file> <dest_file>
-	
+
 ### Examples
 
 _normal usage_
 
 	csv2ofx file.csv file.ofx
 
-_stdout_
+_print output to stdout_
 
 	csv2ofx ~/Downloads/transactions.csv $
 
-_stdin_
+_read input from stdin_
 
 	cat file.csv | csv2ofx -
-		
+
 _qif output_
 
 	csv2ofx -q file.csv
@@ -49,7 +49,7 @@ _specify date range from one year ago to yesterday with qif output_
 _use yoodle settings_
 
 	csv2ofx -m yoodle file.csv
-  
+
 ### Options
 	  -A type, --account-type=type          account type to use if no match is
 	                                        found, defaults to 'CHECKING' for
@@ -85,7 +85,7 @@ _use yoodle settings_
 	                                        value of all program variables
 	  -h, --help                            show this help message and exit
 	  --version                             show the program version and exit
-	
+
 ### Arguments
 	  src_file   the source csv file or data, enter '-' to read data from
 	             standard input
@@ -94,7 +94,7 @@ _use yoodle settings_
 
 ### Where does csv2ofx save files?
 
-csv2ofx saves resultant qif and ofx files to the current directory. 
+csv2ofx saves resultant qif and ofx files to the current directory.
 
 ### Additional date format examples
 
@@ -128,23 +128,23 @@ If you would like to import csv files that aren't from mint or yoodle, you will 
 
 ### Required variables
 
-variable				| description                       
----------------------	| ------------- 
-$this->headAccount		| account name                       
-$this->headDate			| date the transaction was posted    
-$this->headAmount		| amount of transaction              
+variable				| description
+---------------------	| -------------
+$this->headAccount		| account name
+$this->headDate			| date the transaction was posted
+$this->headAmount		| amount of transaction
 $this->split			| is each split of the transaction on its own line? (true/false)
 
 ### Optional variables
 
-variable				| description                       
----------------------	| ------------- 
-$this->headDesc			| transaction description            
-$this->headSplitAccount	| transaction split account name          
-$this->headTranType		| type of transaction (credit/debit) 
-$this->headNotes		| notes/memo                                                          
-$this->headPayee		| transaction payee                  
-$this->headClass		| transaction classification                                          
+variable				| description
+---------------------	| -------------
+$this->headDesc			| transaction description
+$this->headSplitAccount	| transaction split account name
+$this->headTranType		| type of transaction (credit/debit)
+$this->headNotes		| notes/memo
+$this->headPayee		| transaction payee
+$this->headClass		| transaction classification
 $this->headTranId		| unique transaction identifier
 
 ## LICENSE

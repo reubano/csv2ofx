@@ -2,7 +2,6 @@
 
 """ A script to test csv2ofx functionality """
 
-import inspect
 import os
 import sys
 
@@ -19,10 +18,10 @@ def main():
 	try:
 		# setup
 		env = TestFileEnvironment('.scripttest')
-		thisfile = inspect.getfile(inspect.currentframe())
-		scriptdir = path.dirname(path.dirname(path.abspath('%s' % thisfile)))
+		scriptdir = path.dirname(path.dirname(path.abspath(__file__)))
 		tmpfile = NamedTemporaryFile(dir='%s' % scriptdir, delete=False)
 		tmpname = tmpfile.name
+		myhash = None
 
 		# test 1
 		script = 'php csv2ofx.php --help'
@@ -66,6 +65,7 @@ def main():
 		# cleanup
 		os.unlink(tmpname)
 	except Exception as err:
+		myhash = (myhash or None)
 		sys.stderr.write('ERROR: %s on %s\n' % (str(err), myhash))
 		os.unlink(tmpname)
 
