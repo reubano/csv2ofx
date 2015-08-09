@@ -9,7 +9,7 @@
 	],
   "name": "csv2ofx",
   "description": "converts a csv file to ofx and qif",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "homepage": "http://github.com/reubano/csv2ofx",
   "environment": "console",
   "license": "MIT",
