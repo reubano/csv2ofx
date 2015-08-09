@@ -30,11 +30,11 @@ _normal usage_
 
 	csv2ofx file.csv file.ofx
 
-_stdout_
+_print output to stdout_
 
 	csv2ofx ~/Downloads/transactions.csv $
 
-_stdin_
+_read input from stdin_
 
 	cat file.csv | csv2ofx -
 
