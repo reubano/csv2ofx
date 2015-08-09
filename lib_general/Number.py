@@ -1,7 +1,6 @@
 """ purpose: contains general functions to be used by all programs
  """
 
-date_default_timezone_set('Africa/Nairobi')
 class Number
 	protected _className = __CLASS__	# class name
 	protected _verbose
@@ -10,7 +9,7 @@ class Number
 	 @param boolean verbose enable verbose comments
 
 	"""
-	def __construct(verbose=false)
+	def __construct(verbose=False):
 		_verbose = verbose
 
 		if (_verbose)
@@ -25,7 +24,7 @@ class Number
 	 @assert (11) == '11th'
 	 @assert (132) == '132nd'
 	"""
-	def addOrdinal(num)
+	def addOrdinal(num):
 			if (!in_array((num % 100), array(11, 12, 13)))
 				switch (num % 10)
 					# Handle 1st, 2nd, 3rd

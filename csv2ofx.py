@@ -72,12 +72,12 @@ parser = Console_CommandLine::fromXmlFile(XML_FILE)
 			break
 
 		case '':
-			stdout = false
+			stdout = False
 			dest = CUR_DIR.TIME_STAMP.'_'.mapping.'.'.ext
 			break
 
 		default:
-			stdout = false
+			stdout = False
 	} #<-- end switch -->
 
 	if (result->options['debug'])
@@ -188,7 +188,7 @@ parser = Console_CommandLine::fromXmlFile(XML_FILE)
 		csv2ofx->split ? array_shift(data) : ''
 		splitAccounts = csv2ofx->split
 			? csv2ofx->getSplitAccounts(transaction)
-			: null
+			: None
 
 			content .= csv2ofx->split
 			? implode('', array_map(function, splitAccounts, data))

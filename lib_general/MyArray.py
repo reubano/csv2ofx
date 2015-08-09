@@ -1,7 +1,6 @@
 """ purpose: contains general functions to be used by all programs
  """
 
-date_default_timezone_set('Africa/Nairobi')
 class MyArray
 	protected _className = __CLASS__	# class name
 	protected _verbose
@@ -10,7 +9,7 @@ class MyArray
 	 @param boolean verbose enable verbose comments
 
 	"""
-	def __construct(verbose=false)
+	def __construct(verbose=False):
 		_verbose = verbose
 
 		if (_verbose)
@@ -32,7 +31,7 @@ class MyArray
 	 @assert ('numeric', array('1', 2, 3), 3) == array(2)
 	 @assert ('numeric', array('one', 2, 3), 2) == array(2)
 	"""
-	def arraySearchType(needle, haystack, n=1)
+	def arraySearchType(needle, haystack, n=1):
 		if (is_array(current(haystack)))
 			throw new Exception(
 				'Please use a one-dimensional array from '.
@@ -80,8 +79,8 @@ class MyArray
 	 @throws Exception if csvFile exists or is non-empty
 	"""
 	def array2CSV(
-		content, csvFile, fieldDelimiter=',', overWrite=false
-	)
+		content, csvFile, fieldDelimiter=',', overWrite=False
+	):
 		if (file_exists(csvFile) && !overWrite)
 			throw new Exception(
 				'File '.csvFile.' already exists from '._className.'->'.
@@ -110,7 +109,7 @@ class MyArray
 
 	 @assert (array('one', 'two', 'three'), 'two', 2) == array('one', 2, 'three')
 	"""
-	def arraySubstitute(content, needle, replace)
+	def arraySubstitute(content, needle, replace):
 			main = function (&haystack) use (needle, replace)
 				haystack = str_replace(needle, replace, haystack)
 
@@ -126,7 +125,7 @@ class MyArray
 
 	 @assert (array('one', 'two', 'three'), 2) == array('three', 'one', 'two')
 	"""
-	def arrayMove(content, key)
+	def arrayMove(content, key):
 		if (!array_key_exists(key, content))
 			throw new Exception(
 				'Key '.key.' not found from '._className.'->'.
@@ -147,7 +146,7 @@ class MyArray
 
 	 @assert (array(array('sort' => 'one'), array('sort' => 'alpha')), 'sort') == array(array('sort' => 'alpha'), array('sort' => 'one'))
 	"""
-	def arraySortBySubValue(array, key)
+	def arraySortBySubValue(array, key):
 		if (!array_key_exists(key, current(array)))
 			throw new Exception(
 				'Key \''.key.'\' not found from '.__CLASS__.'->'.__FUNCTION__.
@@ -171,7 +170,7 @@ class MyArray
 
 	 @assert (array(1, 2, 3), array(2, 3, 4, 5)) == array(1 => 2, 2 => 3, 3 => 4)
 	"""
-	def arraySafeCombine(keys, values)
+	def arraySafeCombine(keys, values):
 			combinedArray = array()
 			keyCount = count(keys)
 			valueCount = count(values)
@@ -188,12 +187,12 @@ class MyArray
 	 @param mixed needle	  the value to search for
 	 @param array haystack the array to search
 
-	 @return string string true/false
+	 @return string string true/False
 	 @throws Exception if there is no input
 
 	 @assert ('Two', array('one', 'two', 'three')) == true
 	"""
-	def inArray(needle, haystack)
+	def inArray(needle, haystack):
 			lower = array_map('strtolower', haystack)
 			return in_array(strtolower(needle), lower)
 
@@ -215,7 +214,7 @@ class MyArray
 
 	 @assert (array('two'), 0) == array('b8a9f715dbb64fd5c56e7783c6820a61')
 	"""
-	def arrayHash(content, hashKey, algo = 'md5')
+	def arrayHash(content, hashKey, algo = 'md5'):
 			hash = function (&value, key) use (hashKey, algo)
 				value = (key == hashKey) ? hash(algo, value) : value
 
@@ -232,18 +231,18 @@ class MyArray
 
 	 @assert (array(array('', 'value1', 'value2'), array('', '', ''), array('value3', '', 'value4'))) == array(0 => array('', 'value1', 'value2'), 2 => array('value3', '', 'value4'))
 	"""
-	def arrayTrim(content)
+	def arrayTrim(content):
 		if (!is_array(current(content)))
 			throw new Exception(
 				'Please use a multi-dimensional array from '.
 				_className.'->'.__FUNCTION__.'() line '.__LINE__
 			)
 		else
-					rednull = function (a, b)
+					redNone = function (a, b)
 					return (!empty(a) || !empty(b))
 
-				notAllNull = function (content) use (rednull)
-					return array_reduce(content, rednull)
+				notAllNull = function (content) use (redNone)
+					return array_reduce(content, redNone)
 
 				return array_filter(content, notAllNull)
 
@@ -258,7 +257,7 @@ class MyArray
 
 	 @assert(array(array(1, 2, 3), array(4, 5), array(6))) == array(array(1, 2, 3), array(4, 5, ''), array(6, '', ''))
 	"""
-	def arrayLengthen(content)
+	def arrayLengthen(content):
 		if (!is_array(current(content)))
 			throw new Exception(
 				'Please use a multi-dimensional array'.'from '.
@@ -289,7 +288,7 @@ class MyArray
 
 	 @assert(array(array('key1', 'key2', 'key3'), array('value1', 'value2', 'value3'), array('value4', 'value5', 'value6'))) == array(array('key1' => 'key1', 'key2' => 'key2', 'key3' => 'key3'), array('key1' => 'value1', 'key2' => 'value2', 'key3' => 'value3'), array('key1' => 'value4', 'key2' => 'value5', 'key3' => 'value6'))
 	"""
-	def arrayInsertKey(content)
+	def arrayInsertKey(content):
 		if (!is_array(current(content)))
 			throw new Exception(
 				'Please use a multi-dimensional array'.'from '.
@@ -324,7 +323,7 @@ class MyArray
 
 	 @assert(array(array('key1' => '1/1/12'), array('key1' => '2/1/12')), 'key1', 'date') == array(array('key1' => '2012-01-01'), array('key1' => '2012-02-01'))
 	"""
-	def arrayFormat(content, formatKey, format)
+	def arrayFormat(content, formatKey, format):
 		if (!is_array(current(content)))
 			throw new Exception(
 				'Please use a multi-dimensional array from '._className.
@@ -367,7 +366,7 @@ class MyArray
 
 	 @assert (array(array('&'), array('<'))) == array(array('&amp'), array('&lt'))
 	"""
-	def xmlize(content)
+	def xmlize(content):
 		if (empty(content))  # check to make sure content isn't empty
 			throw new Exception(
 				'Empty value passed from '._className.'->'.__FUNCTION__.

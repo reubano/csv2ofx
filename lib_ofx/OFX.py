@@ -5,7 +5,7 @@ class OFX
 	"""
 	 @param 	boolean verbose	enable verbose comments
 	"""
-	def __init__(source='mint', csvContent=null, verbose=FALSE)
+	def __init__(source='mint', csvContent=None, verbose=False)
 		source = source
 		csvContent = csvContent
 		verbose = verbose
@@ -23,7 +23,7 @@ class OFX
 				headPayee 	= 'Description'
 				headNotes 	= 'Notes'
 				headSplitAccount = 'Category'
-				split		= FALSE
+				split		= False
 				break
 
 			case 'xero':
@@ -50,7 +50,7 @@ class OFX
 				headSplitAccount = 'Category'
 				headClass 	= 'Classification'
 				headId 	= 'Transaction Id'
-				split		= FALSE
+				split		= False
 				break
 
 			case 'exim':
@@ -59,7 +59,7 @@ class OFX
 				headAmount 	= 'Amount'
 				headPayee 	= 'Narration'
 				headId 	= 'Reference Number'
-				split		= FALSE
+				split		= False
 				break
 
 			case 'custom':
@@ -71,7 +71,7 @@ class OFX
 				headDesc 	= 'Reference'
 				headSplitAccount = 'Category'
 				headId 	= 'Row'
-				split		= FALSE
+				split		= False
 				break
 
 	 		default:
@@ -87,7 +87,7 @@ class OFX
 				headClass 	= 'Field'
 				headId 	= 'Field'
 				headCheckNum = 'Field'
-				split		= FALSE
+				split		= False
 			} #<-- end switch -->
 
 		if (verbose)
@@ -101,7 +101,7 @@ class OFX
 
 	 @assert (array(array('Amount' => '1,000.00'))) == array(array('Amount' => 1000.00))
 	"""
-	def cleanAmounts(csvContent=null)
+	def cleanAmounts(csvContent=None)
 			headAmount = headAmount
 
 			main = function (content) use (headAmount)
@@ -125,7 +125,7 @@ class OFX
 	 @assert (array(array(array('Account Name' => 'account1'), array('Account Name' => 'account2')), array(array('Account Name' => 'account3'), array('Account Name' => 'account4')))) == array('accounts' => array('account1', 'account3'), 'keys' => array(0, 0))
 	 @assert (array(array(array('Account Name' => 'account1', 'Amount' => -200), array('Account Name' => 'account2', 'Amount' => 200)), array(array('Account Name' => 'account3', 'Amount' => 400), array('Account Name' => 'account4', 'Amount' => -400))), array(200, 400)) == array('accounts' => array('account1', 'account3'), 'keys' => array(0, 0))
 	"""
-	def getAccounts(splitContent, findAmounts=null)
+	def getAccounts(splitContent, findAmounts=None)
 			hAc = headAccount
 			hAm = headAmount
 
@@ -135,11 +135,11 @@ class OFX
 
 			cmp = function (&split, key, findAmount) use (hAm, &newKey)
 				found = (abs(split[hAm]) == findAmount)
-				split = found ? split : null
+				split = found ? split : None
 				newKey = (found && !isset(newKey)) ? key : newKey
 
 			byAmount = function (tr, findAmount) use (hAc, cmp, &newKey, &keys)
-				newKey = null
+				newKey = None
 				array_walk(tr, cmp, findAmount)
 				keys[] = newKey
 				return array_filter(tr)
@@ -171,7 +171,7 @@ class OFX
 				match = (zero || filtered) ? type : match
 
 			main = function (account) use (typeList, search, defType, &match)
-				match = null
+				match = None
 				array_walk(typeList, search, account)
 				return match ?: defType
 
@@ -224,7 +224,7 @@ class OFX
 # 				array_splice(transaction, num - i, 1)
 #
 			main = function (&transaction) use (sum, &splice)
-				previous = array('act' => null, 'amt' => 0)
+				previous = array('act' => None, 'amt' => 0)
 				array_walk(transaction, sum, previous)
 # 				splice ? array_walk(splice, reduce) : ''
 
@@ -232,7 +232,7 @@ class OFX
 					foreach (splice as num => i)
 						array_splice(transaction, num - i, 1)
 
-				splice = null
+				splice = None
 
 			array_walk(content, main)
 			return content
@@ -291,8 +291,8 @@ class OFX
 
 	 @assert (array(array('Amount' => 1,000.00, 'Date' => '06/12/10', 'Category' => 'Checking', 'Account Name' => 'account1'), array('Amount' => 1,000.00, 'Date' => '06/12/10', 'Category' => 'Checking', 'Account Name' => 'account2'))) == array(array(array('Amount' => 1,000.00, 'Date' => '06/12/10', 'Category' => 'Checking', 'Account Name' => 'account1')), array(array('Amount' => 1,000.00, 'Date' => '06/12/10', 'Category' => 'Checking', 'Account Name' => 'account2')))
 	"""
-	def makeSplits(csvContent=null)
-			headId = isset(headId) ? headId : null
+	def makeSplits(csvContent=None)
+			headId = isset(headId) ? headId : None
 
 			main = function (content, key) use (&splitContent, headId)
 				id = headId ? content[headId] : key
@@ -310,22 +310,22 @@ class OFX
 
 	 @return 	array	the QIF content
 
-	 @assert (array('Transaction Type' => 'debit', 'Amount' => 1000.00, 'Date' => '06/12/10', 'Description' => 'payee', 'Original Description' => 'description', 'Notes' => 'notes', 'Category' => 'Checking', 'Account Name' => 'account')) == array('Amount' => '-1000', 'Payee' => 'payee', 'Date' => '06/12/10', 'Desc' => 'description notes', 'Id' => '4fe86d9de995225b174fb3116ca6b1f4', 'CheckNum' => null, 'Type' => 'debit', 'SplitAccount' => 'Checking', 'SplitAccountId' => '195917574edc9b6bbeb5be9785b6a479')
+	 @assert (array('Transaction Type' => 'debit', 'Amount' => 1000.00, 'Date' => '06/12/10', 'Description' => 'payee', 'Original Description' => 'description', 'Notes' => 'notes', 'Category' => 'Checking', 'Account Name' => 'account')) == array('Amount' => '-1000', 'Payee' => 'payee', 'Date' => '06/12/10', 'Desc' => 'description notes', 'Id' => '4fe86d9de995225b174fb3116ca6b1f4', 'CheckNum' => None, 'Type' => 'debit', 'SplitAccount' => 'Checking', 'SplitAccountId' => '195917574edc9b6bbeb5be9785b6a479')
 	"""
 	def getTransactionData(tr, defSplitAccount='Orphan')
 			amount = tr[headAmount]
-			type = isset(headTranType) ? tr[headTranType] : null
+			type = isset(headTranType) ? tr[headTranType] : None
 			amount = (type == 'debit') ? '-'.amount : amount
 			date = date('m/d/y', strtotime(tr[headDate]))
-			payee = isset(headPayee) ? tr[headPayee] : null
-			desc = isset(headDesc) ? tr[headDesc] : null
-			notes = isset(headNotes) ? tr[headNotes] : null
-			class = isset(headClass) ? tr[headClass] : null
-			id = isset(headId) ? tr[headId] : null
+			payee = isset(headPayee) ? tr[headPayee] : None
+			desc = isset(headDesc) ? tr[headDesc] : None
+			notes = isset(headNotes) ? tr[headNotes] : None
+			class = isset(headClass) ? tr[headClass] : None
+			id = isset(headId) ? tr[headId] : None
 
 			checkNum = isset(headCheckNum)
 				? tr[headCheckNum]
-				: null
+				: None
 
 			splitAccount = isset(headSplitAccount)
 				? tr[headSplitAccount]
@@ -335,9 +335,9 @@ class OFX
 
 			# qif doesn't support notes or class so add them to description
 			sep = desc ? ' ' : ''
-			desc .= notes ? sep.notes : null
+			desc .= notes ? sep.notes : None
 			sep = desc ? ' ' : ''
-			desc .= class ? sep.class : null
+			desc .= class ? sep.class : None
 
 			# if no id, create it using check number or md5
 			# hash of the transaction details
@@ -487,7 +487,7 @@ class OFX
 
 	 @assert (150, 20120101111111) == "\t\t\t\t</BANKTRANLIST>\n\t\t\t\t<LEDGERBAL>\n\t\t\t\t\t<BALAMT>150</BALAMT>\n\t\t\t\t\t<DTASOF>20120101111111</DTASOF>\n\t\t\t\t</LEDGERBAL>\n\t\t\t</STMTRS>\n"
 	"""
-	def getOFXTransactionAccountEnd(balance=null, timeStamp=null)
+	def getOFXTransactionAccountEnd(balance=None, timeStamp=None)
 			return
 				"\t\t\t\t</BANKTRANLIST>\n".
 				"\t\t\t\t<LEDGERBAL>\n".

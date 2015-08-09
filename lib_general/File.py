@@ -1,32 +1,15 @@
 """ purpose: contains general functions to be used by all programs
- """
+"""
 
-date_default_timezone_set('Africa/Nairobi')
-class File
-	protected _className = __CLASS__	# class name
-	protected _verbose
-
+class File(object):
 	"""
 	 @param boolean verbose enable verbose comments
 
 	"""
-	def __construct(verbose=false)
+	def __construct(verbose=False):
 		_verbose = verbose
 
-		if (_verbose)
-			fwrite(STDOUT, "_className class constructor set.\n")
-
-	""" Returns the extension of a file
-
-	 @param string file a filename or the path to a file
-
-	 @return string ext the file extension
-	 @throws Exception if file is empty
-
-	 @assert ('file.ext') == 'ext'
-	 @assert ('/path/to/file.ext') == 'ext'
-	"""
-	def getExtension(file)
+	def getExtension(file):
 		if (empty(file))
 			throw new Exception(
 				'Empty file passed from '._className.'->'.__FUNCTION__.
@@ -35,17 +18,7 @@ class File
 		else
 			return pathinfo(file, PATHINFO_EXTENSION)
 
-	""" Writes data to a file
-
-	 @param string content	 the data to write to the file
-	 @param string file	  	 the file path
-	 @param boolean overWrite over write file if exists
-
-	 @return int bytes the number of bytes written to file
-	 @throws Exception if content is empty
-	 @throws Exception if file exists as a non-empty file
-	"""
-	def write2File(content, file, overWrite=false)
+	def write2File(content, file, overWrite=False):
 		if (empty(content))  # check to make sure content isn't empty
 			throw new Exception(
 				'Empty content passed from '._className.'->'.
@@ -76,7 +49,7 @@ class File
 	 @assert ('file.ext') == 'file'
 	 @assert ('/path/to/file.ext') == 'file'
 	"""
-	def getBase(file)
+	def getBase(file):
 		if (empty(file))
 			throw new Exception(
 				'Empty file passed from '._className.'->'.__FUNCTION__.
@@ -92,7 +65,7 @@ class File
 	 @return string base	filename without extension
 	 @throws Exception if files is not an array
 	"""
-	def getFullPath(files)
+	def getFullPath(files):
 		if (!is_array(files))
 			throw new Exception(
 				'Please use an array from '._className.'->'.
@@ -102,7 +75,7 @@ class File
 			dir = getcwd()
 
 			addDir = function (&value, key)
-				if (strpos(value, '/') === false)
+				if (strpos(value, '/') === False)
 			 		value = dir.'/'.value
 
 			array_walk_recursive(files, addDir)
@@ -117,7 +90,7 @@ class File
 	 @return array content the file contents
 	 @throws Exception if file does not exist
 	"""
-	def file2Array(file, csv=false, fieldDelimiter=',')
+	def file2Array(file, csv=False, fieldDelimiter=','):
 		if (!file_exists(file))
 			throw new Exception(
 				'File '.file.' does not exist from '._className.'->'.
@@ -143,7 +116,7 @@ class File
 	 @return string content the file contents
 	 @throws Exception if file does not exist
 	"""
-	def file2String(file)
+	def file2String(file):
 		if (!file_exists(file))
 			throw new Exception(
 				'File '.file.' does not exist from '._className.'->'.
@@ -151,7 +124,7 @@ class File
 			)
 		else
 			handle = fopen(file, 'r')
-			content = null
+			content = None
 
 			while (!feof(handle))
 				content .= fgets(handle, 1024)

@@ -1,7 +1,6 @@
 """ purpose: contains general functions to be used by all programs
  """
 
-date_default_timezone_set('Africa/Nairobi')
 class String
 	protected _className = __CLASS__	# class name
 	protected _verbose
@@ -10,7 +9,7 @@ class String
 	 @param boolean verbose enable verbose comments
 
 	"""
-	def __construct(verbose=false)
+	def __construct(verbose=False):
 		_verbose = verbose
 
 		if (_verbose)
@@ -27,7 +26,7 @@ class String
 
 	 @assert (array(0 => 'content,to,parse', 1 => 'content,to,parse')) == array(0 => array('content', 'to', 'parse'), 1 => array('content', 'to', 'parse'))
 	"""
-	def csv2Array(csvContent, fieldDelimiter=',')
+	def csv2Array(csvContent, fieldDelimiter=','):
 			fill = array_fill(0, count(csvContent), fieldDelimiter)
 			return array_map('str_getcsv', csvContent, fill)
 
@@ -46,7 +45,7 @@ class String
 
 	 @assert (array('one', 'two')) == "'one' 'two'"
 	"""
-	def extraImplode(content, extra = '\'', delimiter = ' ')
+	def extraImplode(content, extra = '\'', delimiter = ' '):
 		if (!is_array(content))
 			throw new Exception(
 				'Please use an array from '._className.'->'.
@@ -65,7 +64,7 @@ class String
 
 	 @assert ("line one\r\nline two\rline three") == "line one\nline two\nline three"
 	"""
-	def makeLFLineEndings(content)
+	def makeLFLineEndings(content):
 			content = str_replace("\r\n", "\n", content)
 			content = str_replace("\r", "\n", content)
 			return content
@@ -80,7 +79,7 @@ class String
 
 	 @assert ("one\ntwo\nthree") == array('one', 'two', 'three')
 	"""
-	def lines2Array(content, lineEnding="\n")
+	def lines2Array(content, lineEnding="\n"):
 			content = explode(lineEnding, content) # turn string to array
 			last = array_pop(content)
 

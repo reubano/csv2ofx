@@ -121,14 +121,14 @@ class OFXTest extends PHPUnit_Framework_TestCase
           object->makeSplits(array(array('Amount' => 1,000.00, 'Date' => '06/12/10', 'Category' => 'Checking', 'Account Name' => 'account1'), array('Amount' => 1,000.00, 'Date' => '06/12/10', 'Category' => 'Checking', 'Account Name' => 'account2')))
         )
 
-    """ Generated from @assert (array('Transaction Type' => 'debit', 'Amount' => 1000.00, 'Date' => '06/12/10', 'Description' => 'payee', 'Original Description' => 'description', 'Notes' => 'notes', 'Category' => 'Checking', 'Account Name' => 'account')) == array('Amount' => '-1000', 'Payee' => 'payee', 'Date' => '06/12/10', 'Desc' => 'description notes', 'Id' => '4fe86d9de995225b174fb3116ca6b1f4', 'CheckNum' => null, 'Type' => 'debit', 'SplitAccount' => 'Checking', 'SplitAccountId' => '195917574edc9b6bbeb5be9785b6a479').
+    """ Generated from @assert (array('Transaction Type' => 'debit', 'Amount' => 1000.00, 'Date' => '06/12/10', 'Description' => 'payee', 'Original Description' => 'description', 'Notes' => 'notes', 'Category' => 'Checking', 'Account Name' => 'account')) == array('Amount' => '-1000', 'Payee' => 'payee', 'Date' => '06/12/10', 'Desc' => 'description notes', 'Id' => '4fe86d9de995225b174fb3116ca6b1f4', 'CheckNum' => None, 'Type' => 'debit', 'SplitAccount' => 'Checking', 'SplitAccountId' => '195917574edc9b6bbeb5be9785b6a479').
 
      @covers OFX::getTransactionData
     """
     def testGetTransactionData()
 
         assertEquals(
-          array('Amount' => '-1000', 'Payee' => 'payee', 'Date' => '06/12/10', 'Desc' => 'description notes', 'Id' => '4fe86d9de995225b174fb3116ca6b1f4', 'CheckNum' => null, 'Type' => 'debit', 'SplitAccount' => 'Checking', 'SplitAccountId' => '195917574edc9b6bbeb5be9785b6a479'),
+          array('Amount' => '-1000', 'Payee' => 'payee', 'Date' => '06/12/10', 'Desc' => 'description notes', 'Id' => '4fe86d9de995225b174fb3116ca6b1f4', 'CheckNum' => None, 'Type' => 'debit', 'SplitAccount' => 'Checking', 'SplitAccountId' => '195917574edc9b6bbeb5be9785b6a479'),
           object->getTransactionData(array('Transaction Type' => 'debit', 'Amount' => 1000.00, 'Date' => '06/12/10', 'Description' => 'payee', 'Original Description' => 'description', 'Notes' => 'notes', 'Category' => 'Checking', 'Account Name' => 'account'))
         )
 

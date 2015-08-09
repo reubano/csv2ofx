@@ -27,7 +27,7 @@ class FileTest extends PHPUnit_Framework_TestCase
 
      @covers File::getExtension
     """
-    def testGetExtension()
+    def testGetExtension():
 
         assertEquals(
           'ext',

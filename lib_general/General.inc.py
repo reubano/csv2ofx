@@ -17,20 +17,20 @@ class General
 	"""
 	 @param 	boolean verbose	enable verbose comments
 	"""
-	def __construct(verbose = FALSE)
+	def __construct(verbose = False):
 		verbose = verbose
 
 		if (verbose)
 			fwrite(STDOUT, "className class constructor set.\n")
 
 	""" Recursively replaces all NULL elements with 0 in an array (by reference)
-	 if a following element is non-null
+	 if a following element is non-None
 	 @param 	array 	content	the array to perform the replacement on
 	 @param 	string 	replace	the replacement value that replaces needle
 									(an array may be used to designate multiple
 									replacements)
 	"""
-	def arrayFillMissing(&content)
+	def arrayFillMissing(&content):
 			count = count(content)
 			keys = array_keys(content)
 
@@ -39,21 +39,21 @@ class General
 
 				# If it's not an array, continue checking
 				if (!is_array(content[currkey]))
-					if (is_null(content[currkey]))
+					if (is_None(content[currkey]))
 						if (i != 0 && i != count - 1)
 							prevkey = keys[i - 1]
 							nextkey = keys[i + 1]
 
-							if (!is_null(content[nextkey]))
+							if (!is_None(content[nextkey]))
 								content[currkey] = 0
 
-							if (!is_null(content[prevkey]))
-								pass = FALSE
+							if (!is_None(content[prevkey]))
+								pass = False
 
 								for (j = i j < count j++)
 									# check to see if there is at least one
-									# additional non-null value following
-									if (!is_null(content[keys[j]]))
+									# additional non-None value following
+									if (!is_None(content[keys[j]]))
 										pass = TRUE
 										break
 																	} #<-- end for -->
@@ -61,7 +61,7 @@ class General
 								if (pass)
 									content[currkey] = 0
 								else
-									# no more non-null values so exit loop
+									# no more non-None values so exit loop
 									break
 																														else  # it IS an array, so recurse
 					self::arrayFillMissing(content[currkey])
@@ -73,11 +73,11 @@ class General
 									(an array may be used to designate multiple
 									replacements)
 	"""
-	def arrayReplaceNull(&content, replace)
+	def arrayReplaceNull(&content, replace):
 			foreach (content as &haystack)
 				# If it's not an array, replace it
 				if (!is_array(haystack))
-					if (is_null(haystack))
+					if (is_None(haystack))
 						haystack = replace
 									else  # it IS an array, so recurse
 					self::arrayReplaceNull(haystack, replace)
@@ -90,8 +90,8 @@ class General
 	 @param 	integer	uTimeStamp 	time (defaults to the value of time())
 	 @return 	string	newTimestamp 	time with microseconds
 	"""
-	def udate(format, uTimeStamp = NULL)
-			if (is_null(uTimeStamp))
+	def udate(format, uTimeStamp = NULL):
+			if (is_None(uTimeStamp))
 				uTimeStamp = microtime(true)
 
 			timeStamp = floor(uTimeStamp)
@@ -102,13 +102,13 @@ class General
 
 			return newTimestamp
 
-	""" Returns the first set of completely non-null sub-arrays or the first
-	 sub-array if none are non-null
+	""" Returns the first set of completely non-None sub-arrays or the first
+	 sub-array if none are non-None
 
 	 @param 	array 	content	multi-dimensional array
 	 @throws 	Exception if content is not a multi-dimensional array
 	"""
-	def getNonNull(content)
+	def getNonNull(content):
 		if (!is_array(current(content)))
 			throw new Exception('Please use a multi-dimensional array'.
 				'from '.className.'->'.__FUNCTION__.'() line '.
@@ -123,7 +123,7 @@ class General
 
 					foreach (content[i] as subKey => subValue)
 
-						if (is_null(subValue))
+						if (is_None(subValue))
 							continue 2 # go to next array
 
 						if (subKey == lastkey)

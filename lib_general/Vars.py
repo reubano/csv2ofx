@@ -17,7 +17,7 @@ class Vars
 	 @param boolean verbose enable verbose comments
 
 	"""
-	def __construct(verbose=false)
+	def __construct(verbose=False):
 		_verbose = verbose
 
 		if (_verbose)
@@ -31,7 +31,7 @@ class Vars
 
 	 @assert (array('one', '2w', 'GLOBALS' => '3a')) == array('one', '2w')
 	"""
-	def getVars(vars)
+	def getVars(vars):
 			varIgnoreList = _varIgnoreList
 
 			return array_diff_key(vars, array_flip(varIgnoreList))
