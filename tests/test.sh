@@ -8,7 +8,7 @@
 exec 2>&1
 
 # set path (necessary for gitx and git-gui)
-export PATH=$PATH:/opt/local/bin:/opt/local/sbin:/usr/local/sbin:/usr/local/bin
+export PATH=$PATH:/Users/reubano/.virtualenvs/testing/bin
 
 # necessary check for initial commit
 if [ git rev-parse --verify HEAD >/dev/null 2>&1 ]; then
