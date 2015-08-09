@@ -1,7 +1,8 @@
-.DS_Store
-exports/*
-php_errors.log
-lib_general/.php
-csv2ofx*.tgz
-.scripttest
-.travis.yml.save
+*.bak
+*.pyc
+*.kpf
+*.pjd
+*.swp
+*.ofx
+*.qif
+.idea
