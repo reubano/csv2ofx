@@ -1,266 +1,197 @@
-#!/usr/bin/env php
-""" csv2ofx converts a csv file to ofx and qif
-"""
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# vim: sw=4:ts=4:expandtab
 
-define('PROGRAM', pathinfo(__FILE__, PATHINFO_FILENAME))
+""" csv2ofx converts a csv file to ofx and qif """
 
-if (strpos('@php_bin@', '@php_bin') === 0)  # not a pear install
-	define('PROJECT_DIR', dirname(__FILE__).DIRECTORY_SEPARATOR)
-else
-	define(
-		'PROJECT_DIR', '@php_dir@'.DIRECTORY_SEPARATOR.PROGRAM.
-		DIRECTORY_SEPARATOR
-	)
+from __future__ import (
+    absolute_import, division, print_function, with_statement,
+    unicode_literals)
 
-define('CUR_DIR', getcwd().DIRECTORY_SEPARATOR)
-define('TIME_STAMP', date('YmdHis')) # format to yyyymmddhhmmss
-define('XML_FILE', PROJECT_DIR.PROGRAM.'.xml')
+import time
+import sys
+import argparse
 
-require PROJECT_DIR.'Autoload.php'
+from inspect import ismodule, getmembers
+from importlib import import_module
+from os import unlink, getcwd, environ, path as p
+from datetime import datetime as dt
+from dateutil.parser import parse
+from manager import Manager
+from . import utils
 
-defType = array('ofx' => 'CHECKING', 'qif' => 'Bank')
-ofxList = array(
-	'CHECKING' => array('checking'),
-	'SAVINGS' => array('savings'),
-	'MONEYMRKT' => array('market'),
-	'CREDITLINE' => array('visa', 'master', 'express', 'discover')
-)
+manager = Manager()
 
-bankList = array(
-	'checking', 'savings', 'market', 'receivable', 'payable', 'visa', 'master',
-	'express', 'discover'
-)
+DEF_ACCOUNTS = {'ofx': 'CHECKING', 'qif': 'Bank'}
 
-qifList = array('Bank' => bankList, 'Cash' => array('cash'))
-typeList = array('ofx' => ofxList, 'qif' => qifList)
-ext = array('ofx' => 'ofx', 'qif' => 'qif')
+TYPES = {
+	'ofx': {
+		'CHECKING': ('checking'),
+		'SAVINGS': ('savings'),
+		'MONEYMRKT': ('market'),
+		'CREDITLINE': ('visa', 'master', 'express', 'discover')
+	},
+	'qif': {
+		'Bank': (
+			'checking', 'savings', 'market', 'receivable', 'payable', 'visa',
+			'master', 'express', 'discover'
+		),
+		'Cash': ('cash',)
+	}
+}
 
-# create the parser from xml file
-parser = Console_CommandLine::fromXmlFile(XML_FILE)
+_types = list(it.chain.from_iterable(v.keys() for v in TYPES.values()))
+_mappings = [n for n, v in getmembers('mappings', ismodule)]
+_basedir = p.dirname(__file__)
 
+def _gen_content(obj, unique_accounts, **kwargs):
+	for account in unique_accounts:
+		kwargs.update({
+			'account': account,
+			'account_id': md5(account),
+			'account_type': account_type})
 
-	# run the parser
-	result = parser->parse()
+		yield obj.account_start(**kwargs)
+		the_content = split_content if qif else csv_content
 
-	# command arguments
-	source = result->args['source']
-	dest = result->args['dest']
+		for transaction in the_content:
+			kwargs.update({'time_stamp': parse(transaction[obj.head_date])}
 
-	# load options if present
-	delimiter = result->options['delimiter']
-	mapping = result->options['mapping']
-	primary = result->options['primary']
-	start = date('YmdHis', strtotime(result->options['start']))
-	startDate = date('Ymd', strtotime(start))
-	end = date('YmdHis', strtotime(result->options['end']))
-	endDate = date('Ymd', strtotime(end))
-	collAccts = explode(',', result->options['collapse'])
-	currency = result->options['currency']
-	language = result->options['language']
-	overwrite = result->options['overwrite']
-	transfer = result->options['transfer']
-	respType = transfer ? 'INTRATRNRS' : 'STMTTRNRS'
-	qif = result->options['qif']
-	type = qif ? 'qif' : 'ofx'
-	defType = result->options['accountType'] ?: defType[type]
-	typeList = typeList[type]
-	ext = ext[type]
+			if qif and obj.split:
+				data = map(obj.transaction_data, transaction)
+				yield obj.transaction(**data[0])
+				splitAccounts = getSplitAccounts(transaction)
+				yield ''.join(map(obj.split, splitAccounts, data[1:]))
+			else:
+				data = obj.transaction_data(transaction, **kwargs)
 
-	switch (dest)
-		case '':
-			stdout = true
-			break
+			if (qif and not obj.split) or (ofx and not transfer):
+				yield obj.transaction(**data)
+			elif ofx and transfer:
+				yield obj.transfer(**data)
 
-		case '':
-			stdout = False
-			dest = CUR_DIR.TIME_STAMP.'_'.mapping.'.'.ext
-			break
+			if qif and not obj.split:
+				yield obj.split(splitAccount, **data)
 
-		default:
-			stdout = False
-	} #<-- end switch -->
+			if qif:
+				yield obj.transaction_end()
 
-	if (result->options['debug'])
-		print('[Command opts] ')
-		print_r(result->options)
-		print('[Command args] ')
-		print_r(result->args)
+		if ofx:
+			yield obj.account_end(**kwargs)
+
+@manager.arg(
+  'source', type=argparse.FileType('r'), nargs='?', help='the source csv file (defaults to stdin)', default=sys.stdin)
+@manager.arg(
+  'dest', type=argparse.FileType('w'), nargs='?', , help='the output file (defaults to stdout)'default=sys.stdout)
+@manager.arg(
+	'account_type', 'A', choices=_types, help=(
+		"account type to use if no match is found, defaults to 'CHECKING'"
+		"for OFX and 'Bank' for QIF."))
+@manager.arg('currency', 'C', default='USD', help="the currency")
+
+@manager.arg(
+	'delimiter', 'D', metavar='CHAR', help="one character field delimiter",
+	default=',')
+
+@manager.arg('end', 'e', metavar='DATE', help="end date", default=str(dt.now()))
+@manager.arg('language', 'l', help="the language", default='ENG')
+
+@manager.arg(
+	'primary', 'p', metavar='ACCOUNT',
+	help="primary account used to pay credit cards", default='MITFCU Checking')
+
+@manager.arg('start', 's', metavar='DATE', help="the start date", default='1/1/1900')
+@manager.arg(
+	'mapping', 'm', choices=_mappings, help="the account mapping", default='mint')
+
+@manager.arg(
+	'qif', 'q', help="enables 'QIF' output instead of 'OFX'", type=bool,
+	default=False)
+@manager.arg(
+	'collapse', 'c', type=bool, default=False, help=(
+		'combine splits from the same account and date if the transaction are
+		'recorded double entry style (e.g. full data export from xero.com or
+		'Quickbooks)'))
+@manager.arg(
+	'transfer', 't', type=bool, default=False, help=(
+		"treat ofx transactions as transfers between accounts (sets the "
+		"destination account to 'category'"))
+@manager.arg(
+	'overwrite', 'o', type=bool, default=False,
+	help="overwrite destination file if it exists")
+@manager.arg(
+	'debug', 'd', type=bool, default=False,
+	help="display the options and arguments passed to the parser")
+@manager.arg('verbose', 'v', help="verbose output", type=bool, default=False
+
+@manager.command
+def convert(source, dest, **kwargs):
+	if debug:
+		print('[Command opts] ', kwargs)
+		print('[Command args] ', source, dest)
 		exit(0)
 
-	# program setting
-	vars = new vars(result->options['verbose'])
-	file = new file(result->options['verbose'])
-	array = new myarray(result->options['verbose'])
-	string = new string(result->options['verbose'])
+	mapping = kwargs['mapping']
+	start_date = parse(kwargs['start'])
+	end_date = parse(kwargs['end'])
+	collapse = kwargs['collapse']
+	resp_type = 'INTRATRNRS' if kwargs.get('transfer') else 'STMTTRNRS'
+	qif = kwargs['qif']
+	ofx = not qif
+	otype = 'qif' if qif else 'ofx'
+	def_type = kwargs.get('account_type', DEF_ACCOUNTS[otype])
 
-	# execute program
-	if (file_exists(source))
-		serverDate = date('YmdHis', filemtime(source))
-		content = file->file2String(source)
-		content = string->makeLFLineEndings(content, delimiter)
-	else
-		content = source
-		serverDate = TIME_STAMP
+	module = import_module('mappings.%s' % mapping)
+	type_list = TYPES[otype]
 
-	content = string->lines2Array(content)
-	csvContent = string->csv2Array(content, delimiter)
-	csvContent = array->arrayTrim(csvContent, delimiter)
-	csvContent = array->arrayLengthen(csvContent, delimiter)
-	csvContent = array->arrayInsertKey(csvContent)
-	array_shift(csvContent)
+	if p.isfile(source):
+		server_date = time.gmtime(p.getmtime(source))
+		csv_content = tabutils.read_csv(source)
+	else:
+		server_date = time.gmtime(time.time())
+		csv_content = tabutils.read_csv_str(source)
 
-	csv2ofx = new ofx(mapping, csvContent, result->options['verbose'])
-	csv2ofx->csvContent = csv2ofx->cleanAmounts()
-	splitContent = csv2ofx->makeSplits()
+	csv_content = xmlize(csv_content) if ofx else csv_content
+	exit(0)
+	obj = QIF(module.mapping) if qif else OFX(module.mapping, resp_type)
+	split_content = makeSplits(csv_content)
 
-	if (csv2ofx->split)
-		# verify splits
-		csv2ofx->verifySplits(splitContent)
-
-		# sort splits by account name
-		function = array(array, 'arraySortBySubValue')
-		field = array_fill(0, count(splitContent), csv2ofx->headAccount)
-		splitContent = array_map(function, splitContent, field)
-
-		# combine splits of collapsable accounts
-		splitContent = collAccts
-			? csv2ofx->collapseSplits(splitContent, collAccts)
-			: splitContent
+	if obj.split and verifySplits(split_content):
+		split_content = collapseSplits(split_content) if collapse else split_content
 
 		# get accounts and keys
-		maxAmounts = csv2ofx->getMaxSplitAmounts(splitContent)
-		accountInfo = csv2ofx->getAccounts(splitContent, maxAmounts)
-		accounts = accountInfo['accounts']
-		keys = accountInfo['keys']
+		maxAmounts = getMaxSplitAmounts(split_content)
+		accounts = getAccounts(split_content, maxAmounts)
 
 		# move main splits to beginning of transaction array
-		function = array(array, 'arrayMove')
-		splitContent = array_map(function, splitContent, keys)
-	else  # not a split transaction
-		accountInfo = csv2ofx->getAccounts(splitContent)
-		accounts = accountInfo['accounts']
-	} #<-- end if split -->
+		split_content = func(split_content, keys)
+	elif obj.split:
+		pass
+		# error
+	else:
+		accounts = getAccounts(split_content)
 
-	accountTypes = csv2ofx->getAccountTypes(accounts, typeList, defType)
-	uniqueAccounts = array_combine(accounts, accountTypes)
- 	asort(uniqueAccounts)
+	account_types = getAccountTypes(accounts, type_list, def_type)
+	unique_accounts = sorted(array_combine(accounts, account_types))
+	content = utils.IterStringIO()
 
-	# variable mode setting
-	if (result->options['variables'])
-		print_r(vars->getVars(get_defined_vars()))
-		exit(0)
+	if qif:
+		content.write(obj.header())
+	else:
+		content.write(obj.header(time_stamp=server_date, language=language))
+		content.write(obj.response_start())
 
-	# sub routines
-	subQIF = function (transaction, key, accountInfo) use (
-		&content, csv2ofx, start, end, primary
-	)
-		accountType = accountInfo[0]
-		account = accountInfo[1]
+	content.write(_gen_content(obj, unique_accounts, **kwargs))
+	content.write(obj.footer())
+	write_file(dest, content, chunksize=?, overwrite=overwrite)
 
-		# if transaction doesn't match the account name, skip it
-		firstSplit = current(transaction)
-		if (firstSplit[csv2ofx->headAccount] != account) return
 
-		# if transaction is not in the specified date range, skip it
-		date = firstSplit[csv2ofx->headDate]
-		timeStamp = date('YmdHis', strtotime(date))
-		if (timeStamp <= start || timeStamp >= end) return
+@manager.command
+def ver():
+  """Show version"""
+  from . import __version__ as version
+  print('v%s' % version)
 
-		# if this is a transfer from the primary account, skip it
-		splitAccount = csv2ofx->headSplitAccount
-			? firstSplit[csv2ofx->headSplitAccount]
-			: csv2ofx->defSplitAccount
 
-		if (csv2ofx->split && splitAccount == primary) return
-
-		# get data
-		function = array(csv2ofx, 'getTransactionData')
-		data = csv2ofx->split
-			? array_map(function, transaction)
-			: csv2ofx->getTransactionData(firstSplit)
-
-		# load content
-		content .= csv2ofx->split
-			? csv2ofx->getQIFTransactionContent(accountType, data[0])
-			: csv2ofx->getQIFTransactionContent(accountType, data)
-
-		function = array(csv2ofx, 'getQIFSplitContent')
-		csv2ofx->split ? array_shift(data) : ''
-		splitAccounts = csv2ofx->split
-			? csv2ofx->getSplitAccounts(transaction)
-			: None
-
-			content .= csv2ofx->split
-			? implode('', array_map(function, splitAccounts, data))
-			: csv2ofx->getQIFSplitContent(splitAccount, data)
-
-		content .= csv2ofx->getQIFTransactionFooter()
-	} #<-- end closure -->
-
-	subOFX = function (transaction, key, accountInfo) use (
-		&content, &timeStamp, csv2ofx, start, end, primary, transfer,
-		language, currency
-	)
-		accountType = accountInfo[0]
-		account = accountInfo[1]
-		accountId = md5(account)
-
-		# if transaction doesn't match the account name, skip it
-		if (transaction[csv2ofx->headAccount] != account) return
-
-		# if this is a transfer from the primary account, skip it
-		splitAccount = transaction[csv2ofx->headSplitAccount]
-		if (splitAccount == primary) return
-
-		# else, business as usual
-		date = transaction[csv2ofx->headDate]
-		timeStamp = date('YmdHis', strtotime(date))
-
-		# if transaction is not in the specified date range, skip it
-		if (timeStamp <= start || timeStamp >= end) return
-		data = csv2ofx->getTransactionData(transaction)
-
-		content .= transfer
-			? csv2ofx->getOFXTransfer(currency, timeStamp, accountId, account, accountType, data)
-			: csv2ofx->getOFXTransaction(timeStamp, data)
-	} #<-- end closure -->
-
-	mainQIF = function (accountType, account) use (
-		&content, subQIF, csv2ofx, splitContent
-	)
-		content .= csv2ofx->getQIFAccountHeader(account, accountType)
-		array_walk(splitContent, subQIF, array(accountType, account))
-	} #<-- end closure -->
-
-	mainOFX = function (accountType, account) use (
-		&content, csvContent, subOFX, csv2ofx, transfer, currency,
-		startDate, endDate
-	)
-		content .= transfer
-			? ''
-			: csv2ofx->getOFXTransactionAccountStart(
-				currency, md5(account), account, accountType, startDate,
-				endDate
-			)
-
-		array_walk(csvContent, subOFX, array(accountType, account))
-
-		content .= transfer
-			? ''
-			: csv2ofx->getOFXTransactionAccountEnd()
-	} #<-- end closure -->
-
-	# main routines
-	csvContent = qif ? csvContent : array->xmlize(csvContent)
-	ofxContent = csv2ofx->getOFXHeader(serverDate, language)
-	ofxContent .= csv2ofx->getOFXResponseStart(respType)
-	content = qif ? '' : ofxContent
-
-	qif
-		? array_walk(uniqueAccounts, mainQIF)
-		: array_walk(uniqueAccounts, mainOFX)
-
-	ofxContent = csv2ofx->getOFXResponseEnd(respType)
-	content .= qif ? '' : ofxContent
-	stdout ? print(content) : file->write2file(content, dest, overwrite)
-	exit(0)
+if __name__ == '__main__':
+  manager.main()
