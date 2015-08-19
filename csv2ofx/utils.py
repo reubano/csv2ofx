@@ -26,65 +26,56 @@ import itertools as it
 from io import TextIOBase
 from operator import itemgetter
 
-CURRENCIES = ('$', '£', '€')
 
 class IterStringIO(TextIOBase):
     def __init__(self, iterable=None):
         iterable = iterable or []
-        self.iter = it.chain.from_iterable(iterable)
+        not_newline = lambda s: s not in {'\n', '\r', '\r\n'}
+        self.iter = self._chain(iterable)
+        self.next_line = it.takewhile(not_newline, self.iter)
+
+    def _chain(self, iterable):
+        return it.chain.from_iterable(it.ifilter(None, iterable))
 
     def _read(self, iterable, n):
-        return bytearray(it.islice(iterable, None, n))
-
-    @property
-    def next_line(self):
-        return it.takewhile(lambda s: s not in {'\n', '\r', '\r\n'}, self.iter)
+        tmp = it.islice(iterable, None, n)
+        # return bytearray(tmp)
+        return ''.join(tmp)
 
     def write(self, iterable):
-        to_chain = it.chain.from_iterable(iterable)
-        self.iter = it.chain.from_iterable([self.iter, to_chain])
+        self.iter = it.chain.from_iterable([self.iter, self._chain(iterable)])
 
-    def read(self, n=None):
+    def read(self, n=pow(10, 10)):
         return self._read(self.iter, n)
 
-    def readline(self, n=None):
+    def readline(self, n=pow(10, 10)):
         return self._read(self.next_line, n)
 
-""" Searches an array for the nth occurrence of a given value
- type and returns the corresponding key if successful.
 
-    Args:
-        needle (str): the type of element to find (i.e. 'numeric' or 'string')
-        haystack (List[str]): the array to search
-
-    Returns:
-        (List[str]): array of the key(s) of the found element(s)
-
-    Examples:
-        >>> func('string', ('one', '2w', '3a'), 3) == (2)
-        >>> func('numeric', ('1', 2, 3), 3) == (2)
-        >>> func('numeric', ('one', 2, 3), 2) == (2)
-"""
 def array_search_type(needle, haystack, n=1):
-    """Helps read a csv file.
+    """ Searches an array for the nth occurrence of a given value
+     type and returns the corresponding key if successful.
 
-    Examples:
-        >>> from os import path as p
-        >>> parent_dir = p.abspath(p.dirname(p.dirname(__file__)))
-        >>> filepath = p.join(parent_dir, 'data', 'test.csv')
-        >>> f = open(filepath, 'rU')
-        >>> names = ['some_date', 'sparse_data', 'some_value', 'unicode_test']
-        >>> records = _read_csv(f, 'utf-8', names)
-        >>> it.islice(records, 2, 3).next()['some_date']
-        u'01-Jan-15'
-        >>> f.close()
-    """    switch = {'numeric': 'real', 'string': 'upper'}
+        Args:
+            needle (str): the type of element to find (i.e. 'numeric' or 'string')
+            haystack (List[str]): the array to search
+
+        Returns:
+            (List[str]): array of the key(s) of the found element(s)
+
+        Examples:
+            >>> func('string', ('one', '2w', '3a'), 3) == (2)
+            >>> func('numeric', ('1', 2, 3), 3) == (2)
+            >>> func('numeric', ('one', 2, 3), 2) == (2)
+    """
+    switch = {'numeric': 'real', 'string': 'upper'}
     func = lambda x: hasattr(item, switch[needle])
     return islice(ifilter(func, haystack), n, None)
 
 
-""" Recursively replaces all occurrences of needle with replace on
- elements in an array
+def array_substitute(content, needle, replace):
+    """ Recursively replaces all occurrences of needle with replace on
+     elements in an array
 
     Args:
         content (List[str]): the array to perform the replacement on
@@ -98,9 +89,9 @@ def array_search_type(needle, haystack, n=1):
     Returns:
         newContent (List[str]): new array with replaced values
 
- array_substitute([('one', 'two', 'three')], 'two', 2) == ('one', 2, 'three')
-"""
-def array_substitute(content, needle, replace):
+    Examples:
+        >>> array_substitute([('one', 'two', 'three')], 'two', 2) == ('one', 2, 'three')
+    """
     for item in content:
         if hasattr(item, 'upper'):
             yield replace if item == needle else item
@@ -111,36 +102,8 @@ def array_substitute(content, needle, replace):
                 yield replace if item == needle else item
 
 
-def mreplace(string, replacements):
-    func = lambda x, y: x.replace(y[0], y[1])
-    return reduce(func, replacements, string)
-
-
-""" Recursively makes elements of an array xml compliant
-
-    Args:
-        content (List[str]): the content to clean
-
-    Returns:
-        (List[str]): the cleaned content
-
-    Examples:
-        >>> func((('&'), ('<'))) == (('&amp'), ('&lt'))
-"""
-def xmlize(content):
-    replacements = [
-        ('&', '&amp'), ('>', '&gt'), ('<', '&lt'), ('\n', ' '), ('\r\n', ' ')]
-
-    for item in content:
-        if hasattr(item, 'upper'):
-            yield mreplace(item, replacements)
-        else:
-            try:
-                yield list(xmlize(item, needle, replace))
-            except TypeError:
-                yield mreplace(item, replacements)
-
-""" Returns a number with ordinal suffix, e.g., 1st, 2nd, 3rd.
+def add_ordinal(num):
+    """ Returns a number with ordinal suffix, e.g., 1st, 2nd, 3rd.
 
     Args:
         num (int): a number
@@ -151,77 +114,52 @@ def xmlize(content):
     Examples:
         >>> func(11) == '11th'
         >>> func(132) == '132nd'
-"""
-def add_ordinal(num):
+    """
     switch = {1: 'st', 2: 'nd', 3: 'rd'}
     end = 'th' if (num % 100 in {11, 12, 13}) else switch.get(num % 10, 'th')
     return '%i%s' % (num, end)
 
 
-""" Converts an array to string while adding an extra string to the beginning
- and end of each element
+def filter_join(items, char=''):
+    return char.join(filter(None, items))
+
+
+def write_file(filepath, content, mode='wb', **kwargs):
+    """Writes content to a named file.
 
     Args:
-        content (List[str]): array to convert
-        extra (str): string to add to the beginning and end of each array
-            element
+        filepath (str): The path of the file or file like object to write to.
+        content (obj): File like object or iterable response data.
+        **kwargs: Keyword arguments.
 
-        delimiter (str): character to seperate each arrayelement
+    Kwargs:
+        mode (Optional[str]): The file open mode (default: 'wb').
+        chunksize (Optional[int]): Number of bytes to write at a time (default:
+            None, i.e., all).
+        length (Optional[int]): Length of content (default: 0).
+        bar_len (Optional[int]): Length of progress bar (default: 50).
 
     Returns:
-        content (str): content formatted on 1 line with the extra string added
-            to the beginning and end of each array element
+        int: bytes written if chunksize else 0
 
     Examples:
-        >>> func(('one', 'two')) == "'one' 'two'"
-"""
-def extraImplode(content, extra = '\'', delimiter = ' '):
-    if (!is_array(content))
-        throw new Exception(
-            'Please use an array from '._className.'->'.
-            __FUNCTION__.'() line '.__LINE__
-        )
-    else
-                return extra.implode(extra.delimiter.extra, content).
-                extra # array to string
-
-def write_file(filepath, fileobj, mode='wb', **kwargs):
-"""Writes content to a named file.
-
-Args:
-    filepath (str): The path of the file to write to.
-    fileobj (obj): File like object or iterable response data.
-    **kwargs: Keyword arguments.
-
-Kwargs:
-    mode (Optional[str]): The file open mode (default: 'wb').
-    chunksize (Optional[int]): Number of bytes to write at a time (default:
-        None, i.e., all).
-    length (Optional[int]): Length of content (default: 0).
-    bar_len (Optional[int]): Length of progress bar (default: 50).
-
-Returns:
-    int: bytes written if chunksize else 0
-
-Examples:
         >>> import requests
         >>> filepath = get_temp_filepath(delete=True)
         >>> r = requests.get('http://google.com')
         >>> write_file(filepath, r.iter_content)
-    10000000000
-"""
-    chunksize = kwargs.get('chunksize')
-    length = int(kwargs.get('length') or 0)
-    bar_len = kwargs.get('bar_len', 50)
-
-    with open(filepath, mode) as f:
+        10000000000
+    """
+    def _write_file(f, content, **kwargs):
+        chunksize = kwargs.get('chunksize')
+        length = int(kwargs.get('length') or 0)
+        bar_len = kwargs.get('bar_len', 50)
         progress = 0
 
-        try:
-            chunks = (chunk for chunk in fileobj.read(chunksize))
-        except AttributeError:
-            chunksize = chunksize or pow(10, 10)
-            chunks = (chunk for chunk in fileobj(chunksize))
+        # try:
+        chunks = (chunk for chunk in content.read(chunksize))
+        # except AttributeError:
+        #     chunksize = chunksize or pow(10, 10)
+        #     chunks = (chunk for chunk in content(chunksize))
 
         for chunk in chunks:
             f.write(chunk)
@@ -232,7 +170,14 @@ Examples:
                 print('\r[%s%s]' % ('=' * bars, ' ' * (bar_len - bars)))
                 sys.stdout.flush()
 
-    return progress
+        return progress
+
+    if hasattr(filepath, 'read'):
+        return _write_file(filepath, content, **kwargs)
+    else:
+        with open(filepath, mode) as f:
+            return _write_file(f, content, **kwargs)
+
 
 
 def chunk(iterable, chunksize=0, start=0, stop=None):
@@ -251,7 +196,7 @@ def chunk(iterable, chunksize=0, start=0, stop=None):
         Iter[List]: Chunked content.
 
     Examples:
-            >>> chunk([1, 2, 3, 4, 5, 6], 2, 1).next()
+        >>> chunk([1, 2, 3, 4, 5, 6], 2, 1).next()
         [2, 3]
     """
     i = it.islice(iter(iterable), start, stop)
@@ -264,38 +209,13 @@ def chunk(iterable, chunksize=0, start=0, stop=None):
 
     return chunked
 
-def getAccounts(splitContent, head_amount, findAmounts=None):
-    """ Get main accounts (if passed findAmounts, it returns the account of the
-     split matching the given amount)
 
-    Args:
-        splitContent (List[str]): return value of makeSplits()
-        findAmounts (List[str]): split amounts to find
-
-    Returns:
-        (List[str]): main accounts
-
-    Examples:
-        >>> getAccounts(({'Account Name': 'account1'}, {'Account Name': 'account2'}), ({'Account Name': 'account3'}, {'Account Name': 'account4'})) == ('account1', 'account3')
-        >>> getAccounts(({'Account Name': 'account1', 'amount': -200}, {'Account Name': 'account2', 'amount': 200}), ({'Account Name': 'account3', 'amount': 400}, {'Account Name': 'account4', 'amount': -400})), (200, 400)) == ('account1', 'account3')
-    """
-    func = lambda x, y: abs(x[head_amount]) == y
-    findAmounts = findAmounts or []
-
-    for splits, amount in izip_longest(splitContent, findAmounts):
-        for split in splits:
-            if not findAmounts or (findAmounts and func(split, amount)):
-                yield split[head_account]
-                break
-
-
-
-def getAccountTypes(accounts, type_list, def_type='n/a'):
+def get_account_type(account, account_types, def_type='n/a'):
     """ Detects account types of given account names
 
     Args:
         accounts (List[str]):  account names
-        type_list (List[str]):  account types and matching account names
+        account_types (dict):  account types and matching account names
         def_type (str):  default account type
 
     Returns:
@@ -304,176 +224,85 @@ def getAccountTypes(accounts, type_list, def_type='n/a'):
     Examples:
         >>> (('somecash', 'checking account', 'other'), {'Bank': ('checking', 'savings'), 'Cash': ('cash',)}) == ('Cash', 'Bank', 'n/a')
     """
-    for account in accounts:
-        for key, values in type_list.items():
-            if any(v in account for v in values):
-                yield key
-                break
-        else:
-            yield def_type
+    _type = def_type
+
+    for key, values in account_types.items():
+        if any(v in account for v in values):
+            _type = key
+            break
+
+    return _type
 
 
-def getSplitAccounts(transaction, head_account):
-    """ Gets split accounts
+def merge_dicts(keyfunc, op, dicts):
+    """Merges a list of dicts by a specified binary operator on the specified
+       key.
 
+    # http://codereview.stackexchange.com/a/85822/71049
     Args:
-        transaction (List[str]): array of splits
+        splits (dict): return value of group_transactions()
 
-    Returns:
-        (List[str]): the resulting split account names
-
-    Examples:
-        >>> (({'Account Name': 'Accounts Receivable', 'amount': 200}, {'Account Name': 'Accounts Receivable', 'amount': 300}, {'Account Name': 'Sales', 'amount': 400})) == {'Accounts Receivable', 'Sales'}
-    """
-    accounts = [split[head_account] for split in transaction]
-    return accounts[1:]
-
-def collapseSplits(content, head_account, head_amount):
-    """ Combines splits with the same account
-
-    Args:
-        content (List[str]): return value of makeSplits()
-
-    Returns:
+    Yields:
         (List[str]): collapsed content
 
     Examples:
-        >>> (({'Account Name': 'Accounts Receivable', 'amount': 200}, {'Account Name': 'Accounts Receivable', 'amount': 300}, {'Account Name': 'Sales', 'amount': 400}), ({'Account Name': 'Accounts Receivable', 'amount': 200}, {'Account Name': 'Accounts Receivable', 'amount': 300}, {'Account Name': 'Sales', 'amount': 400})) == (({'Account Name': 'Accounts Receivable', 'amount': 500}, {'Account Name': 'Sales', 'amount': 400}), ({'Account Name': 'Accounts Receivable', 'amount': 500}, {'Account Name': 'Sales', 'amount': 400}))
+        >>> splits = {1: [{'account': 'Accounts Receivable', 'amount': 200}, {'account': 'Accounts Receivable', 'amount': 300}, {'account': 'Sales', 'amount': -500}], 2: [{'account': 'Accounts Receivable', 'amount': 300}, {'account': 'Accounts Receivable', 'amount': 300}, {'account': 'Sales', 'amount': -600}]}
+        >>> collapse_splits(splits, itemgetter('account'), itemgetter('amount'))
+        (({'account': 'Accounts Receivable', 'amount': 500}, {'account': 'Sales', 'amount': 400}), ({'account': 'Accounts Receivable', 'amount': 500}, {'account': 'Sales', 'amount': 400}))
     """
-    keyfunc = itemgetter(head_account)
+    def reducer(x, y):
+        get_value = lambda k, v: op(x[k], y[k]) if keyfunc(x) == v else x[k]
+        return {k: get_value(k, v) for k, v in x.items()}
 
-    def gen_splits(sorted_splits):
-        for account, group in it.groupby(sorted_splits, keyfunc):
-            split = group.next()
-            add_amount = sum(g[head_amount] for g in group)
-            split.update({head_amount: split[head_amount] + add_amount})
-            yield split
-
-    for splits in content:
-        yield list(gen_splits(sorted(splits, key=keyfunc)))
+    return reduce(reducer, dicts)
 
 
-def getMaxSplitAmounts(splitContent, head_amount):
+def get_max_split(splits, keyfunc):
     """ Returns the split in a transaction with the largest absolute value
 
     Args:
-        splitContent (List[str]): return value of makeSplits()
+        splits (dict): return value of group_transactions()
         collapse (bool): collapse accounts
 
     Returns:
-        (List[str]): splitContent collapsed content
+        (List[str]): splits collapsed content
 
     Examples:
         >>> ((({'amount': 350}, {'amount': -400}), ({'amount': 100}, {'amount': -400}, {'amount': 300}))) == (400, 400)
     """
-    maxAbs = lambda a, b: max(abs(a), abs(b))
-    amounts = ([a[head_amount] for a in split] for split in splitContent)
-    return [reduce(maxAbs, item) for item in amounts]
+    maxfunc = lambda enum: abs(keyfunc(enum[1]))
+    return max(enumerate(splits), key=maxfunc)
 
-
-def verifySplits(splitContent, head_amount):
+def verify_splits(splits, keyfunc):
     """ Verifies that the splits of each transaction sum to 0
 
     Args:
-       splitContent (List[str]): return value of makeSplits()
+       splits (dict): return value of group_transactions()
+       keyfunc (func): function that returns the transaction amount
 
     Returns:
         (bool): true on success
 
     Examples:
-        >>> ((({'amount': 100}, {'amount': -100}), ({'amount': -300}, {'amount': 200}, {'amount': 100}))) == true
+        >>> splits = {1: [{'amount': 100}, {'amount': -100}], 2: [{'amount': -300}, {'amount': 200}, {'amount': 100}]}
+        >>> verify_splits(splits, itemgetter('amount'))
     """
-    amounts = ([a[head_amount] for a in split] for split in splitContent)
-    return not any(sum(item) for item in amounts)
+    return not sum(map(keyfunc, splits))
 
 
-def makeSplits(csv_content, head_id):
-    """
+def group_transactions(transactions, keyfunc):
+    """Groups transactions by account
+
     Args:
-        csv_content (List[str]): csv content
-
+        transactions (List[dict]): csv content
+        keyfunc (func):
     Returns:
-        (List[str]): csv content organized by transaction
+        (List[dict]): csv content organized by transaction
 
     Examples:
-        >>> (({'amount': '1,000.00', 'Date': '06/12/10', 'Category': 'Checking', 'Account Name': 'account1'}, {'amount': '1,000.00', 'Date': '06/12/10', 'Category': 'Checking', 'Account Name': 'account2'})) == (({'amount': '1,000.00', 'Date': '06/12/10', 'Category': 'Checking', 'Account Name': 'account1'}), ({'amount': '1,000.00', 'Date': '06/12/10', 'Category': 'Checking', 'Account Name': 'account2'}))
+        >>> (({'amount': '1,000.00', 'Date': '06/12/10', 'Category': 'Checking', 'account': 'account1'}, {'amount': '1,000.00', 'Date': '06/12/10', 'Category': 'Checking', 'account': 'account2'})) == (({'amount': '1,000.00', 'Date': '06/12/10', 'Category': 'Checking', 'account': 'account1'}), ({'amount': '1,000.00', 'Date': '06/12/10', 'Category': 'Checking', 'account': 'account2'}))
     """
-    for content in csv_content:
-        splitContent[content[head_id]] = content
+    sorted_transactions = sorted(transactions, key=keyfunc)
 
-    splitContent = {}
-    [{splitContent: [content[head_id]]} for content in csv_content]
-    return splitContent
-    # TODO: fixme
-
-
-def decimalize(string, thousand_sep=',', decimal_sep='.', precision=2):
-    """
-    >>> decimalize('$123.45')
-    123.45
-    >>> decimalize('123€')
-    123.00
-    >>> decimalize('2,123.45')
-    2123.45
-    >>> decimalize('2.123,45', '.', ',')
-    2123.45
-    >>> decimalize('spam')
-    TypeError
-    """
-    currencies = it.izip(CURRENCIES, it.repeat(''))
-    seperators = [(thousand_sep, ''), (decimal_sep, '.')]
-    stripped = mreplace(string, it.chain(currencies, seperators))
-    return float(stripped)
-
-
-def is_numeric_like(string, seperators=('.', ',')):
-    """
-    >>> is_numeric_like('$123.45')
-    True
-    >>> is_numeric_like('123€')
-    True
-    >>> is_numeric_like('2,123.45')
-    True
-    >>> is_numeric_like('2.123,45')
-    True
-    >>> is_numeric_like('10e5')
-    True
-    >>> is_numeric_like('spam')
-    False
-    """
-    replacements = it.izip(it.chain(CURRENCIES, seperators), it.repeat(''))
-    stripped = mreplace(string, replacements)
-
-    try:
-        return float(stripped)
-    except (ValueError, TypeError):
-        return False
-
-
-def afterish(string, char):
-    """Number of digits after a given character.
-
-    >>> afterish('123.45', '.')
-    2
-    >>> afterish('1001.', '.')
-    0
-    >>> afterish('1001', '.')
-    -1
-    >>> afterish('1,001', ',')
-    3
-    >>> afterish('2,100,001.00', ',')
-    3
-    >>> afterish('eggs', '.')
-    TypeError
-
-    """
-    numeric_like = is_numeric_like(string)
-
-    elif numeric_like and char in string:
-        after = len(string) - string.rfind(char) - 1
-    elif numeric_like:
-        after = -1
-    else:
-        raise TypeError('Not able to convert %s to a number' % string)
-
-    return after
+    for account, group in it.groupby(sorted_transactions, keyfunc):
+        yield (account, list(group))
