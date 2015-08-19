@@ -35,6 +35,7 @@ class IterStringIO(TextIOBase):
         self.next_line = it.takewhile(not_newline, self.iter)
 
     def _chain(self, iterable):
+        iterable = iterable or []
         return it.chain.from_iterable(it.ifilter(None, iterable))
 
     def _read(self, iterable, n):

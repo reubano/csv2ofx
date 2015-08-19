@@ -65,8 +65,8 @@ class File(object):
 
     def convert_amount(self, tr):
         raw_amount = self.get('amount', tr)
-        after_comma = tabutils.afterish(raw_amount, ',')
-        after_decimal = tabutils.afterish(raw_amount, '.')
+        after_comma = tabutils.afterish(raw_amount, exclude='.')
+        after_decimal = tabutils.afterish(raw_amount, '.', ',')
 
         if after_comma in (-1, 0, 3) and after_decimal in (-1, 0, 2):
             amount = tabutils.decimalize(raw_amount)
@@ -74,7 +74,9 @@ class File(object):
             kwargs = {'thousand_sep': '.', 'decimal_sep': ','}
             amount = tabutils.decimalize(raw_amount, **kwargs)
         else:
-            raise TypeError('Invalid number format for %s.' % raw_amount)
+            print('after_comma', after_comma)
+            print('after_decimal', after_decimal)
+            raise TypeError('Invalid number format for `%s`.' % raw_amount)
 
         return amount
 
