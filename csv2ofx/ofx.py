@@ -21,7 +21,6 @@ from __future__ import (
     unicode_literals)
 
 from . import File
-from . import utils
 
 
 class OFX(File):
@@ -55,7 +54,11 @@ class OFX(File):
             (str): the OFX content
 
         Examples:
-            >>> (20120101111111) == "<OFX>\n\t<SIGNONMSGSRSV1>\n\t\t<SONRS>\n\t\t\t<STATUS>\n\t\t\t\t<CODE>0</CODE>\n\t\t\t\t<SEVERITY>INFO</SEVERITY>\n\t\t\t</STATUS>\n\t\t\t<DTSERVER>20120101111111</DTSERVER>\n\t\t\t<LANGUAGE>ENG</LANGUAGE>\n\t\t</SONRS>\n\t</SIGNONMSGSRSV1>\n"
+            >>> kwargs = {'time_stamp': 20120101111111}
+            "<OFX>\n\t<SIGNONMSGSRSV1>\n\t\t<SONRS>\n\t\t\t<STATUS>\n\t\t\t\t \
+<CODE>0</CODE>\n\t\t\t\t<SEVERITY>INFO</SEVERITY>\n\t\t\t</STATUS>\n\t\t\t \
+<DTSERVER>20120101111111</DTSERVER>\n\t\t\t<LANGUAGE>ENG</LANGUAGE>\n\t\t \
+</SONRS>\n\t</SIGNONMSGSRSV1>\n"
         """
         kwargs.setdefault('language', 'ENG')
         time_stamp = kwargs['time_stamp'].strftime('%Y%m%d')
@@ -89,7 +92,8 @@ class OFX(File):
             (str): the OFX content
 
         Examples:
-            >>> () == "\t\t</INTRATRNRS>\n\t</BANKMSGSRSV1>\n</OFX>"
+            >>> footer()
+            "\t\t</INTRATRNRS>\n\t</BANKMSGSRSV1>\n</OFX>"
         """
         return "\t\t</%s>\n\t</BANKMSGSRSV1>\n</OFX>" % self.resp_type
 
@@ -102,7 +106,14 @@ class OFX(File):
             (str): the OFX content
 
         Examples:
-            >>> ('USD', 1, 'account', 'type', 20120101, 20120101) == "\t\t\t<STMTRS>\n\t\t\t\t<CURDEF>USD</CURDEF>\n\t\t\t\t<BANKACCTFROM>\n\t\t\t\t\t<BANKID>1</BANKID>\n\t\t\t\t\t<ACCTID>account</ACCTID>\n\t\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t\t</BANKACCTFROM>\n\t\t\t\t<BANKTRANLIST>\n\t\t\t\t\t<DTSTART>20120101</DTSTART>\n\t\t\t\t\t<DTEND>20120101</DTEND>\n"
+            >>> kwargs = {'currency': 'USD', 'bank_id': 1, 'account_id': 1, \
+'account_type': 'type', 'start_date': 20120101, 'end_date': 20120101}
+            >>> account_start(**kwargs)
+            "\t\t\t<STMTRS>\n\t\t\t\t<CURDEF>USD</CURDEF>\n\t\t\t\t \
+<BANKACCTFROM>\n\t\t\t\t\t<BANKID>1</BANKID>\n\t\t\t\t\t<ACCTID>account \
+</ACCTID>\n\t\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t\t</BANKACCTFROM> \
+\n\t\t\t\t<BANKTRANLIST>\n\t\t\t\t\t<DTSTART>20120101</DTSTART>\n\t\t\t\t\t \
+<DTEND>20120101</DTEND>\n"
         """
         kwargs.update({
             'start_date': self.start.strftime('%Y%m%d'),
@@ -129,7 +140,14 @@ class OFX(File):
             (str): the OFX content
 
         Examples:
-            >>> (20120101111111, {'type': 'type', 'amount': 100, 'id': 1, 'check_num': 1, 'Payee': 'payee', 'desc': 'memo'}) == "\t\t\t\t\t<STMTTRN>\n\t\t\t\t\t\t<TRNTYPE>type</TRNTYPE>\n\t\t\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t\t\t\t<FITID>1</FITID>\n\t\t\t\t\t\t<CHECKNUM>1</CHECKNUM>\n\t\t\t\t\t\t<NAME>payee</NAME>\n\t\t\t\t\t\t<MEMO>memo</MEMO>\n\t\t\t\t\t</STMTTRN>\n"
+            >>> kwargs = {'time_stamp', 20120101111111, 'type': 'type', \
+'amount': 100, 'id': 1, 'check_num': 1, 'Payee': 'payee', 'desc': 'memo'}
+            >>> transaction(**kwargs)
+            "\t\t\t\t\t<STMTTRN>\n\t\t\t\t\t\t<TRNTYPE>type</TRNTYPE> \
+\n\t\t\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t\t\t\t<TRNAMT>100 \
+</TRNAMT>\n\t\t\t\t\t\t<FITID>1</FITID>\n\t\t\t\t\t\t<CHECKNUM>1</CHECKNUM> \
+\n\t\t\t\t\t\t<NAME>payee</NAME>\n\t\t\t\t\t\t<MEMO>memo</MEMO>\n\t\t\t\t\t \
+</STMTTRN>\n"
         """
         content = '\t\t\t\t\t<STMTTRN>\n'
         content += '\t\t\t\t\t\t<TRNTYPE>%(tran_type)s</TRNTYPE>\n' % kwargs
@@ -151,7 +169,11 @@ class OFX(File):
             (str): the OFX content
 
         Examples:
-            >>> (150, 20120101111111) == "\t\t\t\t</BANKTRANLIST>\n\t\t\t\t<LEDGERBAL>\n\t\t\t\t\t<BALAMT>150</BALAMT>\n\t\t\t\t\t<DTASOF>20120101111111</DTASOF>\n\t\t\t\t</LEDGERBAL>\n\t\t\t</STMTRS>\n"
+            >>> kwargs = {'balance': 150, 'time_stamp': 20120101111111}
+            >>> account_end(**kwargs)
+            "\t\t\t\t</BANKTRANLIST>\n\t\t\t\t<LEDGERBAL>\n\t\t\t\t\t<BALAMT> \
+150</BALAMT>\n\t\t\t\t\t<DTASOF>20120101111111</DTASOF>\n\t\t\t\t</LEDGERBAL> \
+\n\t\t\t</STMTRS>\n"
         """
         content = '\t\t\t\t</BANKTRANLIST>\n'
 
@@ -174,7 +196,18 @@ class OFX(File):
             (str): the QIF content
 
         Examples:
-            >>> ('USD', 20120101111111, 1, 'account', 'type', {'split_account_id': 2, 'split_account': 'split_account', 'amount': 100}) == "\t\t\t<INTRARS>\n\t\t\t\t<CURDEF>USD</CURDEF>\n\t\t\t\t<SRVRTID>20120101111111</SRVRTID>\n\t\t\t\t<XFERINFO>\n\t\t\t\t\t<BANKACCTFROM>\n\t\t\t\t\t\t<BANKID>1</BANKID>\n\t\t\t\t\t\t<ACCTID>account</ACCTID>\n\t\t\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t\t\t</BANKACCTFROM>\n\t\t\t\t\t<BANKACCTTO>\n\t\t\t\t\t\t<BANKID>2</BANKID>\n\t\t\t\t\t\t<ACCTID>split_account</ACCTID>\n\t\t\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t\t\t</BANKACCTTO>\n\t\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t\t</XFERINFO>\n\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t</INTRARS>\n"
+            >>> kwargs = {'currency': USD', 'time_stamp': 20120101111111, \
+'bank_id': 1, 'account_id': 1, 'account_type': 'type', 'split_account_id': 2, \
+'split_account': 'split_account', 'amount': 100}
+            >>> transfer(**kwargs)
+            "\t\t\t<INTRARS>\n\t\t\t\t<CURDEF>USD</CURDEF>\n\t\t\t\t<SRVRTID> \
+20120101111111</SRVRTID>\n\t\t\t\t<XFERINFO>\n\t\t\t\t\t<BANKACCTFROM> \
+\n\t\t\t\t\t\t<BANKID>1</BANKID>\n\t\t\t\t\t\t<ACCTID>account</ACCTID> \
+\n\t\t\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t\t\t</BANKACCTFROM> \
+\n\t\t\t\t\t<BANKACCTTO>\n\t\t\t\t\t\t<BANKID>2</BANKID>\n\t\t\t\t\t\t \
+<ACCTID>split_account</ACCTID>\n\t\t\t\t\t\t<ACCTTYPE>type</ACCTTYPE> \
+\n\t\t\t\t\t</BANKACCTTO>\n\t\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t\t \
+</XFERINFO>\n\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t</INTRARS>\n"
         """
         content = '\t\t\t<INTRARS>\n'
         content += '\t\t\t\t<CURDEF>%(currency)s</CURDEF>\n' % kwargs
@@ -183,12 +216,15 @@ class OFX(File):
         content += '\t\t\t\t\t<BANKACCTFROM>\n'
         content += '\t\t\t\t\t\t<BANKID>%(bank_id)s</BANKID>\n' % kwargs
         content += '\t\t\t\t\t\t<ACCTID>%(account_id)s</ACCTID>\n' % kwargs
-        content += '\t\t\t\t\t\t<ACCTTYPE>%(account_type)s</ACCTTYPE>\n' % kwargs
+        content += '\t\t\t\t\t\t<ACCTTYPE>%(account_type)s' % kwargs
+        content += '</ACCTTYPE>\n'
         content += '\t\t\t\t\t</BANKACCTFROM>\n'
         content += '\t\t\t\t\t<BANKACCTTO>\n'
         content += '\t\t\t\t\t\t<BANKID>%(bank_id)s</BANKID>\n' % kwargs
-        content += '\t\t\t\t\t\t<ACCTID>%(split_account_id)s</ACCTID>\n' % kwargs
-        content += '\t\t\t\t\t\t<ACCTTYPE>%(split_account_type)s</ACCTTYPE>\n' % kwargs
+        content += '\t\t\t\t\t\t<ACCTID>%(split_account_id)s' % kwargs
+        content += '</ACCTID>\n'
+        content += '\t\t\t\t\t\t<ACCTTYPE>%(split_account_type)s' % kwargs
+        content += '</ACCTTYPE>\n'
         content += '\t\t\t\t\t</BANKACCTTO>\n'
         content += '\t\t\t\t\t<TRNAMT>%(amount)s</TRNAMT>\n' % kwargs
         content += '\t\t\t\t</XFERINFO>\n'

@@ -37,7 +37,7 @@ class QIF(File):
     def header(self, **kwargs):
         return None
 
-    def transaction_data(self, tr, **kwargs):
+    def transaction_data(self, tr):
         """ gets QIF transaction data
 
         Args:
@@ -50,17 +50,25 @@ class QIF(File):
             (List[str]):   the QIF content
 
         Examples:
-            >>> ({'Transaction Type': 'debit', 'amount': 1000.00, 'Date': '06/12/10', 'Description': 'payee', 'Original Description': 'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': 'account'}) == {'amount': '-1000', 'Payee': 'payee', 'Date': '06/12/10', 'desc': 'description notes', 'id': '4fe86d9de995225b174fb3116ca6b1f4', 'check_num': None, 'type': 'debit', 'split_account': 'Checking', 'split_account_id': '195917574edc9b6bbeb5be9785b6a479'}
+            >>> tr = {'Transaction Type': 'debit', 'amount': 1000.00, \
+'Date': '06/12/10', 'Description': 'payee', 'Original Description': \
+'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': \
+'account'}
+            >>> QIF({}).transaction_data(tr)
+            {'amount': '-1000', 'Payee': 'payee', 'Date': '06/12/10', 'desc': \
+'description notes', 'id': '4fe86d9de995225b174fb3116ca6b1f4', 'check_num': \
+None, 'type': 'debit', 'split_account': 'Checking', 'split_account_id': \
+'195917574edc9b6bbeb5be9785b6a479'}
         """
-        data = super(QIF, self).transaction_data(tr, **kwargs)
+        data = super(QIF, self).transaction_data(tr)
         desc = data.get('desc') or ''
         notes = data['notes']
         tran_class = data['tran_class']
 
         # qif doesn't support notes or class so add them to description
-        sep =  ' ' if desc else ''
+        sep = ' ' if desc else ''
         desc += '%s%s' % (sep, notes) if notes else ''
-        sep =  ' ' if desc else ''
+        sep = ' ' if desc else ''
         desc += '%s%s' % (sep, tran_class) if tran_class else ''
         data.update({'desc': desc})
         return data
@@ -89,8 +97,10 @@ class QIF(File):
             (str): content the QIF content
 
         Examples:
-            >>> ('type', {'Payee': 'payee', 'amount': 100, 'check_num': 1, 'Date': '01/01/12'}) == "!Type:type\nN1\nD01/01/12\nPpayee\nT100\n"
-            >>> ('type', {'Payee': 'payee', 'amount': 100, 'Date': '01/01/12'}) == "!Type:type\nD01/01/12\nPpayee\nT100\n"
+            >>> kwargs = {'Payee': 'payee', 'amount': 100, 'check_num': 1, \
+'Date': '01/01/12'})
+            >>> transaction(**kwargs)
+            "!Type:type\nN1\nD01/01/12\nPpayee\nT100\n"
         """
         content = "!Type:%(account_type)s\n" % kwargs
         content += "N%(check_num)s\n" % kwargs if 'check_num' in kwargs else ''
@@ -108,7 +118,8 @@ class QIF(File):
             (str): the QIF content
 
         Examples:
-            >>> ('account', {'desc': 'desc', 'amount': 100}) == "Saccount\nEdesc\n100\n"
+            >>> split_content('account', {'desc': 'desc', 'amount': 100})
+            "Saccount\nEdesc\n100\n"
         """
         content = "S%s\nE" % split_account
         content += "%(desc)s\n\%(amount)s\n" % kwargs
@@ -127,4 +138,3 @@ class QIF(File):
 
     def footer(self):
         return None
-

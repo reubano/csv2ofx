@@ -21,6 +21,13 @@ from __future__ import (
     absolute_import, division, print_function, with_statement,
     unicode_literals)
 
+import tabutils
+import hashlib
+
+from datetime import datetime as dt
+from dateutil.parser import parse
+from . import utils
+
 __title__ = 'csv2ofx'
 __package_name__ = 'csv2ofx'
 __author__ = 'Reuben Cummings'
@@ -30,14 +37,8 @@ __version__ = '0.14.0'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2015 Reuben Cummings'
 
-import tabutils
-import hashlib
-
-from datetime import datetime as dt
-from itertools import starmap
-from dateutil.parser import parse
-
 md5 = lambda content: hashlib.md5(content).hexdigest()
+
 
 class File(object):
     def __init__(self, mapping, **kwargs):
@@ -93,7 +94,15 @@ class File(object):
             (List[str]): the QIF content
 
         Examples:
-            >>> ({'Transaction Type': 'debit', 'amount': 1000.00, 'Date': '06/12/10', 'Description': 'payee', 'Original Description': 'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': 'account'}) == {'amount': '-1000', 'Payee': 'payee', 'Date': '06/12/10', 'desc': 'description notes', 'id': '4fe86d9de995225b174fb3116ca6b1f4', 'check_num': None, 'type': 'debit', 'split_account': 'Checking', 'split_account_id': '195917574edc9b6bbeb5be9785b6a479'}
+            >>> tr = {'Transaction Type': 'debit', 'amount': 1000.00, \
+'Date': '06/12/10', 'Description': 'payee', 'Original Description': \
+'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': \
+'account'}
+            >>> File({}).transaction_data(tr)
+            {'amount': '-1000', 'Payee': 'payee', 'Date': '06/12/10', 'desc': \
+'description notes', 'id': '4fe86d9de995225b174fb3116ca6b1f4', 'check_num': \
+None, 'type': 'debit', 'split_account': 'Checking', 'split_account_id': \
+'195917574edc9b6bbeb5be9785b6a479'}
         """
         args = [self.account_types, self.def_type]
 
@@ -119,9 +128,11 @@ class File(object):
         check_num = self.get('check_num', tr)
         split_account = self.get('split_account', tr, '')
         split_account_type = utils.get_account_type(split_account, *args)
-        details = utils.filter_join([date, raw_amount, payee, split_account, desc])
+        _details = [date, raw_amount, payee, split_account, desc]
+        details = utils.filter_join(_details)
         tran_id = self.get('id', tr, check_num) or md5(details)
 
+        # TODO: find where to put notes and tran_class
         return {
             'time_stamp': parse(self.get('date', tr)),
             'currency': currency,
@@ -134,8 +145,8 @@ class File(object):
             'payee': payee,
             'date': date,
             'desc': desc,
-            'notes': self.get('notes', tr),  # TODO: find where to put this
-            'tran_class': self.get('class', tr), # TODO: find where to put this,
+            'notes': self.get('notes', tr),
+            'tran_class': self.get('class', tr),
             'id': tran_id,
             'check_num': check_num,
             'tran_type': tran_type,

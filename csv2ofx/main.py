@@ -5,17 +5,18 @@
 """ csv2ofx converts a csv file to ofx and qif """
 
 from __future__ import (
-        absolute_import, division, print_function, with_statement,
-        unicode_literals)
+    absolute_import, division, print_function, with_statement,
+    unicode_literals)
 
 import time
 import sys
 import argparse
 
+from functools import partial
 from inspect import ismodule, getmembers
 from pprint import pprint
 from importlib import import_module
-from os import unlink, getcwd, environ, path as p
+from os import path as p
 from datetime import datetime as dt
 from dateutil.parser import parse
 from argparse import RawTextHelpFormatter, ArgumentParser
@@ -62,8 +63,8 @@ parser.add_argument(
     '-V', '--version', help="show version and exit", action='store_true',
     default=False)
 parser.add_argument(
-    '-q', '--qif', help="enables 'QIF' output instead of 'OFX'", action='store_true',
-    default=False)
+    '-q', '--qif', help="enables 'QIF' output instead of 'OFX'",
+    action='store_true', default=False)
 parser.add_argument(
     '-c', '--collapse', action='store_true', default=False, help=(
         'combine splits from the same account and date if the transactions\n'
@@ -104,7 +105,7 @@ def gen_content(chunks, obj, ofx, transfer):
             if obj.is_split and args.collapse:
                 # group transactions by account and sum the amounts
                 byaccount = utils.group_transactions(transactions, obj.account)
-                merger = partial(merge_dicts, obj.amount, sum)
+                merger = partial(utils.merge_dicts, obj.amount, sum)
                 trxns = map(merger, byaccount.values())
             else:
                 trxns = transactions
@@ -120,12 +121,10 @@ def gen_content(chunks, obj, ofx, transfer):
             else:
                 main_pos, main_trxn = 0, trxns[0]
 
-            # pprint(main_trxn)
-
             main_data = obj.transaction_data(main_trxn)
 
             if ofx and transfer:
-                yield obj.transfer(**data)
+                yield obj.transfer(**main_data)
             else:
                 yield obj.account_start(**main_data)
                 yield obj.transaction(**main_data)

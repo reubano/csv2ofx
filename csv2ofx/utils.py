@@ -21,6 +21,7 @@ from __future__ import (
     absolute_import, division, print_function, with_statement,
     unicode_literals)
 
+import sys
 import itertools as it
 
 from io import TextIOBase
@@ -58,20 +59,24 @@ def array_search_type(needle, haystack, n=1):
      type and returns the corresponding key if successful.
 
         Args:
-            needle (str): the type of element to find (i.e. 'numeric' or 'string')
+            needle (str): the type of element to find (i.e. 'numeric'
+                or 'string')
             haystack (List[str]): the array to search
 
         Returns:
             (List[str]): array of the key(s) of the found element(s)
 
         Examples:
-            >>> func('string', ('one', '2w', '3a'), 3) == (2)
-            >>> func('numeric', ('1', 2, 3), 3) == (2)
-            >>> func('numeric', ('one', 2, 3), 2) == (2)
+            >>> array_search_type('string', ('one', '2w', '3a'), 3)
+            (2)
+            >>> array_search_type('numeric', ('1', 2, 3), 3)
+            (2)
+            >>> array_search_type('numeric', ('one', 2, 3), 2)
+            (2)
     """
     switch = {'numeric': 'real', 'string': 'upper'}
-    func = lambda x: hasattr(item, switch[needle])
-    return islice(ifilter(func, haystack), n, None)
+    func = lambda x: hasattr(x, switch[needle])
+    return it.islice(it.ifilter(func, haystack), n, None)
 
 
 def array_substitute(content, needle, replace):
@@ -91,7 +96,8 @@ def array_substitute(content, needle, replace):
         newContent (List[str]): new array with replaced values
 
     Examples:
-        >>> array_substitute([('one', 'two', 'three')], 'two', 2) == ('one', 2, 'three')
+        >>> array_substitute([('one', 'two', 'three')], 'two', 2)
+        ('one', 2, 'three')
     """
     for item in content:
         if hasattr(item, 'upper'):
@@ -113,8 +119,8 @@ def add_ordinal(num):
         (str): ext a number with the ordinal suffix
 
     Examples:
-        >>> func(11) == '11th'
-        >>> func(132) == '132nd'
+        >>> add_ordinal(11) == '11th'
+        >>> add_ordinal(132) == '132nd'
     """
     switch = {1: 'st', 2: 'nd', 3: 'rd'}
     end = 'th' if (num % 100 in {11, 12, 13}) else switch.get(num % 10, 'th')
@@ -145,9 +151,10 @@ def write_file(filepath, content, mode='wb', **kwargs):
 
     Examples:
         >>> import requests
-        >>> filepath = get_temp_filepath(delete=True)
+        >>> from tempfile import NamedTemporaryFile
+        >>> tmpfile = NamedTemporaryFile(delete='True')
         >>> r = requests.get('http://google.com')
-        >>> write_file(filepath, r.iter_content)
+        >>> write_file(tmpfile.name, r.iter_content)
         10000000000
     """
     def _write_file(f, content, **kwargs):
@@ -178,7 +185,6 @@ def write_file(filepath, content, mode='wb', **kwargs):
     else:
         with open(filepath, mode) as f:
             return _write_file(f, content, **kwargs)
-
 
 
 def chunk(iterable, chunksize=0, start=0, stop=None):
@@ -223,7 +229,7 @@ def get_account_type(account, account_types, def_type='n/a'):
         (List[str]): the resulting account types
 
     Examples:
-        >>> (('somecash', 'checking account', 'other'), {'Bank': ('checking', 'savings'), 'Cash': ('cash',)}) == ('Cash', 'Bank', 'n/a')
+        >>> get_account_type('somecash', {'Cash': ('cash',)})
     """
     _type = def_type
 
@@ -247,9 +253,13 @@ def merge_dicts(keyfunc, op, dicts):
         (List[str]): collapsed content
 
     Examples:
-        >>> splits = {1: [{'account': 'Accounts Receivable', 'amount': 200}, {'account': 'Accounts Receivable', 'amount': 300}, {'account': 'Sales', 'amount': -500}], 2: [{'account': 'Accounts Receivable', 'amount': 300}, {'account': 'Accounts Receivable', 'amount': 300}, {'account': 'Sales', 'amount': -600}]}
-        >>> collapse_splits(splits, itemgetter('account'), itemgetter('amount'))
-        (({'account': 'Accounts Receivable', 'amount': 500}, {'account': 'Sales', 'amount': 400}), ({'account': 'Accounts Receivable', 'amount': 500}, {'account': 'Sales', 'amount': 400}))
+        >>> splits = {1: [{'account': 'Accounts Receivable', 'amount': 200}, \
+{'account': 'Accounts Receivable', 'amount': 300}, {'account': 'Sales', \
+'amount': -500}], 2: [{'account': 'Accounts Receivable', 'amount': 300}, \
+{'account': 'Accounts Receivable', 'amount': 300}, {'account': 'Sales', \
+'amount': -600}]}
+        >>> merge_dicts(splits, itemgetter('account'), \
+itemgetter('amount'))
     """
     def reducer(x, y):
         get_value = lambda k, v: op(x[k], y[k]) if keyfunc(x) == v else x[k]
@@ -269,10 +279,11 @@ def get_max_split(splits, keyfunc):
         (List[str]): splits collapsed content
 
     Examples:
-        >>> ((({'amount': 350}, {'amount': -400}), ({'amount': 100}, {'amount': -400}, {'amount': 300}))) == (400, 400)
+        >>> get_max_split([{'amount': 350}, {'amount': -400}, {'amount': 100}])
     """
     maxfunc = lambda enum: abs(keyfunc(enum[1]))
     return max(enumerate(splits), key=maxfunc)
+
 
 def verify_splits(splits, keyfunc):
     """ Verifies that the splits of each transaction sum to 0
@@ -285,7 +296,8 @@ def verify_splits(splits, keyfunc):
         (bool): true on success
 
     Examples:
-        >>> splits = {1: [{'amount': 100}, {'amount': -100}], 2: [{'amount': -300}, {'amount': 200}, {'amount': 100}]}
+        >>> splits = {1: [{'amount': 100}, {'amount': -100}], 2: [{'amount': \
+-300}, {'amount': 200}, {'amount': 100}]}
         >>> verify_splits(splits, itemgetter('amount'))
     """
     return not sum(map(keyfunc, splits))
@@ -301,7 +313,9 @@ def group_transactions(transactions, keyfunc):
         (List[dict]): csv content organized by transaction
 
     Examples:
-        >>> (({'amount': '1,000.00', 'Date': '06/12/10', 'Category': 'Checking', 'account': 'account1'}, {'amount': '1,000.00', 'Date': '06/12/10', 'Category': 'Checking', 'account': 'account2'})) == (({'amount': '1,000.00', 'Date': '06/12/10', 'Category': 'Checking', 'account': 'account1'}), ({'amount': '1,000.00', 'Date': '06/12/10', 'Category': 'Checking', 'account': 'account2'}))
+        >>> group_transactions([{'amount': '1,000.00', 'Date': '06/12/10', \
+'Category': 'Checking', 'account': 'account1'}, {'amount': '1,000.00', \
+'Date': '06/12/10', 'Category': 'Checking', 'account': 'account2'}])
     """
     sorted_transactions = sorted(transactions, key=keyfunc)
 
