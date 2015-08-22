@@ -20,7 +20,8 @@ from os import path as p
 from datetime import datetime as dt
 from dateutil.parser import parse
 from argparse import RawTextHelpFormatter, ArgumentParser
-from tabutils import read_csv, xmlize
+from tabutils.io import read_csv
+from tabutils.process import xmlize
 from . import utils
 from .ofx import OFX
 from .qif import QIF
@@ -55,7 +56,7 @@ parser.add_argument(
     default='2010-01-01')
 parser.add_argument(
     '-m', '--mapping', help="the account mapping",
-    default='mint')
+    default='default')
 parser.add_argument(
     '-C', '--chunksize', metavar='ROWS', default=10 ** 6,
     help="number of rows to process at a time")
@@ -115,7 +116,7 @@ def gen_content(chunks, obj, ofx, transfer):
             if obj.is_split and obj.skip_transaction(trxns[0]):
                 continue
             elif obj.is_split and not utils.verify_splits(*_args):
-                raise Exception
+                raise Exception('Splits do not sum to zero.')
             elif obj.is_split:
                 main_pos, main_trxn = utils.get_max_split(*_args)
             else:
@@ -183,7 +184,7 @@ def run():
     csv_content.next()  # remove header
     server_date = dt.fromtimestamp(mtime)
     content = utils.IterStringIO()
-    content.write(obj.header(time_stamp=server_date, language=args.language))
+    content.write(obj.header(date=server_date, language=args.language))
     chunks = utils.chunk(csv_content, args.chunksize)
     new_content = gen_content(chunks, obj, ofx, args.transfer)
     content.write(new_content)

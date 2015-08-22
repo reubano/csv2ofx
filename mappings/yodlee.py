@@ -4,7 +4,7 @@ mapping = {
     'has_header': True,
     'is_split': True,
     'bank': lambda tr: tr['Account Name'].split(' - ')[0],
-    'notes': lambda tr: ' / '.join(filter(None, [desc1, desc2, desc3]),
+    'notes': lambda tr: ' / '.join(filter(None, [desc1, desc2, desc3])),
     'account': lambda tr: tr['Account Name'].split(' - ')[1:],
     'date': itemgetter('Date'),
     'tran_type': itemgetter('Transaction Type'),

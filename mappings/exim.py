@@ -1,7 +1,7 @@
 from operator import itemgetter
 
 mapping = {
-    'bank': 'Exim'
+    'bank': 'Exim',
     'has_header': True,
     'currency': 'USD',
     'account': itemgetter('Account'),

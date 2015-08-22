@@ -20,11 +20,13 @@ from __future__ import (
     absolute_import, division, print_function, with_statement,
     unicode_literals)
 
+from datetime import datetime as dt
 from . import File
+from . import utils
 
 
 class OFX(File):
-    def __init__(self, mapping, **kwargs):
+    def __init__(self, mapping=None, **kwargs):
         """ Gets OFX format transaction content
 
         Kwargs:
@@ -48,20 +50,21 @@ class OFX(File):
         """ Gets OFX format transaction content
 
         Kwargs:
-            time_stamp (str): the time in mmddyy_hhmmss format
+            date (date): the datetime
 
         Returns:
             (str): the OFX content
 
         Examples:
-            >>> kwargs = {'time_stamp': 20120101111111}
-            "<OFX>\n\t<SIGNONMSGSRSV1>\n\t\t<SONRS>\n\t\t\t<STATUS>\n\t\t\t\t \
-<CODE>0</CODE>\n\t\t\t\t<SEVERITY>INFO</SEVERITY>\n\t\t\t</STATUS>\n\t\t\t \
-<DTSERVER>20120101111111</DTSERVER>\n\t\t\t<LANGUAGE>ENG</LANGUAGE>\n\t\t \
-</SONRS>\n\t</SIGNONMSGSRSV1>\n"
+            >>> kwargs = {'date': dt(2012, 1, 15)}
+            >>> OFX().header(**kwargs).replace('\\n', '').replace('\\t', '')
+            u'DATA:OFXSGMLENCODING:UTF-8<OFX><SIGNONMSGSRSV1><SONRS><STATUS>\
+<CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS><DTSERVER>20120115</DTSERVER>\
+<LANGUAGE>ENG</LANGUAGE></SONRS></SIGNONMSGSRSV1><BANKMSGSRSV1><INTRATRNRS>\
+<TRNUID></TRNUID><STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>'
         """
         kwargs.setdefault('language', 'ENG')
-        time_stamp = kwargs['time_stamp'].strftime('%Y%m%d')
+        time_stamp = kwargs['date'].strftime('%Y%m%d')  # mmddyy_hhmmss
 
         content = 'DATA:OFXSGML\n'
         content += 'ENCODING:UTF-8\n'
@@ -85,6 +88,46 @@ class OFX(File):
         content += '\t\t\t</STATUS>\n'
         return content
 
+    def transaction_data(self, tr):
+        """ gets OFX transaction data
+
+        Args:
+            tr (List[str]): the transaction
+
+        Kwargs:
+
+        Returns:
+            (List[str]):   the QIF content
+
+        Examples:
+            >>> from mappings.mint import mapping
+            >>> tr = {'Transaction Type': 'debit', 'Amount': 1000.00, \
+'Date': '06/12/10', 'Description': 'payee', 'Original Description': \
+'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': \
+'account'}
+            >>> OFX(mapping).transaction_data(tr)
+            {u'account': u'account', u'check_num': None, u'account_type': \
+u'CHECKING', u'account_id': 'e268443e43d93dab7ebef303bbe9642f', u'payee': \
+u'payee', u'tran_class': None, u'split_account': u'Checking', u'notes': \
+u'notes', u'tran_type': u'debit', u'split_account_id': \
+'195917574edc9b6bbeb5be9785b6a479', u'bank_id': \
+'e268443e43d93dab7ebef303bbe9642f', u'currency': u'USD', u'amount': \
+Decimal('-1000.00'), u'split_account_type': u'CHECKING', u'date': \
+datetime.datetime(2010, 6, 12, 0, 0), u'id': \
+'b045c43277d797f8a6993ee6668958d9', u'bank': u'account', u'desc': \
+u'description'}
+        """
+        data = super(OFX, self).transaction_data(tr)
+        args = [self.account_types, self.def_type]
+        sa_type = utils.get_account_type(data['split_account'], *args)
+
+        new_data = {
+            'account_type': utils.get_account_type(data['account'], *args),
+            'split_account_type': sa_type}
+
+        data.update(new_data)
+        return data
+
     def footer(self):
         """ Gets OFX transfer end
 
@@ -92,8 +135,8 @@ class OFX(File):
             (str): the OFX content
 
         Examples:
-            >>> footer()
-            "\t\t</INTRATRNRS>\n\t</BANKMSGSRSV1>\n</OFX>"
+            >>> OFX().footer().replace('\\n', '').replace('\\t', '')
+            u'</INTRATRNRS></BANKMSGSRSV1></OFX>'
         """
         return "\t\t</%s>\n\t</BANKMSGSRSV1>\n</OFX>" % self.resp_type
 
@@ -106,14 +149,14 @@ class OFX(File):
             (str): the OFX content
 
         Examples:
-            >>> kwargs = {'currency': 'USD', 'bank_id': 1, 'account_id': 1, \
-'account_type': 'type', 'start_date': 20120101, 'end_date': 20120101}
-            >>> account_start(**kwargs)
-            "\t\t\t<STMTRS>\n\t\t\t\t<CURDEF>USD</CURDEF>\n\t\t\t\t \
-<BANKACCTFROM>\n\t\t\t\t\t<BANKID>1</BANKID>\n\t\t\t\t\t<ACCTID>account \
-</ACCTID>\n\t\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t\t</BANKACCTFROM> \
-\n\t\t\t\t<BANKTRANLIST>\n\t\t\t\t\t<DTSTART>20120101</DTSTART>\n\t\t\t\t\t \
-<DTEND>20120101</DTEND>\n"
+            >>> kwargs = {'start': dt(2012, 1, 1), 'end': dt(2012, 2, 1)}
+            >>> akwargs = {'currency': 'USD', 'bank_id': 1, 'account_id': 1, \
+'account_type': 'type'}
+            >>> OFX(**kwargs).account_start(**akwargs).replace(\
+'\\n', '').replace('\\t', '')
+            u'<STMTRS><CURDEF>USD</CURDEF><BANKACCTFROM><BANKID>1</BANKID>\
+<ACCTID>1</ACCTID><ACCTTYPE>type</ACCTTYPE></BANKACCTFROM><BANKTRANLIST>\
+<DTSTART>20120101</DTSTART><DTEND>20120201</DTEND>'
         """
         kwargs.update({
             'start_date': self.start.strftime('%Y%m%d'),
@@ -140,18 +183,19 @@ class OFX(File):
             (str): the OFX content
 
         Examples:
-            >>> kwargs = {'time_stamp', 20120101111111, 'type': 'type', \
-'amount': 100, 'id': 1, 'check_num': 1, 'Payee': 'payee', 'desc': 'memo'}
-            >>> transaction(**kwargs)
-            "\t\t\t\t\t<STMTTRN>\n\t\t\t\t\t\t<TRNTYPE>type</TRNTYPE> \
-\n\t\t\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t\t\t\t<TRNAMT>100 \
-</TRNAMT>\n\t\t\t\t\t\t<FITID>1</FITID>\n\t\t\t\t\t\t<CHECKNUM>1</CHECKNUM> \
-\n\t\t\t\t\t\t<NAME>payee</NAME>\n\t\t\t\t\t\t<MEMO>memo</MEMO>\n\t\t\t\t\t \
-</STMTTRN>\n"
+            >>> kwargs = {'date': dt(2012, 1, 15), 'tran_type': 'type', \
+'amount': 100, 'id': 1, 'check_num': 1, 'payee': 'payee', 'desc': 'memo'}
+            >>> OFX().transaction(**kwargs).replace('\\n', '').replace( \
+'\\t', '')
+            u'<STMTTRN><TRNTYPE>type</TRNTYPE><DTPOSTED>20120115000000\
+</DTPOSTED><TRNAMT>100</TRNAMT><FITID>1</FITID><CHECKNUM>1</CHECKNUM><NAME>\
+payee</NAME><MEMO>memo</MEMO></STMTTRN>'
         """
+        time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
+
         content = '\t\t\t\t\t<STMTTRN>\n'
         content += '\t\t\t\t\t\t<TRNTYPE>%(tran_type)s</TRNTYPE>\n' % kwargs
-        content += '\t\t\t\t\t\t<DTPOSTED>%(time_stamp)s</DTPOSTED>\n' % kwargs
+        content += '\t\t\t\t\t\t<DTPOSTED>%s</DTPOSTED>\n' % time_stamp
         content += '\t\t\t\t\t\t<TRNAMT>%(amount)s</TRNAMT>\n' % kwargs
         content += '\t\t\t\t\t\t<FITID>%(id)s</FITID>\n' % kwargs
         content += '\t\t\t\t\t\t<CHECKNUM>%(check_num)s</CHECKNUM>\n' % kwargs
@@ -169,18 +213,18 @@ class OFX(File):
             (str): the OFX content
 
         Examples:
-            >>> kwargs = {'balance': 150, 'time_stamp': 20120101111111}
-            >>> account_end(**kwargs)
-            "\t\t\t\t</BANKTRANLIST>\n\t\t\t\t<LEDGERBAL>\n\t\t\t\t\t<BALAMT> \
-150</BALAMT>\n\t\t\t\t\t<DTASOF>20120101111111</DTASOF>\n\t\t\t\t</LEDGERBAL> \
-\n\t\t\t</STMTRS>\n"
+            >>> kwargs = {'balance': 150, 'date': dt(2012, 1, 15)}
+            >>> OFX().account_end(**kwargs).replace('\\n', '').replace('\\t', '')
+            u'</BANKTRANLIST><LEDGERBAL><BALAMT>150</BALAMT><DTASOF>\
+20120115000000</DTASOF></LEDGERBAL></STMTRS>'
         """
-        content = '\t\t\t\t</BANKTRANLIST>\n'
+        time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
+        content = '\t\t\t\t</BANKTRANLIST>'
 
         if kwargs.get('balance'):
             content += '\t\t\t\t<LEDGERBAL>\n'
             content += '\t\t\t\t\t<BALAMT>%(balance)s</BALAMT>\n' % kwargs
-            content += '\t\t\t\t\t<DTASOF>%(time_stamp)s</DTASOF>\n' % kwargs
+            content += '\t\t\t\t\t<DTASOF>%s</DTASOF>\n' % time_stamp
             content += '\t\t\t\t</LEDGERBAL>\n'
 
         content += '\t\t\t</STMTRS>\n'
@@ -196,22 +240,22 @@ class OFX(File):
             (str): the QIF content
 
         Examples:
-            >>> kwargs = {'currency': USD', 'time_stamp': 20120101111111, \
+            >>> kwargs = {'currency': 'USD', 'date': dt(2012, 1, 15), \
 'bank_id': 1, 'account_id': 1, 'account_type': 'type', 'split_account_id': 2, \
-'split_account': 'split_account', 'amount': 100}
-            >>> transfer(**kwargs)
-            "\t\t\t<INTRARS>\n\t\t\t\t<CURDEF>USD</CURDEF>\n\t\t\t\t<SRVRTID> \
-20120101111111</SRVRTID>\n\t\t\t\t<XFERINFO>\n\t\t\t\t\t<BANKACCTFROM> \
-\n\t\t\t\t\t\t<BANKID>1</BANKID>\n\t\t\t\t\t\t<ACCTID>account</ACCTID> \
-\n\t\t\t\t\t\t<ACCTTYPE>type</ACCTTYPE>\n\t\t\t\t\t</BANKACCTFROM> \
-\n\t\t\t\t\t<BANKACCTTO>\n\t\t\t\t\t\t<BANKID>2</BANKID>\n\t\t\t\t\t\t \
-<ACCTID>split_account</ACCTID>\n\t\t\t\t\t\t<ACCTTYPE>type</ACCTTYPE> \
-\n\t\t\t\t\t</BANKACCTTO>\n\t\t\t\t\t<TRNAMT>100</TRNAMT>\n\t\t\t\t \
-</XFERINFO>\n\t\t\t\t<DTPOSTED>20120101111111</DTPOSTED>\n\t\t\t</INTRARS>\n"
+'split_account': 'split_account', 'split_account_type': 'type', 'amount': 100 \
+, 'id': 'jbaevf'}
+            >>> OFX().transfer(**kwargs).replace('\\n', '').replace('\\t', '')
+            u'<INTRARS><CURDEF>USD</CURDEF><SRVRTID>jbaevf</SRVRTID>\
+<XFERINFO><BANKACCTFROM><BANKID>1</BANKID><ACCTID>1</ACCTID><ACCTTYPE>type\
+</ACCTTYPE></BANKACCTFROM><BANKACCTTO><BANKID>1</BANKID><ACCTID>2</ACCTID>\
+<ACCTTYPE>type</ACCTTYPE></BANKACCTTO><TRNAMT>100</TRNAMT></XFERINFO>\
+<DTPOSTED>20120115000000</DTPOSTED></INTRARS>'
         """
+        time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
+
         content = '\t\t\t<INTRARS>\n'
         content += '\t\t\t\t<CURDEF>%(currency)s</CURDEF>\n' % kwargs
-        content += '\t\t\t\t<SRVRTID>%(time_stamp)s</SRVRTID>\n' % kwargs
+        content += '\t\t\t\t<SRVRTID>%(id)s</SRVRTID>\n' % kwargs
         content += '\t\t\t\t<XFERINFO>\n'
         content += '\t\t\t\t\t<BANKACCTFROM>\n'
         content += '\t\t\t\t\t\t<BANKID>%(bank_id)s</BANKID>\n' % kwargs
@@ -228,6 +272,6 @@ class OFX(File):
         content += '\t\t\t\t\t</BANKACCTTO>\n'
         content += '\t\t\t\t\t<TRNAMT>%(amount)s</TRNAMT>\n' % kwargs
         content += '\t\t\t\t</XFERINFO>\n'
-        content += '\t\t\t\t<DTPOSTED>%(time_stamp)s</DTPOSTED>\n'
+        content += '\t\t\t\t<DTPOSTED>%s</DTPOSTED>\n' % time_stamp
         content += '\t\t\t</INTRARS>\n' % kwargs
         return content

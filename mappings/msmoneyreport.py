@@ -8,7 +8,7 @@ mapping = {
     'currency': itemgetter('Currency'),
     'class': itemgetter('Projects'),
     'check_num': itemgetter('Num'),
-    'tran_type' lambda tr: 'debit' if tr.get('Debit') else 'credit',
+    'tran_type': lambda tr: 'debit' if tr.get('Debit') else 'credit',
     'amount': itemgetter('Amount'),
     'notes': itemgetter('Memo'),
     'date': itemgetter('Date'),
