@@ -37,12 +37,17 @@ class OFX(File):
             (str): the OFX content
         """
         super(OFX, self).__init__(mapping, **kwargs)
-        self.resp_type = kwargs.get('resp_type', 'INTRATRNRS')
+
+        if kwargs.get('split_account'):
+            self.resp_type = 'INTRATRNRS'
+        else:
+            self.resp_type = 'STMTTRNRS'
+
         self.def_type = kwargs.get('def_type', 'CHECKING')
         self.account_types = {
-            'CHECKING': ('checking'),
-            'SAVINGS': ('savings'),
-            'MONEYMRKT': ('market'),
+            'CHECKING': ('checking', 'income', 'receivable', 'payable'),
+            'SAVINGS': ('savings',),
+            'MONEYMRKT': ('market', 'cash', 'expenses'),
             'CREDITLINE': ('visa', 'master', 'express', 'discover')
         }
 
@@ -64,7 +69,7 @@ class OFX(File):
 <TRNUID></TRNUID><STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>'
         """
         kwargs.setdefault('language', 'ENG')
-        time_stamp = kwargs['date'].strftime('%Y%m%d')  # mmddyy_hhmmss
+        time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
 
         content = 'DATA:OFXSGML\n'
         content += 'ENCODING:UTF-8\n'
@@ -106,24 +111,31 @@ class OFX(File):
 'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': \
 'account'}
             >>> OFX(mapping).transaction_data(tr)
-            {u'account': u'account', u'check_num': None, u'account_type': \
-u'CHECKING', u'account_id': 'e268443e43d93dab7ebef303bbe9642f', u'payee': \
-u'payee', u'tran_class': None, u'split_account': u'Checking', u'notes': \
-u'notes', u'tran_type': u'debit', u'split_account_id': \
-'195917574edc9b6bbeb5be9785b6a479', u'bank_id': \
-'e268443e43d93dab7ebef303bbe9642f', u'currency': u'USD', u'amount': \
-Decimal('-1000.00'), u'split_account_type': u'CHECKING', u'date': \
-datetime.datetime(2010, 6, 12, 0, 0), u'id': \
-'b045c43277d797f8a6993ee6668958d9', u'bank': u'account', u'desc': \
-u'description'}
+            {u'account_type': u'CHECKING', u'account_id': \
+'e268443e43d93dab7ebef303bbe9642f', u'memo': u'description notes', \
+u'split_account_id': '195917574edc9b6bbeb5be9785b6a479', u'currency': u'USD', \
+u'date': datetime.datetime(2010, 6, 12, 0, 0), u'id': \
+'0b9df731dbf286154784222755482d6f', u'bank': u'account', u'account': \
+u'account', u'split_account': u'Checking', u'bank_id': \
+'e268443e43d93dab7ebef303bbe9642f', u'class': None, u'payee': u'payee', \
+u'amount': Decimal('-1000.00'), u'split_account_type': u'CHECKING', \
+u'check_num': None, u'type': u'debit'}
         """
         data = super(OFX, self).transaction_data(tr)
         args = [self.account_types, self.def_type]
         sa_type = utils.get_account_type(data['split_account'], *args)
+        memo = data.get('memo')
+        _class = data.get('class')
+
+        if memo and _class:
+            memo = '%s %s' % (memo, _class)
+        else:
+            memo = memo or _class
 
         new_data = {
             'account_type': utils.get_account_type(data['account'], *args),
-            'split_account_type': sa_type}
+            'split_account_type': sa_type,
+            'memo': memo}
 
         data.update(new_data)
         return data
@@ -138,7 +150,7 @@ u'description'}
             >>> OFX().footer().replace('\\n', '').replace('\\t', '')
             u'</INTRATRNRS></BANKMSGSRSV1></OFX>'
         """
-        return "\t\t</%s>\n\t</BANKMSGSRSV1>\n</OFX>" % self.resp_type
+        return "\t\t</%s>\n\t</BANKMSGSRSV1>\n</OFX>\n" % self.resp_type
 
     def account_start(self, **kwargs):
         """ Gets OFX format transaction account start content
@@ -183,8 +195,8 @@ u'description'}
             (str): the OFX content
 
         Examples:
-            >>> kwargs = {'date': dt(2012, 1, 15), 'tran_type': 'type', \
-'amount': 100, 'id': 1, 'check_num': 1, 'payee': 'payee', 'desc': 'memo'}
+            >>> kwargs = {'date': dt(2012, 1, 15), 'type': 'type', \
+'amount': 100, 'id': 1, 'check_num': 1, 'payee': 'payee', 'memo': 'memo'}
             >>> OFX().transaction(**kwargs).replace('\\n', '').replace( \
 '\\t', '')
             u'<STMTTRN><TRNTYPE>type</TRNTYPE><DTPOSTED>20120115000000\
@@ -194,13 +206,16 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
         time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
 
         content = '\t\t\t\t\t<STMTTRN>\n'
-        content += '\t\t\t\t\t\t<TRNTYPE>%(tran_type)s</TRNTYPE>\n' % kwargs
+        content += '\t\t\t\t\t\t<TRNTYPE>%(type)s</TRNTYPE>\n' % kwargs
         content += '\t\t\t\t\t\t<DTPOSTED>%s</DTPOSTED>\n' % time_stamp
         content += '\t\t\t\t\t\t<TRNAMT>%(amount)s</TRNAMT>\n' % kwargs
         content += '\t\t\t\t\t\t<FITID>%(id)s</FITID>\n' % kwargs
         content += '\t\t\t\t\t\t<CHECKNUM>%(check_num)s</CHECKNUM>\n' % kwargs
         content += '\t\t\t\t\t\t<NAME>%(payee)s</NAME>\n' % kwargs
-        content += '\t\t\t\t\t\t<MEMO>%(desc)s</MEMO>\n' % kwargs
+
+        if kwargs.get('memo'):
+            content += '\t\t\t\t\t\t<MEMO>%(memo)s</MEMO>\n' % kwargs
+
         content += '\t\t\t\t\t</STMTTRN>\n'
         return content
 
@@ -219,7 +234,7 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
 20120115000000</DTASOF></LEDGERBAL></STMTRS>'
         """
         time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
-        content = '\t\t\t\t</BANKTRANLIST>'
+        content = '\t\t\t\t</BANKTRANLIST>\n'
 
         if kwargs.get('balance'):
             content += '\t\t\t\t<LEDGERBAL>\n'
@@ -251,27 +266,42 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
 <ACCTTYPE>type</ACCTTYPE></BANKACCTTO><TRNAMT>100</TRNAMT></XFERINFO>\
 <DTPOSTED>20120115000000</DTPOSTED></INTRARS>'
         """
-        time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
-
         content = '\t\t\t<INTRARS>\n'
         content += '\t\t\t\t<CURDEF>%(currency)s</CURDEF>\n' % kwargs
         content += '\t\t\t\t<SRVRTID>%(id)s</SRVRTID>\n' % kwargs
         content += '\t\t\t\t<XFERINFO>\n'
+        content += '\t\t\t\t\t<TRNAMT>%(amount)s</TRNAMT>\n' % kwargs
         content += '\t\t\t\t\t<BANKACCTFROM>\n'
         content += '\t\t\t\t\t\t<BANKID>%(bank_id)s</BANKID>\n' % kwargs
         content += '\t\t\t\t\t\t<ACCTID>%(account_id)s</ACCTID>\n' % kwargs
         content += '\t\t\t\t\t\t<ACCTTYPE>%(account_type)s' % kwargs
         content += '</ACCTTYPE>\n'
         content += '\t\t\t\t\t</BANKACCTFROM>\n'
-        content += '\t\t\t\t\t<BANKACCTTO>\n'
+        return content
+
+    def split_content(self, **kwargs):
+        content = '\t\t\t\t\t<BANKACCTTO>\n'
         content += '\t\t\t\t\t\t<BANKID>%(bank_id)s</BANKID>\n' % kwargs
-        content += '\t\t\t\t\t\t<ACCTID>%(split_account_id)s' % kwargs
+
+        if kwargs.get('split_account'):
+            content += '\t\t\t\t\t\t<ACCTID>%(split_account_id)s' % kwargs
+        else:
+            content += '\t\t\t\t\t\t<ACCTID>%(account_id)s' % kwargs
+
         content += '</ACCTID>\n'
-        content += '\t\t\t\t\t\t<ACCTTYPE>%(split_account_type)s' % kwargs
+
+        if kwargs.get('split_account'):
+            content += '\t\t\t\t\t\t<ACCTTYPE>%(split_account_type)s' % kwargs
+        else:
+            content += '\t\t\t\t\t\t<ACCTTYPE>%(account_type)s' % kwargs
+
         content += '</ACCTTYPE>\n'
         content += '\t\t\t\t\t</BANKACCTTO>\n'
-        content += '\t\t\t\t\t<TRNAMT>%(amount)s</TRNAMT>\n' % kwargs
-        content += '\t\t\t\t</XFERINFO>\n'
+        return content
+
+    def transfer_end(self, **kwargs):
+        time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
+        content = '\t\t\t\t</XFERINFO>\n'
         content += '\t\t\t\t<DTPOSTED>%s</DTPOSTED>\n' % time_stamp
-        content += '\t\t\t</INTRARS>\n' % kwargs
+        content += '\t\t\t</INTRARS>\n'
         return content

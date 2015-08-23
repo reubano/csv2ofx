@@ -33,6 +33,9 @@ def main():
             ('default.csv', 'default_w_splits.qif', 'oqS Category'),
             ('xero.csv', 'xero.qif', 'oqc Description -m xero'),
             ('mint.csv', 'mint.qif', 'oqS Category -m mint'),
+            ('default.csv', 'default.ofx', 'o'),
+            ('default.csv', 'default_w_splits.ofx', 'oS Category'),
+            ('mint.csv', 'mint.ofx', 'oS Category -m mint'),
         ]
 
         for example_file, check_file, opts in tests:

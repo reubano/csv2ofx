@@ -77,9 +77,6 @@ parser.add_argument(
     '-q', '--qif', help="enables 'QIF' output instead of 'OFX'",
     action='store_true', default=False)
 parser.add_argument(
-    '-t', '--transfer', action='store_true', default=False, help=(
-        "treat ofx transactions as transfers between two accounts"))
-parser.add_argument(
     '-o', '--overwrite', action='store_true', default=False,
     help="overwrite destination file if it exists")
 parser.add_argument(
@@ -141,23 +138,36 @@ def gen_main_trxns(groups, obj):
 def gen_ofx_content(groups, obj):
     for group, main_pos, trxns in groups:
         keyfunc = lambda enum: enum[0] != main_pos
+        sorted_trxns = sorted(enumerate(trxns), key=keyfunc)
 
-        for pos, trxn in sorted(enumerate(trxns), key=keyfunc):
+        if obj.is_split and len(sorted_trxns) > 2:
+            raise TypeError('Group %s has too many splits.\n' % group)
+
+        for pos, trxn in sorted_trxns:
             data = obj.transaction_data(trxn)
             is_main = pos == main_pos
 
             if not obj.is_split and obj.skip_transaction(trxn):
                 continue
 
-            if is_main and not obj.is_transfer:
+            if is_main and not (obj.is_split or obj.split_account):
                 yield obj.account_start(**data)
 
-            if obj.is_transfer:
-                yield obj.transfer(**data)
-            else:
+            if not (obj.is_split or obj.split_account):
                 yield obj.transaction(**data)
 
-        if not obj.is_transfer:
+            if (obj.is_split and is_main) or obj.split_account:
+                yield obj.transfer(**data)
+
+            if (obj.is_split and not is_main) or obj.split_account:
+                yield obj.split_content(**data)
+
+            if obj.split_account:
+                yield obj.transfer_end(**data)
+
+        if obj.is_split:
+            yield obj.transfer_end(**data)
+        elif not (obj.is_split or obj.split_account):
             yield obj.account_end(**data)
 
 
@@ -205,7 +215,6 @@ def run():
 
     okwargs = {
         'def_type': args.account_type,
-        'is_transfer': args.transfer,
         'split_account': args.split,
         'start': parse(args.start),
         'end': parse(args.end)
@@ -241,8 +250,17 @@ def run():
     content.write(body)
     content.write(obj.footer())
 
-    # write content to file
-    utils.write_file(args.dest, content, overwrite=args.overwrite)
+    try:
+        # write content to file
+        utils.write_file(args.dest, content, overwrite=args.overwrite)
+    except TypeError as e:
+        msg = str(e)
+
+        if not args.collapse:
+            msg += 'Try again with `-c` option.'
+
+        exit(msg)
+
     # print(groups.next())
 
 

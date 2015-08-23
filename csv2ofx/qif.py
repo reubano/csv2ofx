@@ -34,7 +34,7 @@ class QIF(File):
             'Oth A': ('receivable',),
             'Oth L': ('payable',),
             'CCard': ('visa', 'master', 'express', 'discover'),
-            'Cash': ('cash',)
+            'Cash': ('cash', 'expenses')
         }
 
     def header(self, **kwargs):
