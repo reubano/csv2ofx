@@ -13,6 +13,7 @@ import sys
 import argparse
 
 from functools import partial
+from operator import itemgetter
 from inspect import ismodule, getmembers
 from pprint import pprint
 from importlib import import_module
@@ -20,8 +21,10 @@ from os import path as p
 from datetime import datetime as dt
 from dateutil.parser import parse
 from argparse import RawTextHelpFormatter, ArgumentParser
+
 from tabutils.io import read_csv
 from tabutils.process import xmlize
+
 from . import utils
 from .ofx import OFX
 from .qif import QIF
@@ -53,10 +56,17 @@ parser.add_argument(
     '-l', '--language', help="the language", default='ENG')
 parser.add_argument(
     '-s', '--start', metavar='DATE', help="the start date",
-    default='2010-01-01')
+    default='2015-01-01')
 parser.add_argument(
     '-m', '--mapping', help="the account mapping",
     default='default')
+parser.add_argument(
+    '-c', '--collapse', metavar='FIELD NAME', help=(
+        'field used to combine transactions within a split for double entry '
+        'statements'))
+parser.add_argument(
+    '-S', '--split', metavar='FIELD NAME', help=(
+        'field used for the split account for single entry statements'))
 parser.add_argument(
     '-C', '--chunksize', metavar='ROWS', default=10 ** 6,
     help="number of rows to process at a time")
@@ -66,11 +76,6 @@ parser.add_argument(
 parser.add_argument(
     '-q', '--qif', help="enables 'QIF' output instead of 'OFX'",
     action='store_true', default=False)
-parser.add_argument(
-    '-c', '--collapse', action='store_true', default=False, help=(
-        'combine splits from the same account and date if the transactions\n'
-        'arerecorded double entry style (e.g. full data export from xero.com\n'
-        'or Quickbooks)'))
 parser.add_argument(
     '-t', '--transfer', action='store_true', default=False, help=(
         "treat ofx transactions as transfers between two accounts"))
@@ -86,70 +91,104 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-
-def gen_content(chunks, obj, ofx, transfer):
+def gen_groups(chunks, obj, qif):
     for chunk in chunks:
-        if ofx:
+        if qif:
+            cleansed = chunk
+        else:
             cleansed = [
                 {k: xmlize([v]).next() for k, v in c.items()} for c in chunk]
+
+        keyfunc = obj.id if obj.is_split else obj.account
+        grouped = utils.group_transactions(cleansed, keyfunc)
+
+        for group, transactions in grouped:
+            yield (group, transactions)
+
+
+def gen_trxns(groups, obj, collapse):
+    for group, transactions in groups:
+        if obj.is_split and args.collapse:
+            # group transactions by collapse field and sum the amounts
+            groupby = itemgetter(args.collapse)
+            byaccount = utils.group_transactions(transactions, groupby)
+            op = lambda values: sum(map(utils.convert_amount, values))
+            merger = partial(utils.merge_dicts, obj.amount, op)
+            trxns = [merger(dicts) for _, dicts in byaccount]
         else:
-            cleansed = chunk
+            trxns = transactions
+
+        yield (group, trxns)
+
+
+def gen_main_trxns(groups, obj):
+    for group, trxns in groups:
+        _args = [trxns, obj.convert_amount]
+
+        # if it's split, transactions skipping is all or none
+        if obj.is_split and obj.skip_transaction(trxns[0]):
+            continue
+        elif obj.is_split and not utils.verify_splits(*_args):
+            raise Exception('Splits do not sum to zero.')
+        elif obj.is_split:
+            main_pos = utils.get_max_split(*_args)[0]
+        else:
+            main_pos = 0
+
+        yield (group, main_pos, trxns)
+
+
+def gen_ofx_content(groups, obj):
+    for group, main_pos, trxns in groups:
+        keyfunc = lambda enum: enum[0] != main_pos
+
+        for pos, trxn in sorted(enumerate(trxns), key=keyfunc):
+            data = obj.transaction_data(trxn)
+            is_main = pos == main_pos
+
+            if not obj.is_split and obj.skip_transaction(trxn):
+                continue
+
+            if is_main and not obj.is_transfer:
+                yield obj.account_start(**data)
+
+            if obj.is_transfer:
+                yield obj.transfer(**data)
+            else:
+                yield obj.transaction(**data)
+
+        if not obj.is_transfer:
+            yield obj.account_end(**data)
+
+
+def gen_qif_content(groups, obj):
+    prev_account = None
+
+    for group, main_pos, trxns in groups:
+        keyfunc = lambda enum: enum[0] != main_pos
+
+        for pos, trxn in sorted(enumerate(trxns), key=keyfunc):
+            data = obj.transaction_data(trxn)
+            is_main = pos == main_pos
+
+            if not obj.is_split and obj.skip_transaction(trxn):
+                continue
+
+            if is_main and prev_account != obj.account(trxn):
+                yield obj.account_start(**data)
+
+            if (obj.is_split and is_main) or not obj.is_split:
+                yield obj.transaction(**data)
+                prev_account = obj.account(trxn)
+
+            if (obj.is_split and not is_main) or obj.split_account:
+                yield obj.split_content(**data)
+
+            if not obj.is_split:
+                yield obj.transaction_end()
 
         if obj.is_split:
-            # group transactions by id
-            grouped = utils.group_transactions(cleansed, obj.id)
-        else:
-            # group transactions by account
-            grouped = utils.group_transactions(cleansed, obj.account)
-
-        for _, transactions in grouped:
-            if obj.is_split and args.collapse:
-                # group transactions by account and sum the amounts
-                byaccount = utils.group_transactions(transactions, obj.account)
-                merger = partial(utils.merge_dicts, obj.amount, sum)
-                trxns = map(merger, byaccount.values())
-            else:
-                trxns = transactions
-
-            _args = [trxns, obj.convert_amount]
-
-            if obj.is_split and obj.skip_transaction(trxns[0]):
-                continue
-            elif obj.is_split and not utils.verify_splits(*_args):
-                raise Exception('Splits do not sum to zero.')
-            elif obj.is_split:
-                main_pos, main_trxn = utils.get_max_split(*_args)
-            else:
-                main_pos, main_trxn = 0, trxns[0]
-
-            main_data = obj.transaction_data(main_trxn)
-
-            if ofx and transfer:
-                yield obj.transfer(**main_data)
-            else:
-                yield obj.account_start(**main_data)
-                yield obj.transaction(**main_data)
-
-            for pos, transaction in enumerate(trxns):
-                if not pos == main_pos:
-                    continue
-
-                data = obj.transaction_data(transaction)
-
-                if not obj.is_split and obj.skip_transaction(transaction):
-                    continue
-
-                if not ofx and obj.is_split:
-                    content = obj.split_content(**data)
-                elif ofx and transfer:
-                    content = obj.transfer(**data)
-                else:
-                    content = obj.transaction(**data)
-
-                yield content
-
-            if not (ofx and transfer):
-                yield obj.account_end(**data)
+            yield obj.transaction_end()
 
 
 def run():
@@ -162,16 +201,17 @@ def run():
         print('v%s' % version)
         exit(0)
 
-    ofx = not args.qif
     mapping = import_module('mappings.%s' % args.mapping).mapping
 
     okwargs = {
         'def_type': args.account_type,
-        'resp_type': 'INTRATRNRS' if args.transfer else 'STMTTRNRS',
+        'is_transfer': args.transfer,
+        'split_account': args.split,
         'start': parse(args.start),
         'end': parse(args.end)
     }
 
+    content_func = gen_qif_content if args.qif else gen_ofx_content
     OBJ = QIF if args.qif else OFX
     obj = OBJ(mapping, **okwargs)
 
@@ -181,15 +221,29 @@ def run():
         mtime = time.time()
 
     csv_content = read_csv(args.source, has_header=obj.has_header)
-    csv_content.next()  # remove header
+
+    # remove csv header
+    csv_content.next()
     server_date = dt.fromtimestamp(mtime)
     content = utils.IterStringIO()
+
+    # write content header
     content.write(obj.header(date=server_date, language=args.language))
+
+    # get content body
     chunks = utils.chunk(csv_content, args.chunksize)
-    new_content = gen_content(chunks, obj, ofx, args.transfer)
-    content.write(new_content)
+    groups = gen_groups(chunks, obj, args.qif)
+    gtrxns = gen_trxns(groups, obj, args.collapse)
+    main_gtrxns = gen_main_trxns(gtrxns, obj)
+    body = content_func(main_gtrxns, obj)
+
+    # write content body and footer
+    content.write(body)
     content.write(obj.footer())
+
+    # write content to file
     utils.write_file(args.dest, content, overwrite=args.overwrite)
+    # print(groups.next())
 
 
 if __name__ == '__main__':

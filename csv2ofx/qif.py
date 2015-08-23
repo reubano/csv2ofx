@@ -20,6 +20,7 @@ from __future__ import (
     absolute_import, division, print_function, with_statement,
     unicode_literals)
 
+from datetime import datetime as dt
 from . import File
 from . import utils
 
@@ -29,9 +30,10 @@ class QIF(File):
         super(QIF, self).__init__(mapping, **kwargs)
         self.def_type = kwargs.get('def_type', 'Bank')
         self.account_types = {
-            'Bank': (
-                'checking', 'savings', 'market', 'receivable', 'payable',
-                'visa', 'master', 'express', 'discover'),
+            'Bank': ('checking', 'savings', 'market', 'income'),
+            'Oth A': ('receivable',),
+            'Oth L': ('payable',),
+            'CCard': ('visa', 'master', 'express', 'discover'),
             'Cash': ('cash',)
         }
 
@@ -56,35 +58,31 @@ class QIF(File):
 'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': \
 'account'}
             >>> QIF(mapping).transaction_data(tr)
-            {u'account': u'account', u'check_num': None, u'account_type': \
-u'Bank', u'account_id': 'e268443e43d93dab7ebef303bbe9642f', u'payee': \
-u'payee', u'tran_class': None, u'split_account': u'Checking', u'notes': \
-u'notes', u'tran_type': u'debit', u'split_account_id': \
-'195917574edc9b6bbeb5be9785b6a479', u'bank_id': \
-'e268443e43d93dab7ebef303bbe9642f', u'currency': u'USD', u'amount': \
-Decimal('-1000.00'), u'split_account_type': u'Bank', u'date': \
-datetime.datetime(2010, 6, 12, 0, 0), u'id': \
-'b045c43277d797f8a6993ee6668958d9', u'bank': u'account', u'desc': \
-u'description notes'}
+            {u'account_type': u'Bank', u'account_id': \
+'e268443e43d93dab7ebef303bbe9642f', u'memo': u'description notes', \
+u'split_account_id': '195917574edc9b6bbeb5be9785b6a479', u'currency': u'USD', \
+u'date': datetime.datetime(2010, 6, 12, 0, 0), u'id': \
+'0b9df731dbf286154784222755482d6f', u'bank': u'account', u'account': \
+u'account', u'split_memo': u'description notes', u'split_account': \
+u'Checking', u'bank_id': 'e268443e43d93dab7ebef303bbe9642f', u'class': None, \
+u'payee': u'payee', u'amount': Decimal('-1000.00'), u'split_account_type': \
+u'Bank', u'check_num': None, u'type': u'debit'}
         """
         data = super(QIF, self).transaction_data(tr)
         args = [self.account_types, self.def_type]
         sa_type = utils.get_account_type(data['split_account'], *args)
+        memo = data.get('memo')
+        _class = data.get('class')
 
-        desc = data.get('desc') or ''
-        notes = data['notes']
-        tran_class = data['tran_class']
-
-        # qif doesn't support notes or class so add them to description
-        sep = ' ' if desc else ''
-        desc += '%s%s' % (sep, notes) if notes else ''
-        sep = ' ' if desc else ''
-        desc += '%s%s' % (sep, tran_class) if tran_class else ''
+        if memo and _class:
+            split_memo = '%s %s' % (memo, _class)
+        else:
+            split_memo = memo or _class
 
         new_data = {
             'account_type': utils.get_account_type(data['account'], *args),
             'split_account_type': sa_type,
-            'desc': desc}
+            'split_memo': split_memo}
 
         data.update(new_data)
         return data
@@ -117,17 +115,34 @@ u'description notes'}
 
         Examples:
             >>> kwargs = {'payee': 'payee', 'amount': 100, 'check_num': 1, \
-'date': '01/01/12', 'account_type': 'type'}
+'date': dt(2012, 1, 1), 'account_type': 'type'}
             >>> QIF().transaction(**kwargs).replace('\\n', '').replace(\
 '\\t', '')
-            u'!Type:typeN1D01/01/12PpayeeT100'
+            u'!Type:typeN1D01/01/12PpayeeT-100'
         """
+        kwargs.update({'time_stamp': kwargs['date'].strftime('%m/%d/%y')})
+
+        if self.is_split:
+            kwargs.update({'amount': kwargs['amount'] * -1})
+
         content = "!Type:%(account_type)s\n" % kwargs
-        content += "N%(check_num)s\n" % kwargs if 'check_num' in kwargs else ''
-        content += "D%(date)s\nP%(payee)s\nT%(amount)s\n" % kwargs
+
+        if kwargs.get('check_num'):
+            content += "N%(check_num)s\n" % kwargs
+
+        content += "D%(time_stamp)s\n" % kwargs
+        content += "P%(payee)s\n" % kwargs
+
+        if kwargs.get('memo'):
+            content += "M%(memo)s\n" % kwargs
+
+        if kwargs.get('class'):
+            content += "L%(class)s\n" % kwargs
+
+        content += "T%(amount)s\n" % kwargs
         return content
 
-    def split_content(self, split_account, **kwargs):
+    def split_content(self, **kwargs):
         """ Gets QIF format split content
 
         Args:
@@ -138,23 +153,31 @@ u'description notes'}
             (str): the QIF content
 
         Examples:
-            >>> kwargs =  {'desc': 'desc', 'amount': 100}
-            >>> QIF().split_content('account', **kwargs).replace(\
-'\\n', '').replace('\\t', '')
-            u'SaccountEdesc100'
+            >>> kwargs =  {'account': 'account', 'split_memo': 'memo', \
+'amount': 100}
+            >>> QIF().split_content(**kwargs).replace('\\n', '').replace(\
+'\\t', '')
+            u'SaccountEmemo$100'
         """
-        content = "S%s\nE" % split_account
-        content += "%(desc)s\n%(amount)s\n" % kwargs
+        if kwargs.get('split_account'):
+            content = "S%(split_account)s\n" % kwargs
+        else:
+            content = "S%(account)s\n" % kwargs
+
+        if kwargs.get('split_memo'):
+            content += "E%(split_memo)s\n" % kwargs
+
+        content += "$%(amount)s\n" % kwargs
         return content
 
-    def account_end(self, **kwargs):
+    def transaction_end(self):
         """ Gets QIF transaction end
 
         Returns:
             (str): the QIF content
 
         Examples:
-            >>> QIF().account_end().replace('\\n', '').replace('\\t', '')
+            >>> QIF().transaction_end().replace('\\n', '').replace('\\t', '')
             u'^'
         """
         return "^\n"

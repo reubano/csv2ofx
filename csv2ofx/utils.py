@@ -26,7 +26,7 @@ import itertools as it
 
 from io import TextIOBase
 from operator import itemgetter
-
+from tabutils import process
 
 class IterStringIO(TextIOBase):
     def __init__(self, iterable=None):
@@ -168,7 +168,7 @@ def write_file(filepath, content, mode='wb', **kwargs):
 
         try:
             chunks = (chunk for chunk in content.read(chunksize))
-        except AttributeError:
+        except KeyError:
             chunksize = chunksize or pow(10, 10)
             chunks = (chunk for chunk in content(chunksize))
 
@@ -238,11 +238,34 @@ def get_account_type(account, account_types, def_type='n/a'):
     _type = def_type
 
     for key, values in account_types.items():
-        if any(v in account for v in values):
+        if any(v in account.lower() for v in values):
             _type = key
             break
 
     return _type
+
+
+def convert_amount(raw):
+    try:
+        after_comma = process.afterish(raw, exclude='.')
+        after_decimal = process.afterish(raw, '.', ',')
+    except AttributeError:
+        # We don't have a string
+        after_comma = 0
+        after_decimal = 0
+
+
+    if after_comma in {-1, 0, 3} and after_decimal in {-1, 0, 1, 2}:
+        amount = process.decimalize(raw)
+    elif after_comma in {-1, 0, 1, 2} and after_decimal in {-1, 0, 3}:
+        kwargs = {'thousand_sep': '.', 'decimal_sep': ','}
+        amount = process.decimalize(raw, **kwargs)
+    else:
+        print('after_comma', after_comma)
+        print('after_decimal', after_decimal)
+        raise TypeError('Invalid number format for `%s`.' % raw)
+
+    return amount
 
 
 def merge_dicts(keyfunc, op, dicts):
@@ -284,6 +307,9 @@ def get_max_split(splits, keyfunc):
         >>> splits = [{'amount': 350}, {'amount': -450}, {'amount': 100}]
         >>> get_max_split(splits, itemgetter('amount'))
         (1, {u'amount': -450})
+        >>> splits = [{'amount': 350}, {'amount': -350}]
+        >>> get_max_split(splits, itemgetter('amount'))
+        (0, {u'amount': 350})
     """
     maxfunc = lambda enum: abs(keyfunc(enum[1]))
     return max(enumerate(splits), key=maxfunc)

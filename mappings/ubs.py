@@ -5,7 +5,7 @@ mapping = {
     'has_header': True,
     'currency': 'Ccy.',
     'delimiter': ';',
-    'tran_type': lambda tr: 'debit' if tr.get('Debit') else 'credit',
+    'type': lambda tr: 'debit' if tr.get('Debit') else 'credit',
     'amount': lambda tr: tr.get('Debit', tr['Credit']),
     'notes': lambda tr: ' / '.join(
         filter(

@@ -12,7 +12,6 @@ mapping = {
     'desc': itemgetter('Reference'),
     'payee': itemgetter('Description'),
     'notes': itemgetter('Notes'),
-    'split_account': itemgetter('Category'),
     'check_num': itemgetter('Num'),
     'id': itemgetter('Row'),
 }
