@@ -225,7 +225,8 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
 
         Examples:
             >>> kwargs = {'balance': 150, 'date': dt(2012, 1, 15)}
-            >>> OFX().account_end(**kwargs).replace('\\n', '').replace('\\t', '')
+            >>> OFX().account_end(**kwargs).replace('\\n', '').replace(\
+'\\t', '')
             u'</BANKTRANLIST><LEDGERBAL><BALAMT>150</BALAMT><DTASOF>\
 20120115000000</DTASOF></LEDGERBAL></STMTRS>'
         """

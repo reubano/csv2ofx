@@ -22,9 +22,7 @@ from __future__ import (
     unicode_literals)
 
 import hashlib
-import sys
 
-from os import path as p
 from datetime import datetime as dt
 from operator import itemgetter
 from dateutil.parser import parse

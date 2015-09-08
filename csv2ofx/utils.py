@@ -28,6 +28,7 @@ from io import TextIOBase
 from operator import itemgetter
 from tabutils import process
 
+
 class IterStringIO(TextIOBase):
     def __init__(self, iterable=None):
         iterable = iterable or []
@@ -253,7 +254,6 @@ def convert_amount(raw):
         # We don't have a string
         after_comma = 0
         after_decimal = 0
-
 
     if after_comma in {-1, 0, 3} and after_decimal in {-1, 0, 1, 2}:
         amount = process.decimalize(raw)
