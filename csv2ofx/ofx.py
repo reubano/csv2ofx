@@ -37,12 +37,7 @@ class OFX(File):
             (str): the OFX content
         """
         super(OFX, self).__init__(mapping, **kwargs)
-
-        if kwargs.get('split_account'):
-            self.resp_type = 'INTRATRNRS'
-        else:
-            self.resp_type = 'STMTTRNRS'
-
+        self.resp_type = 'INTRATRNRS' if self.split_account else 'STMTTRNRS'
         self.def_type = kwargs.get('def_type', 'CHECKING')
         self.account_types = {
             'CHECKING': ('checking', 'income', 'receivable', 'payable'),
@@ -64,9 +59,10 @@ class OFX(File):
             >>> kwargs = {'date': dt(2012, 1, 15)}
             >>> OFX().header(**kwargs).replace('\\n', '').replace('\\t', '')
             u'DATA:OFXSGMLENCODING:UTF-8<OFX><SIGNONMSGSRSV1><SONRS><STATUS>\
-<CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS><DTSERVER>20120115</DTSERVER>\
-<LANGUAGE>ENG</LANGUAGE></SONRS></SIGNONMSGSRSV1><BANKMSGSRSV1><INTRATRNRS>\
-<TRNUID></TRNUID><STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS>'
+<CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS><DTSERVER>20120115000000\
+</DTSERVER><LANGUAGE>ENG</LANGUAGE></SONRS></SIGNONMSGSRSV1><BANKMSGSRSV1>\
+<STMTTRNRS><TRNUID></TRNUID><STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY>\
+</STATUS>'
         """
         kwargs.setdefault('language', 'ENG')
         time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
@@ -113,17 +109,18 @@ class OFX(File):
             >>> OFX(mapping).transaction_data(tr)
             {u'account_type': u'CHECKING', u'account_id': \
 'e268443e43d93dab7ebef303bbe9642f', u'memo': u'description notes', \
-u'split_account_id': '195917574edc9b6bbeb5be9785b6a479', u'currency': u'USD', \
-u'date': datetime.datetime(2010, 6, 12, 0, 0), u'id': \
-'0b9df731dbf286154784222755482d6f', u'bank': u'account', u'account': \
-u'account', u'split_account': u'Checking', u'bank_id': \
-'e268443e43d93dab7ebef303bbe9642f', u'class': None, u'payee': u'payee', \
-u'amount': Decimal('-1000.00'), u'split_account_type': u'CHECKING', \
-u'check_num': None, u'type': u'debit'}
+u'split_account_id': None, u'currency': u'USD', u'date': \
+datetime.datetime(2010, 6, 12, 0, 0), u'class': None, u'bank': u'account', \
+u'account': u'account', u'split_account': None, u'bank_id': \
+'e268443e43d93dab7ebef303bbe9642f', u'id': \
+'ee86450a47899254e2faa82dca3c2cf2', u'payee': u'payee', u'amount': \
+Decimal('-1000.00'), u'split_account_type': None, u'check_num': None, \
+u'type': u'debit'}
         """
         data = super(OFX, self).transaction_data(tr)
         args = [self.account_types, self.def_type]
-        sa_type = utils.get_account_type(data['split_account'], *args)
+        sa = data['split_account']
+        sa_type = utils.get_account_type(sa, *args) if sa else None
         memo = data.get('memo')
         _class = data.get('class')
 
@@ -148,7 +145,7 @@ u'check_num': None, u'type': u'debit'}
 
         Examples:
             >>> OFX().footer().replace('\\n', '').replace('\\t', '')
-            u'</INTRATRNRS></BANKMSGSRSV1></OFX>'
+            u'</STMTTRNRS></BANKMSGSRSV1></OFX>'
         """
         return "\t\t</%s>\n\t</BANKMSGSRSV1>\n</OFX>\n" % self.resp_type
 
@@ -261,10 +258,8 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
 , 'id': 'jbaevf'}
             >>> OFX().transfer(**kwargs).replace('\\n', '').replace('\\t', '')
             u'<INTRARS><CURDEF>USD</CURDEF><SRVRTID>jbaevf</SRVRTID>\
-<XFERINFO><BANKACCTFROM><BANKID>1</BANKID><ACCTID>1</ACCTID><ACCTTYPE>type\
-</ACCTTYPE></BANKACCTFROM><BANKACCTTO><BANKID>1</BANKID><ACCTID>2</ACCTID>\
-<ACCTTYPE>type</ACCTTYPE></BANKACCTTO><TRNAMT>100</TRNAMT></XFERINFO>\
-<DTPOSTED>20120115000000</DTPOSTED></INTRARS>'
+<XFERINFO><TRNAMT>100</TRNAMT><BANKACCTFROM><BANKID>1</BANKID><ACCTID>1\
+</ACCTID><ACCTTYPE>type</ACCTTYPE></BANKACCTFROM>'
         """
         content = '\t\t\t<INTRARS>\n'
         content += '\t\t\t\t<CURDEF>%(currency)s</CURDEF>\n' % kwargs

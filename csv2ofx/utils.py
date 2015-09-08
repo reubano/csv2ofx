@@ -168,7 +168,7 @@ def write_file(filepath, content, mode='wb', **kwargs):
 
         try:
             chunks = (chunk for chunk in content.read(chunksize))
-        except KeyError:
+        except AttributeError:
             chunksize = chunksize or pow(10, 10)
             chunks = (chunk for chunk in content(chunksize))
 

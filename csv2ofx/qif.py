@@ -60,17 +60,18 @@ class QIF(File):
             >>> QIF(mapping).transaction_data(tr)
             {u'account_type': u'Bank', u'account_id': \
 'e268443e43d93dab7ebef303bbe9642f', u'memo': u'description notes', \
-u'split_account_id': '195917574edc9b6bbeb5be9785b6a479', u'currency': u'USD', \
-u'date': datetime.datetime(2010, 6, 12, 0, 0), u'id': \
-'0b9df731dbf286154784222755482d6f', u'bank': u'account', u'account': \
-u'account', u'split_memo': u'description notes', u'split_account': \
-u'Checking', u'bank_id': 'e268443e43d93dab7ebef303bbe9642f', u'class': None, \
-u'payee': u'payee', u'amount': Decimal('-1000.00'), u'split_account_type': \
-u'Bank', u'check_num': None, u'type': u'debit'}
+u'split_account_id': None, u'currency': u'USD', u'date': \
+datetime.datetime(2010, 6, 12, 0, 0), u'class': None, u'bank': u'account', \
+u'account': u'account', u'split_memo': u'description notes', \
+u'split_account': None, u'bank_id': 'e268443e43d93dab7ebef303bbe9642f', \
+u'id': 'ee86450a47899254e2faa82dca3c2cf2', u'payee': u'payee', \
+u'amount': Decimal('-1000.00'), u'split_account_type': None, u'check_num': \
+None, u'type': u'debit'}
         """
         data = super(QIF, self).transaction_data(tr)
         args = [self.account_types, self.def_type]
-        sa_type = utils.get_account_type(data['split_account'], *args)
+        sa = data['split_account']
+        sa_type = utils.get_account_type(sa, *args) if sa else None
         memo = data.get('memo')
         _class = data.get('class')
 
@@ -118,7 +119,7 @@ u'Bank', u'check_num': None, u'type': u'debit'}
 'date': dt(2012, 1, 1), 'account_type': 'type'}
             >>> QIF().transaction(**kwargs).replace('\\n', '').replace(\
 '\\t', '')
-            u'!Type:typeN1D01/01/12PpayeeT-100'
+            u'!Type:typeN1D01/01/12PpayeeT100'
         """
         kwargs.update({'time_stamp': kwargs['date'].strftime('%m/%d/%y')})
 

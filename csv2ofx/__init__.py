@@ -47,10 +47,13 @@ class File(object):
         mapping = mapping or {}
         [self.__setattr__(k, v) for k, v in mapping.items()]
 
+        if not hasattr(self, 'is_split'):
+            self.is_split = False
+
         if kwargs.get('split_account'):
             self.split_account = itemgetter(kwargs['split_account'])
         else:
-            self.split_account = ''
+            self.split_account = None
 
         self.start = kwargs.get('start', dt.now())
         self.end = kwargs.get('end', dt.now())
@@ -96,16 +99,15 @@ class File(object):
 'account'}
             >>> File(mapping).transaction_data(tr)
             {u'account_id': 'e268443e43d93dab7ebef303bbe9642f', u'memo': \
-u'description notes', u'split_account_id': \
-'195917574edc9b6bbeb5be9785b6a479', u'currency': u'USD', u'date': \
-datetime.datetime(2010, 6, 12, 0, 0), u'id': \
-'0b9df731dbf286154784222755482d6f', u'bank': u'account', u'account': \
-u'account', u'split_account': u'Checking', u'bank_id': \
-'e268443e43d93dab7ebef303bbe9642f', u'class': None, u'payee': u'payee', \
-u'amount': Decimal('-1000.00'), u'check_num': None, u'type': u'debit'}
+u'description notes', u'split_account_id': None, u'currency': u'USD', \
+u'date': datetime.datetime(2010, 6, 12, 0, 0), u'class': None, u'bank': \
+u'account', u'account': u'account', u'split_account': None, u'bank_id': \
+'e268443e43d93dab7ebef303bbe9642f', u'id': \
+'ee86450a47899254e2faa82dca3c2cf2', u'payee': u'payee', u'amount': \
+Decimal('-1000.00'), u'check_num': None, u'type': u'debit'}
         """
         account = self.get('account', tr)
-        split_account = self.get('split_account', tr, '')
+        split_account = self.get('split_account', tr)
         bank = self.get('bank', tr, account)
 
         raw_amount = str(self.get('amount', tr))
@@ -138,7 +140,7 @@ u'amount': Decimal('-1000.00'), u'check_num': None, u'type': u'debit'}
             'account': account,
             'account_id': self.get('account_id', tr, md5(account)),
             'split_account': split_account,
-            'split_account_id': md5(split_account),
+            'split_account_id': md5(split_account) if split_account else None,
             'amount': amount,
             'payee': payee,
             'memo': memo,
