@@ -1,0 +1,4 @@
+manage.py==0.2.10
+python-dateutil==2.4.2
+requests==2.4.3
+tabutils==0.9.5
