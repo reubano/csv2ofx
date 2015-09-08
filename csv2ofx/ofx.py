@@ -30,8 +30,7 @@ class OFX(File):
         """ Gets OFX format transaction content
 
         Kwargs:
-            resp_type (str): the time in mmddyy_hhmmss format
-            'INTRATRNRS' or 'STMTTRNRS'
+            def_type (str): Default account type.
 
         Returns:
             (str): the OFX content

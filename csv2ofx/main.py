@@ -93,6 +93,7 @@ def gen_groups(chunks, obj, qif):
         if qif:
             cleansed = chunk
         else:
+            # cleansed = chunk
             cleansed = [
                 {k: xmlize([v]).next() for k, v in c.items()} for c in chunk]
 
