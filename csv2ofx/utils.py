@@ -174,12 +174,14 @@ def write_file(filepath, content, mode='wb', **kwargs):
         int: bytes written if chunksize else 0
 
     Examples:
-        >>> import requests
+        >>> from StringIO import StringIO
         >>> from tempfile import NamedTemporaryFile
         >>> tmpfile = NamedTemporaryFile(delete='True')
-        >>> r = requests.get('http://google.com')
-        >>> write_file(tmpfile.name, r.iter_content)
-        10000000000
+        >>> write_file(tmpfile.name, StringIO('Hello World'))
+        11
+        >>> tmpfile = NamedTemporaryFile(delete='True')
+        >>> write_file(tmpfile.name, IterStringIO(iter('Hello World')))
+        11
     """
     def _write_file(f, content, **kwargs):
         chunksize = kwargs.get('chunksize')
@@ -187,15 +189,22 @@ def write_file(filepath, content, mode='wb', **kwargs):
         bar_len = kwargs.get('bar_len', 50)
         progress = 0
 
-        try:
-            chunks = (chunk for chunk in content.read(chunksize))
-        except AttributeError:
-            chunksize = chunksize or pow(10, 10)
-            chunks = (chunk for chunk in content(chunksize))
+        if chunksize:
+            try:
+                chunks = (chunk for chunk in content.read(chunksize))
+            except AttributeError:
+                chunks = (chunk for chunk in content(chunksize))
+        else:
+            try:
+                chunks = [content.read()]
+            except AttributeError:
+                chunks = [content()]
+
+            chunksize = len(chunks[0])
 
         for chunk in chunks:
             f.write(chunk)
-            progress += chunksize or 0
+            progress += chunksize
 
             if length:
                 bars = min(int(bar_len * progress / length), bar_len)
