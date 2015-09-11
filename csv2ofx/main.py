@@ -35,7 +35,7 @@ from dateutil.parser import parse
 from argparse import RawTextHelpFormatter, ArgumentParser
 
 from tabutils.io import read_csv
-from tabutils.process import xmlize
+from tabutils.process import xmlize, chunk
 
 from . import utils
 from .ofx import OFX
@@ -253,7 +253,7 @@ def run():
     content.write(obj.header(date=server_date, language=args.language))
 
     # get content body
-    chunks = utils.chunk(csv_content, args.chunksize)
+    chunks = chunk(csv_content, args.chunksize)
     groups = gen_groups(chunks, obj, args.qif)
     grouped_trxns = gen_trxns(groups, obj, args.collapse)
     main_gtrxns = gen_main_trxns(grouped_trxns, obj)
