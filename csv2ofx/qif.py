@@ -36,6 +36,11 @@ class QIF(Content):
             split_header (str): Transaction field to use for the split account.
             start (date): Date from which to begin including transactions.
             end (date): Date from which to exclude transactions.
+
+        Examples:
+            >>> from mappings.mint import mapping
+            >>> QIF(mapping)  #doctest: +ELLIPSIS
+            <csv2ofx.qif.QIF object at 0x...>
         """
         super(QIF, self).__init__(mapping, **kwargs)
         self.def_type = kwargs.get('def_type', 'Bank')
@@ -111,10 +116,10 @@ None, u'type': u'debit'}
              (str): the QIF content
 
         Examples:
-            >>> kwargs = {'account': 'account', 'account_type': 'type'}
+            >>> kwargs = {'account': 'account', 'account_type': 'Bank'}
             >>> QIF().account_start(**kwargs).replace('\\n', '').replace(\
 '\\t', '')
-            u'!AccountNaccountTtype^'
+            u'!AccountNaccountTBank^'
         """
         return "!Account\nN%(account)s\nT%(account_type)s\n^\n" % kwargs
 
@@ -137,10 +142,10 @@ None, u'type': u'debit'}
 
         Examples:
             >>> kwargs = {'payee': 'payee', 'amount': 100, 'check_num': 1, \
-'date': dt(2012, 1, 1), 'account_type': 'type'}
+'date': dt(2012, 1, 1), 'account_type': 'Bank'}
             >>> QIF().transaction(**kwargs).replace('\\n', '').replace(\
 '\\t', '')
-            u'!Type:typeN1D01/01/12PpayeeT100'
+            u'!Type:BankN1D01/01/12PpayeeT100.00'
         """
         kwargs.update({'time_stamp': kwargs['date'].strftime('%m/%d/%y')})
 
@@ -161,7 +166,7 @@ None, u'type': u'debit'}
         if kwargs.get('class'):
             content += "L%(class)s\n" % kwargs
 
-        content += "T%(amount)s\n" % kwargs
+        content += "T%(amount)0.2f\n" % kwargs
         return content
 
     def split_content(self, **kwargs):
@@ -187,7 +192,7 @@ None, u'type': u'debit'}
 'amount': 100}
             >>> QIF().split_content(**kwargs).replace('\\n', '').replace(\
 '\\t', '')
-            u'SaccountEmemo$100'
+            u'SaccountEmemo$100.00'
         """
         if kwargs.get('split_account'):
             content = "S%(split_account)s\n" % kwargs
@@ -197,7 +202,7 @@ None, u'type': u'debit'}
         if kwargs.get('split_memo'):
             content += "E%(split_memo)s\n" % kwargs
 
-        content += "$%(amount)s\n" % kwargs
+        content += "$%(amount)0.2f\n" % kwargs
         return content
 
     def transaction_end(self):
@@ -217,5 +222,8 @@ None, u'type': u'debit'}
 
         Returns:
             (None): the QIF footer
+
+        Examples:
+            >>> QIF().footer()
         """
         return None

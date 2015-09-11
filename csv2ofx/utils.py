@@ -38,6 +38,18 @@ class IterStringIO(TextIOBase):
         """ IterStringIO constructor
         Args:
             iterable (dict): bank mapper (see csv2ofx.mappings)
+
+        Examples:
+            >>> from StringIO import StringIO
+            >>> iter_content = iter('Hello World')
+            >>> StringIO(iter_content).getvalue()  #doctest: +ELLIPSIS
+            '<iterator object at 0x...>'
+            >>> iter_sio = IterStringIO(iter_content)
+            >>> iter_sio.read(5)
+            u'Hello'
+            >>> iter_sio.write(iter('ly person'))
+            >>> iter_sio.read(8)
+            u' Worldly'
         """
         iterable = iterable or []
         not_newline = lambda s: s not in {'\n', '\r', '\r\n'}

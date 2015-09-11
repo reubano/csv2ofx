@@ -51,6 +51,11 @@ class Content(object):
             split_header (str): Transaction field to use for the split account.
             start (date): Date from which to begin including transactions.
             end (date): Date from which to exclude transactions.
+
+        Examples:
+            >>> from mappings.mint import mapping
+            >>> Content(mapping)  #doctest: +ELLIPSIS
+            <csv2ofx.Content object at 0x...>
         """
         mapping = mapping or {}
         [self.__setattr__(k, v) for k, v in mapping.items()]
@@ -80,18 +85,32 @@ class Content(object):
         Returns:
             (mixed): Either the value of the attribute function applied to the
                 transaction, or the value of the attribute.
+
+        Examples:
+            >>> from mappings.mint import mapping
+            >>> tr = {'Transaction Type': 'debit', 'Amount': 1000.00}
+            >>> start = dt(2015, 1, 1)
+            >>> Content(mapping, start=start).get('start')  # normal attribute
+            datetime.datetime(2015, 1, 1, 0, 0)
+            >>> Content(mapping).get('amount', tr)  # mapping function
+            1000.0
+            >>> Content(mapping).get('has_header')  # mapping attribute
+            True
         """
         try:
             attr = getattr(self, name)
         except AttributeError:
-            value = default
+            attr = None
+            value = None
         else:
-            try:
-                value = attr(tr)
-            except TypeError:
-                value = attr
-            except KeyError:
-                value = default
+            value = None
+
+        try:
+            value = value or attr(tr) if attr else default
+        except TypeError:
+            value = attr
+        except KeyError:
+            value = default
 
         return value
 
@@ -104,6 +123,14 @@ class Content(object):
 
         Returns:
             (bool): Whether or not to skip the transaction.
+
+        Examples:
+            >>> from mappings.mint import mapping
+            >>> tr = {'Date': '06/12/10', 'Amount': 1000.00}
+            >>> Content(mapping, start=dt(2010, 1, 1)).skip_transaction(tr)
+            False
+            >>> Content(mapping, start=dt(2013, 1, 1)).skip_transaction(tr)
+            True
         """
         return not (self.end >= parse(self.get('date', tr)) >= self.start)
 
@@ -115,6 +142,12 @@ class Content(object):
 
         Returns:
             (decimal): The converted amount.
+
+        Examples:
+            >>> from mappings.mint import mapping
+            >>> tr = {'Date': '06/12/10', 'Amount': '$1,000'}
+            >>> Content(mapping, start=dt(2010, 1, 1)).convert_amount(tr)
+            Decimal('1000.00')
         """
         return utils.convert_amount(self.get('amount', tr))
 
