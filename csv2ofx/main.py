@@ -100,30 +100,31 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-def gen_groups(chunks, obj, qif):
-    for chunk in chunks:
-        if qif:
-            cleansed = chunk
-        else:
-            # cleansed = chunk
-            cleansed = [
-                {k: xmlize([v]).next() for k, v in c.items()} for c in chunk]
 
-        keyfunc = obj.id if obj.is_split else obj.account
+def gen_groups(chunks, cont, qif):
+    for chnk in chunks:
+        if qif:
+            cleansed = chnk
+        else:
+            # cleansed = chnk
+            cleansed = [
+                {k: xmlize([v]).next() for k, v in c.items()} for c in chnk]
+
+        keyfunc = cont.id if cont.is_split else cont.account
         grouped = utils.group_transactions(cleansed, keyfunc)
 
         for group, transactions in grouped:
             yield (group, transactions)
 
 
-def gen_trxns(groups, obj, collapse):
+def gen_trxns(groups, cont, collapse):
     for group, transactions in groups:
-        if obj.is_split and args.collapse:
+        if cont.is_split and args.collapse:
             # group transactions by collapse field and sum the amounts
             groupby = itemgetter(args.collapse)
             byaccount = utils.group_transactions(transactions, groupby)
             op = lambda values: sum(map(utils.convert_amount, values))
-            merger = partial(utils.merge_dicts, obj.amount, op)
+            merger = partial(utils.merge_dicts, cont.amount, op)
             trxns = [merger(dicts) for _, dicts in byaccount]
         else:
             trxns = transactions
@@ -131,16 +132,16 @@ def gen_trxns(groups, obj, collapse):
         yield (group, trxns)
 
 
-def gen_main_trxns(groups, obj):
+def gen_main_trxns(groups, cont):
     for group, trxns in groups:
-        _args = [trxns, obj.convert_amount]
+        _args = [trxns, cont.convert_amount]
 
         # if it's split, transactions skipping is all or none
-        if obj.is_split and obj.skip_transaction(trxns[0]):
+        if cont.is_split and cont.skip_transaction(trxns[0]):
             continue
-        elif obj.is_split and not utils.verify_splits(*_args):
+        elif cont.is_split and not utils.verify_splits(*_args):
             raise Exception('Splits do not sum to zero.')
-        elif obj.is_split:
+        elif cont.is_split:
             main_pos = utils.get_max_split(*_args)[0]
         else:
             main_pos = 0
@@ -148,70 +149,70 @@ def gen_main_trxns(groups, obj):
         yield (group, main_pos, trxns)
 
 
-def gen_ofx_content(groups, obj):
+def gen_ofx_content(groups, cont):
     for group, main_pos, trxns in groups:
         keyfunc = lambda enum: enum[0] != main_pos
         sorted_trxns = sorted(enumerate(trxns), key=keyfunc)
 
-        if obj.is_split and len(sorted_trxns) > 2:
+        if cont.is_split and len(sorted_trxns) > 2:
             raise TypeError('Group %s has too many splits.\n' % group)
 
         for pos, trxn in sorted_trxns:
-            data = obj.transaction_data(trxn)
+            data = cont.transaction_data(trxn)
             is_main = pos == main_pos
 
-            if not obj.is_split and obj.skip_transaction(trxn):
+            if not cont.is_split and cont.skip_transaction(trxn):
                 continue
 
-            if is_main and not (obj.is_split or obj.split_account):
-                yield obj.account_start(**data)
+            if is_main and not (cont.is_split or cont.split_account):
+                yield cont.account_start(**data)
 
-            if not (obj.is_split or obj.split_account):
-                yield obj.transaction(**data)
+            if not (cont.is_split or cont.split_account):
+                yield cont.transaction(**data)
 
-            if (obj.is_split and is_main) or obj.split_account:
-                yield obj.transfer(**data)
+            if (cont.is_split and is_main) or cont.split_account:
+                yield cont.transfer(**data)
 
-            if (obj.is_split and not is_main) or obj.split_account:
-                yield obj.split_content(**data)
+            if (cont.is_split and not is_main) or cont.split_account:
+                yield cont.split_content(**data)
 
-            if obj.split_account:
-                yield obj.transfer_end(**data)
+            if cont.split_account:
+                yield cont.transfer_end(**data)
 
-        if obj.is_split:
-            yield obj.transfer_end(**data)
-        elif not (obj.is_split or obj.split_account):
-            yield obj.account_end(**data)
+        if cont.is_split:
+            yield cont.transfer_end(**data)
+        elif not (cont.is_split or cont.split_account):
+            yield cont.account_end(**data)
 
 
-def gen_qif_content(groups, obj):
+def gen_qif_content(groups, cont):
     prev_account = None
 
     for group, main_pos, trxns in groups:
         keyfunc = lambda enum: enum[0] != main_pos
 
         for pos, trxn in sorted(enumerate(trxns), key=keyfunc):
-            data = obj.transaction_data(trxn)
+            data = cont.transaction_data(trxn)
             is_main = pos == main_pos
 
-            if not obj.is_split and obj.skip_transaction(trxn):
+            if not cont.is_split and cont.skip_transaction(trxn):
                 continue
 
-            if is_main and prev_account != obj.account(trxn):
-                yield obj.account_start(**data)
+            if is_main and prev_account != cont.account(trxn):
+                yield cont.account_start(**data)
 
-            if (obj.is_split and is_main) or not obj.is_split:
-                yield obj.transaction(**data)
-                prev_account = obj.account(trxn)
+            if (cont.is_split and is_main) or not cont.is_split:
+                yield cont.transaction(**data)
+                prev_account = cont.account(trxn)
 
-            if (obj.is_split and not is_main) or obj.split_account:
-                yield obj.split_content(**data)
+            if (cont.is_split and not is_main) or cont.split_account:
+                yield cont.split_content(**data)
 
-            if not obj.is_split:
-                yield obj.transaction_end()
+            if not cont.is_split:
+                yield cont.transaction_end()
 
-        if obj.is_split:
-            yield obj.transaction_end()
+        if cont.is_split:
+            yield cont.transaction_end()
 
 
 def run():
@@ -234,38 +235,33 @@ def run():
     }
 
     content_func = gen_qif_content if args.qif else gen_ofx_content
-    OBJ = QIF if args.qif else OFX
-    obj = OBJ(mapping, **okwargs)
+    Content = QIF if args.qif else OFX
+    cont = Content(mapping, **okwargs)
 
     try:
         mtime = p.getmtime(args.source.name)
     except AttributeError:
         mtime = time.time()
 
-    csv_content = read_csv(args.source, has_header=obj.has_header)
-
-    # remove csv header
-    csv_content.next()
+    csv_content = read_csv(args.source, has_header=cont.has_header)
+    csv_content.next()  # remove csv header
     server_date = dt.fromtimestamp(mtime)
     content = utils.IterStringIO()
-
-    # write content header
-    content.write(obj.header(date=server_date, language=args.language))
-
-    # get content body
+    content.write(cont.header(date=server_date, language=args.language))
     chunks = chunk(csv_content, args.chunksize)
-    groups = gen_groups(chunks, obj, args.qif)
-    grouped_trxns = gen_trxns(groups, obj, args.collapse)
-    main_gtrxns = gen_main_trxns(grouped_trxns, obj)
-    body = content_func(main_gtrxns, obj)
-
-    # write content body and footer
+    groups = gen_groups(chunks, cont, args.qif)
+    grouped_trxns = gen_trxns(groups, cont, args.collapse)
+    main_gtrxns = gen_main_trxns(grouped_trxns, cont)
+    body = content_func(main_gtrxns, cont)
     content.write(body)
-    content.write(obj.footer())
+    content.write(cont.footer())
 
     try:
-        # write content to file
-        utils.write_file(args.dest, content, overwrite=args.overwrite)
+        kwargs = {
+            'overwrite': args.overwrite,
+            'chunksize': args.chunksize
+        }
+        utils.write_file(args.dest, content, **kwargs)
     except TypeError as e:
         msg = str(e)
 
@@ -273,8 +269,6 @@ def run():
             msg += 'Try again with `-c` option.'
 
         exit(msg)
-
-    # print(groups.next())
 
 
 if __name__ == '__main__':
