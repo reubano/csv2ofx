@@ -42,6 +42,16 @@ md5 = lambda content: hashlib.md5(content).hexdigest()
 
 class File(object):
     def __init__(self, mapping=None, **kwargs):
+        """ Base content constructor
+        Args:
+            mapping (dict): bank mapper (see csv2ofx.mappings)
+            kwargs (dict): Keyword arguments
+
+        Kwargs:
+            split_header (str): Transaction field to use for the split account.
+            start (date): Date from which to begin including transactions.
+            end (date): Date from which to exclude transactions.
+        """
         mapping = mapping or {}
         [self.__setattr__(k, v) for k, v in mapping.items()]
 
@@ -57,6 +67,20 @@ class File(object):
         self.end = kwargs.get('end', dt.now())
 
     def get(self, name, tr=None, default=None):
+        """ Gets an attribute which could be either a normal attribute,
+        a mapping function, or a mapping attribute
+
+        Args:
+            name (str): The attribute.
+            tr (dict): The transaction. Require if `name` is a mapping function
+                (default: None).
+
+            default (str): Value to use if `name` isn't found (default: None).
+
+        Returns:
+            (mixed): Either the value of the attribute function applied to the
+                transaction, or the value of the attribute.
+        """
         try:
             attr = getattr(self, name)
         except AttributeError:
@@ -72,22 +96,36 @@ class File(object):
         return value
 
     def skip_transaction(self, tr):
-        # if transaction is not in the specified date range, skip it
+        """ Determines whether a transaction should be skipped (isn't in the
+        specified date range)
+
+        Args:
+            tr (dict): The transaction.
+
+        Returns:
+            (bool): Whether or not to skip the transaction.
+        """
         return not (self.end >= parse(self.get('date', tr)) >= self.start)
 
     def convert_amount(self, tr):
+        """ Converts a string amount into a number
+
+        Args:
+            tr (dict): The transaction.
+
+        Returns:
+            (decimal): The converted amount.
+        """
         return utils.convert_amount(self.get('amount', tr))
 
     def transaction_data(self, tr):
         """ gets transaction data
 
         Args:
-            tr (List[str]): the transaction
-
-        Kwargs:
+            tr (dict): the transaction
 
         Returns:
-            (List[str]): the QIF content
+            (dict): the QIF content
 
         Examples:
             >>> from mappings.mint import mapping

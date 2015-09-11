@@ -2,8 +2,20 @@
 # -*- coding: utf-8 -*-
 # vim: sw=4:ts=4:expandtab
 
-""" csv2ofx converts a csv file to ofx and qif """
+"""
+csv2ofx.main
+~~~~~~~~~~~~
 
+Provides the primary ofx and qif conversion functions
+
+Examples:
+    literal blocks::
+
+        python example_google.py
+
+Attributes:
+    ENCODING (str): Default file encoding.
+"""
 from __future__ import (
     absolute_import, division, print_function, with_statement,
     unicode_literals)

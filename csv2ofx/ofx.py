@@ -6,7 +6,7 @@
 csv2ofx.ofx
 ~~~~~~~~~~~
 
-Provides methods for generating OFX files
+Provides methods for generating OFX content
 
 Examples:
     literal blocks::
@@ -27,13 +27,17 @@ from . import utils
 
 class OFX(File):
     def __init__(self, mapping=None, **kwargs):
-        """ Gets OFX format transaction content
+        """ OFX constructor
+        Args:
+            mapping (dict): bank mapper (see csv2ofx.mappings)
+            kwargs (dict): Keyword arguments
 
         Kwargs:
             def_type (str): Default account type.
+            split_header (str): Transaction field to use for the split account.
+            start (date): Date from which to begin including transactions.
+            end (date): Date from which to exclude transactions.
 
-        Returns:
-            (str): the OFX content
         """
         super(OFX, self).__init__(mapping, **kwargs)
         self.resp_type = 'INTRATRNRS' if self.split_account else 'STMTTRNRS'
@@ -49,7 +53,8 @@ class OFX(File):
         """ Gets OFX format transaction content
 
         Kwargs:
-            date (date): the datetime
+            date (date): The datetime.
+            language (str:) The ISO formatted language (defaul: ENG).
 
         Returns:
             (str): the OFX content
@@ -92,12 +97,10 @@ class OFX(File):
         """ gets OFX transaction data
 
         Args:
-            tr (List[str]): the transaction
-
-        Kwargs:
+            tr (dict): the transaction
 
         Returns:
-            (List[str]):   the QIF content
+            (dict): the OFX transaction data
 
         Examples:
             >>> from mappings.mint import mapping
@@ -151,7 +154,15 @@ u'type': u'debit'}
     def account_start(self, **kwargs):
         """ Gets OFX format transaction account start content
 
+        Args:
+            kwargs (dict): Output from `transaction_data`.
+
         Kwargs:
+            currency (str): The ISO formatted currency (required).
+            bank_id (str): A unique bank identifier (required).
+            account_id (str): A unique account identifier (required).
+            account_type (str): The account type. One of [
+                'CHECKING', 'SAVINGS', 'MONEYMRKT', 'CREDITLINE'] (required).
 
         Returns:
             (str): the OFX content
@@ -185,7 +196,17 @@ u'type': u'debit'}
     def transaction(self, **kwargs):
         """ Gets OFX format transaction content
 
+        Args:
+            kwargs (dict): Output from `transaction_data`.
+
         Kwargs:
+            date (datetime): the transaction date (required)
+            type (str): the transaction type (required)
+            amount (number): the transaction amount (required)
+            id (str): the transaction id (required)
+            check_num (str): the check num (required)
+            payee (str): the payee (required)
+            memo (str): the transaction memo
 
         Returns:
             (str): the OFX content
@@ -219,6 +240,8 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
         """ Gets OFX format transaction account end content
 
         Kwargs:
+            date (datetime): the transaction date (required)
+            balance (number): the account balance
 
         Returns:
             (str): the OFX content
@@ -245,11 +268,22 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
     def transfer(self, **kwargs):
         """ Gets OFX transfer start
 
+        Args:
+            kwargs (dict): Output from `transaction_data`.
+
         Kwargs:
-            account_type (str): the account type
+            account_type (str): The account type. One of [
+                'CHECKING', 'SAVINGS', 'MONEYMRKT', 'CREDITLINE']
+            currency (str): The ISO formatted currency (required).
+            id (str):
+            amount (number): the transaction amount (required)
+            bank_id (str): A unique bank identifier (required).
+            account_id (str): A unique account identifier (required).
+            account_type (str): The account type. One of [
+                'CHECKING', 'SAVINGS', 'MONEYMRKT', 'CREDITLINE'] (required).
 
         Returns:
-            (str): the QIF content
+            (str): the start of an OFX transfer
 
         Examples:
             >>> kwargs = {'currency': 'USD', 'date': dt(2012, 1, 15), \
@@ -275,6 +309,34 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
         return content
 
     def split_content(self, **kwargs):
+        """ Gets OFX split content
+
+        Args:
+            kwargs (dict): Output from `transaction_data`.
+
+        Kwargs:
+            split_account (str): Account to use as the transfer recipient.
+                (useful in cases when the transaction data isn't already split)
+
+            bank_id (str): A unique bank identifier (required).
+
+            split_account_id (str): A unique account identifier (required if a
+                `split_account` is given).
+
+            split_account_type (str): The account type. One of [
+                'CHECKING', 'SAVINGS', 'MONEYMRKT', 'CREDITLINE'] (required if
+                a `split_account` is given).
+
+            account_id (str): A unique account identifier (required if a
+                `split_account` isn't given).
+
+            account_type (str): The account type. One of [
+                'CHECKING', 'SAVINGS', 'MONEYMRKT', 'CREDITLINE'] (required if
+                a `split_account` isn't given).
+
+        Returns:
+            (str): the OFX split content
+        """
         content = '\t\t\t\t\t<BANKACCTTO>\n'
         content += '\t\t\t\t\t\t<BANKID>%(bank_id)s</BANKID>\n' % kwargs
 
@@ -296,6 +358,14 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
 
     def transfer_end(self, **kwargs):
         time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
+        """ Gets OFX transfer end
+
+        Args:
+            date (datetime): the transfer date (required)
+
+        Returns:
+            (str): the end of an OFX transfer
+        """
         content = '\t\t\t\t</XFERINFO>\n'
         content += '\t\t\t\t<DTPOSTED>%s</DTPOSTED>\n' % time_stamp
         content += '\t\t\t</INTRARS>\n'

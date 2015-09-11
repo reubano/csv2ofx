@@ -6,7 +6,7 @@
 csv2ofx.qif
 ~~~~~~~~~~~
 
-Provides methods for generating qif files
+Provides methods for generating qif content
 
 Examples:
     literal blocks::
@@ -27,6 +27,17 @@ from . import utils
 
 class QIF(File):
     def __init__(self, mapping=None, **kwargs):
+        """ QIF constructor
+        Args:
+            mapping (dict): bank mapper (see csv2ofx.mappings)
+            kwargs (dict): Keyword arguments
+
+        Kwargs:
+            def_type (str): Default account type.
+            split_header (str): Transaction field to use for the split account.
+            start (date): Date from which to begin including transactions.
+            end (date): Date from which to exclude transactions.
+        """
         super(QIF, self).__init__(mapping, **kwargs)
         self.def_type = kwargs.get('def_type', 'Bank')
         self.account_types = {
@@ -44,12 +55,10 @@ class QIF(File):
         """ gets QIF transaction data
 
         Args:
-            tr (List[str]): the transaction
-
-        Kwargs:
+            tr (dict): the transaction
 
         Returns:
-            (List[str]):   the QIF content
+            (dict): the QIF transaction data
 
         Examples:
             >>> from mappings.mint import mapping
@@ -91,8 +100,13 @@ None, u'type': u'debit'}
     def account_start(self, **kwargs):
         """ Gets QIF format account content
 
+        Args:
+            kwargs (dict): Output from `transaction_data`.
+
         Kwargs:
-            account (str): the account
+            account (str): The account name.
+            account_type (str): The account type. One of ['Bank', 'Oth A',
+                'Oth L', 'CCard', 'Cash'] (required).
 
         Returns:
              (str): the QIF content
@@ -108,8 +122,16 @@ None, u'type': u'debit'}
     def transaction(self, **kwargs):
         """ Gets QIF format transaction content
 
+        Args:
+            kwargs (dict): Output from `transaction_data`.
+
         Kwargs:
-            (str): account_type the account type
+            date (date): the transaction date (required)
+            amount (number): the transaction amount (required)
+            payee (number): the transaction amount (required)
+            memo (str): the transaction memo
+            class (str): the transaction classification
+            check_num (str): a unique transaction identifier
 
         Returns:
             (str): content the QIF content
@@ -147,8 +169,16 @@ None, u'type': u'debit'}
         """ Gets QIF format split content
 
         Args:
+            kwargs (dict): Output from `transaction_data`.
 
         Kwargs:
+            split_account (str): Account to use as the transfer recipient.
+                (useful in cases when the transaction data isn't already split)
+
+            account (str): A unique account identifier (required if a
+                `split_account` isn't given).
+
+            split_memo (str): the transaction split memo
 
         Returns:
             (str): the QIF content
@@ -175,7 +205,7 @@ None, u'type': u'debit'}
         """ Gets QIF transaction end
 
         Returns:
-            (str): the QIF content
+            (str): the QIF transaction end
 
         Examples:
             >>> QIF().transaction_end().replace('\\n', '').replace('\\t', '')
@@ -184,4 +214,9 @@ None, u'type': u'debit'}
         return "^\n"
 
     def footer(self):
+        """ Gets QIF transaction footer. Kept for compatibility with OFX.
+
+        Returns:
+            (None): the QIF footer
+        """
         return None

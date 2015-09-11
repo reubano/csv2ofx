@@ -30,7 +30,15 @@ from tabutils import process
 
 
 class IterStringIO(TextIOBase):
+    """A lazy StringIO that lets you read/write a generator of strings.
+    Add SO entry
+    """
+
     def __init__(self, iterable=None):
+        """ IterStringIO constructor
+        Args:
+            iterable (dict): bank mapper (see csv2ofx.mappings)
+        """
         iterable = iterable or []
         not_newline = lambda s: s not in {'\n', '\r', '\r\n'}
         self.iter = self._chain(iterable)
@@ -222,15 +230,15 @@ def chunk(iterable, chunksize=0, start=0, stop=None):
 
 
 def get_account_type(account, account_types, def_type='n/a'):
-    """ Detects account types of given account names
+    """ Detects the account type of a given account
 
     Args:
-        accounts (List[str]):  account names
-        account_types (dict):  account types and matching account names
-        def_type (str):  default account type
+        account (str): The account name
+        account_types (dict): The account types with matching account names.
+        def_type (str): The default account type.
 
     Returns:
-        (List[str]): the resulting account types
+        (str): The resulting account type.
 
     Examples:
         >>> get_account_type('somecash', {'Cash': ('cash',)})
