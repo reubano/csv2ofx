@@ -40,7 +40,7 @@ __copyright__ = 'Copyright 2015 Reuben Cummings'
 md5 = lambda content: hashlib.md5(content).hexdigest()
 
 
-class File(object):
+class Content(object):
     def __init__(self, mapping=None, **kwargs):
         """ Base content constructor
         Args:
@@ -58,8 +58,8 @@ class File(object):
         if not hasattr(self, 'is_split'):
             self.is_split = False
 
-        if kwargs.get('split_account'):
-            self.split_account = itemgetter(kwargs['split_account'])
+        if kwargs.get('split_header'):
+            self.split_account = itemgetter(kwargs['split_header'])
         else:
             self.split_account = None
 
@@ -133,7 +133,7 @@ class File(object):
 'Date': '06/12/10', 'Description': 'payee', 'Original Description': \
 'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': \
 'account'}
-            >>> File(mapping).transaction_data(tr)
+            >>> Content(mapping).transaction_data(tr)
             {u'account_id': 'e268443e43d93dab7ebef303bbe9642f', u'memo': \
 u'description notes', u'split_account_id': None, u'currency': u'USD', \
 u'date': datetime.datetime(2010, 6, 12, 0, 0), u'class': None, u'bank': \

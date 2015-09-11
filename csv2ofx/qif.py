@@ -21,11 +21,10 @@ from __future__ import (
     unicode_literals)
 
 from datetime import datetime as dt
-from . import File
-from . import utils
+from . import Content, utils
 
 
-class QIF(File):
+class QIF(Content):
     def __init__(self, mapping=None, **kwargs):
         """ QIF constructor
         Args:

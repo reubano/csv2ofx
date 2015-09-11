@@ -228,7 +228,7 @@ def run():
 
     okwargs = {
         'def_type': args.account_type,
-        'split_account': args.split,
+        'split_header': args.split,
         'start': parse(args.start),
         'end': parse(args.end)
     }
@@ -255,8 +255,8 @@ def run():
     # get content body
     chunks = utils.chunk(csv_content, args.chunksize)
     groups = gen_groups(chunks, obj, args.qif)
-    gtrxns = gen_trxns(groups, obj, args.collapse)
-    main_gtrxns = gen_main_trxns(gtrxns, obj)
+    grouped_trxns = gen_trxns(groups, obj, args.collapse)
+    main_gtrxns = gen_main_trxns(grouped_trxns, obj)
     body = content_func(main_gtrxns, obj)
 
     # write content body and footer

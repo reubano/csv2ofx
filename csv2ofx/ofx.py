@@ -21,11 +21,10 @@ from __future__ import (
     unicode_literals)
 
 from datetime import datetime as dt
-from . import File
-from . import utils
+from . import Content, utils
 
 
-class OFX(File):
+class OFX(Content):
     def __init__(self, mapping=None, **kwargs):
         """ OFX constructor
         Args:
@@ -356,8 +355,7 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
         content += '\t\t\t\t\t</BANKACCTTO>\n'
         return content
 
-    def transfer_end(self, **kwargs):
-        time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
+    def transfer_end(self, date=None, **kwargs):
         """ Gets OFX transfer end
 
         Args:
@@ -366,6 +364,7 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
         Returns:
             (str): the end of an OFX transfer
         """
+        time_stamp = date.strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
         content = '\t\t\t\t</XFERINFO>\n'
         content += '\t\t\t\t<DTPOSTED>%s</DTPOSTED>\n' % time_stamp
         content += '\t\t\t</INTRARS>\n'

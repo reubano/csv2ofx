@@ -21,27 +21,25 @@ def main():
     Returns 0 on success, 1 on failure
     """
     start = timer()
-    test_num = 1
     script = 'bin/csv2ofx --help'
     env = TestFileEnvironment('.scripttest')
     tmpfile = NamedTemporaryFile(dir=parent_dir, delete=False)
     tmpname = tmpfile.name
 
     tests = [
-        ('default.csv', 'default.qif', 'oq'),
-        ('default.csv', 'default_w_splits.qif', 'oqS Category'),
-        ('xero.csv', 'xero.qif', 'oqc Description -m xero'),
-        ('mint.csv', 'mint.qif', 'oqS Category -m mint'),
-        ('default.csv', 'default.ofx', 'o'),
-        ('default.csv', 'default_w_splits.ofx', 'oS Category'),
-        ('mint.csv', 'mint.ofx', 'oS Category -m mint'),
+        (2, 'default.csv', 'default.qif', 'oq'),
+        (3, 'default.csv', 'default_w_splits.qif', 'oqS Category'),
+        (4, 'xero.csv', 'xero.qif', 'oqc Description -m xero'),
+        (5, 'mint.csv', 'mint.qif', 'oqS Category -m mint'),
+        (6, 'default.csv', 'default.ofx', "oe '20150908'"),
+        (7, 'default.csv', 'default_w_splits.ofx', 'oS Category'),
+        (8, 'mint.csv', 'mint.ofx', 'oS Category -m mint'),
     ]
 
     env.run(script, cwd=parent_dir)
-    print('\nScripttest: #%i ... ok' % test_num)
-    test_num += 1
+    print('\nScripttest: #1 ... ok')
 
-    for example_filename, check_filename, opts in tests:
+    for test_num, example_filename, check_filename, opts in tests:
         example = p.join(example_dir, example_filename)
         check = p.join(check_dir, check_filename)
         checkfile = open(check)
@@ -60,7 +58,6 @@ def main():
             sys.exit(''.join(diffs))
         else:
             print('Scripttest: #%i ... ok' % test_num)
-            test_num += 1
 
     checkfile.close
     os.unlink(tmpname)
