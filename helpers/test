@@ -3,5 +3,5 @@
 
 # Run nose and script tests
 
-python `which nosetests` -xv
+python `which nosetests` $@
 python tests/test.py
