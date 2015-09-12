@@ -169,38 +169,45 @@ def gen_base_data(groups, cont):
             yield base_data
 
 
+def splitless_content(gd, prev_group, content=''):
+    if prev_group and prev_group != gd['group']:
+        content += gd['cont'].account_end(**gd['data'])
+
+    if gd['is_main']:
+        content += gd['cont'].account_start(**gd['data'])
+
+    content += gd['cont'].transaction(**gd['data'])
+    return content
+
+
+def split_like_content(gd, prev_group, content=''):
+    if gd['is_split'] and gd['len'] > 2:
+        # OFX doesn't support more than 2 splits
+        raise TypeError('Group %s has too many splits.\n' % gd['group'])
+
+    if prev_group and prev_group != gd['group'] and gd['is_split']:
+        content += gd['cont'].transfer_end(**gd['data'])
+
+    if (gd['is_split'] and gd['is_main']) or gd['split_account']:
+        content += gd['cont'].transfer(**gd['data'])
+
+    if (gd['is_split'] and not gd['is_main']) or gd['split_account']:
+        content += gd['cont'].split_content(**gd['data'])
+
+    if gd['split_account']:
+        content += gd['cont'].transfer_end(**gd['data'])
+
+    return content
 
 
 def gen_ofx_content(grouped_data, prev_group=None):
     for gd in grouped_data:
-        split_like = gd['is_split'] or gd['split_account']
+        if gd['is_split'] or gd['split_account']:
+            yield split_like_content(gd, prev_group)
+        else:
+            yield splitless_content(gd, prev_group)
 
-        if gd['is_split'] and gd['len'] > 2:
-            # OFX doesn't support more than 2 splits
-            raise TypeError('Group %s has too many splits.\n' % gd['group'])
-
-        new_group = prev_group and prev_group != gd['group']
         prev_group = gd['group']
-
-        if new_group and gd['is_split']:
-            yield gd['cont'].transfer_end(**gd['data'])
-        elif new_group and not gd['split_account']:
-            yield gd['cont'].account_end(**gd['data'])
-
-        if gd['is_main'] and not split_like:
-            yield gd['cont'].account_start(**gd['data'])
-
-        if not split_like:
-            yield gd['cont'].transaction(**gd['data'])
-
-        if (gd['is_split'] and gd['is_main']) or gd['split_account']:
-            yield gd['cont'].transfer(**gd['data'])
-
-        if (gd['is_split'] and not gd['is_main']) or gd['split_account']:
-            yield gd['cont'].split_content(**gd['data'])
-
-        if gd['split_account']:
-            yield gd['cont'].transfer_end(**gd['data'])
 
     if gd['is_split']:
         yield gd['cont'].transfer_end(**gd['data'])
