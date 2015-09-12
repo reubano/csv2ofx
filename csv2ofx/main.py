@@ -107,7 +107,6 @@ def gen_groups(chunks, cont, qif):
         if qif:
             cleansed = chnk
         else:
-            # cleansed = chnk
             cleansed = [
                 {k: xmlize([v]).next() for k, v in c.items()} for c in chnk]
 
@@ -115,7 +114,7 @@ def gen_groups(chunks, cont, qif):
         yield utils.group_transactions(cleansed, keyfunc)
 
 
-def gen_trxns(groups, cont, collapse):
+def gen_trxns(groups, cont, collapse=False):
     for group, transactions in groups:
         if cont.is_split and collapse:
             # group transactions by collapse field and sum the amounts
@@ -144,73 +143,93 @@ def gen_main_trxns(groups, cont):
         else:
             main_pos = 0
 
-        yield (group, main_pos, trxns)
-
-
-def gen_ofx_content(groups, cont):
-    for group, main_pos, trxns in groups:
         keyfunc = lambda enum: enum[0] != main_pos
         sorted_trxns = sorted(enumerate(trxns), key=keyfunc)
+        yield (group, main_pos, sorted_trxns)
 
-        if cont.is_split and len(sorted_trxns) > 2:
-            raise TypeError('Group %s has too many splits.\n' % group)
 
+def gen_base_content(groups, cont):
+    for group, main_pos, sorted_trxns in groups:
         for pos, trxn in sorted_trxns:
-            data = cont.transaction_data(trxn)
-            is_main = pos == main_pos
 
             if not cont.is_split and cont.skip_transaction(trxn):
                 continue
 
-            if is_main and not (cont.is_split or cont.split_account):
-                yield cont.account_start(**data)
+            base_content = {
+                'data': cont.transaction_data(trxn),
+                'account': cont.account(trxn),
+                'is_main': pos == main_pos,
+                'split_account': cont.split_account,
+                'is_split': cont.is_split,
+                'len': len(sorted_trxns),
+                'cont': cont,
+                'group': group
+            }
 
-            if not (cont.is_split or cont.split_account):
-                yield cont.transaction(**data)
-
-            if (cont.is_split and is_main) or cont.split_account:
-                yield cont.transfer(**data)
-
-            if (cont.is_split and not is_main) or cont.split_account:
-                yield cont.split_content(**data)
-
-            if cont.split_account:
-                yield cont.transfer_end(**data)
-
-        if cont.is_split:
-            yield cont.transfer_end(**data)
-        elif not (cont.is_split or cont.split_account):
-            yield cont.account_end(**data)
+            yield base_content
 
 
-def gen_qif_content(groups, cont):
-    prev_account = None
 
-    for group, main_pos, trxns in groups:
-        keyfunc = lambda enum: enum[0] != main_pos
 
-        for pos, trxn in sorted(enumerate(trxns), key=keyfunc):
-            data = cont.transaction_data(trxn)
-            is_main = pos == main_pos
+def gen_ofx_content(grouped_content, prev_group=None):
+    for bc in grouped_content:
+        split_like = bc['is_split'] or bc['split_account']
 
-            if not cont.is_split and cont.skip_transaction(trxn):
-                continue
+        if bc['is_split'] and bc['len'] > 2:
+            # OFX doesn't support more than 2 splits
+            raise TypeError('Group %s has too many splits.\n' % bc['group'])
 
-            if is_main and prev_account != cont.account(trxn):
-                yield cont.account_start(**data)
+        new_group = prev_group and prev_group != bc['group']
+        prev_group = bc['group']
 
-            if (cont.is_split and is_main) or not cont.is_split:
-                yield cont.transaction(**data)
-                prev_account = cont.account(trxn)
+        if new_group and bc['is_split']:
+            yield bc['cont'].transfer_end(**bc['data'])
+        elif new_group and not bc['split_account']:
+            yield bc['cont'].account_end(**bc['data'])
 
-            if (cont.is_split and not is_main) or cont.split_account:
-                yield cont.split_content(**data)
+        if bc['is_main'] and not split_like:
+            yield bc['cont'].account_start(**bc['data'])
 
-            if not cont.is_split:
-                yield cont.transaction_end()
+        if not split_like:
+            yield bc['cont'].transaction(**bc['data'])
 
-        if cont.is_split:
-            yield cont.transaction_end()
+        if (bc['is_split'] and bc['is_main']) or bc['split_account']:
+            yield bc['cont'].transfer(**bc['data'])
+
+        if (bc['is_split'] and not bc['is_main']) or bc['split_account']:
+            yield bc['cont'].split_content(**bc['data'])
+
+        if bc['split_account']:
+            yield bc['cont'].transfer_end(**bc['data'])
+
+    if bc['is_split']:
+        yield bc['cont'].transfer_end(**bc['data'])
+    elif not bc['split_account']:
+        yield bc['cont'].account_end(**bc['data'])
+
+
+def gen_qif_content(grouped_content, prev_account=None, prev_group=None):
+    for bc in grouped_content:
+        if prev_group and prev_group != bc['group'] and bc['is_split']:
+            yield bc['cont'].transaction_end()
+
+        if bc['is_main'] and prev_account != bc['account']:
+            yield bc['cont'].account_start(**bc['data'])
+
+        if (bc['is_split'] and bc['is_main']) or not bc['is_split']:
+            yield bc['cont'].transaction(**bc['data'])
+            prev_account = bc['account']
+
+        if (bc['is_split'] and not bc['is_main']) or bc['split_account']:
+            yield bc['cont'].split_content(**bc['data'])
+
+        if not bc['is_split']:
+            yield bc['cont'].transaction_end()
+
+        prev_group = bc['group']
+
+    if bc['is_split']:
+        yield bc['cont'].transaction_end()
 
 
 def run():
@@ -250,7 +269,8 @@ def run():
     groups = it.chain.from_iterable(gen_groups(chunks, cont, args.qif))
     grouped_trxns = gen_trxns(groups, cont, args.collapse)
     main_gtrxns = gen_main_trxns(grouped_trxns, cont)
-    body = content_func(main_gtrxns, cont)
+    grouped_content = gen_base_content(main_gtrxns, cont)
+    body = content_func(grouped_content)
     content.write(body)
     content.write(cont.footer())
 
