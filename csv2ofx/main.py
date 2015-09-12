@@ -23,6 +23,7 @@ from __future__ import (
 import time
 import sys
 import argparse
+import itertools as it
 
 from functools import partial
 from operator import itemgetter
@@ -111,10 +112,7 @@ def gen_groups(chunks, cont, qif):
                 {k: xmlize([v]).next() for k, v in c.items()} for c in chnk]
 
         keyfunc = cont.id if cont.is_split else cont.account
-        grouped = utils.group_transactions(cleansed, keyfunc)
-
-        for group, transactions in grouped:
-            yield (group, transactions)
+        yield utils.group_transactions(cleansed, keyfunc)
 
 
 def gen_trxns(groups, cont, collapse):
@@ -249,7 +247,7 @@ def run():
     content = utils.IterStringIO()
     content.write(cont.header(date=server_date, language=args.language))
     chunks = chunk(csv_content, args.chunksize)
-    groups = gen_groups(chunks, cont, args.qif)
+    groups = it.chain.from_iterable(gen_groups(chunks, cont, args.qif))
     grouped_trxns = gen_trxns(groups, cont, args.collapse)
     main_gtrxns = gen_main_trxns(grouped_trxns, cont)
     body = content_func(main_gtrxns, cont)
