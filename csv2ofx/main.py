@@ -117,7 +117,7 @@ def gen_groups(chunks, cont, qif):
 def gen_trxns(groups, cont, collapse=False):
     for group, transactions in groups:
         if cont.is_split and collapse:
-            # group transactions by collapse field and sum the amounts
+            # group transactions by `collapse` field and sum the amounts
             groupby = itemgetter(collapse)
             byaccount = utils.group_transactions(transactions, groupby)
             op = lambda values: sum(map(utils.convert_amount, values))
