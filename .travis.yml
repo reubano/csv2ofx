@@ -1,15 +1,11 @@
-language: php
-php:
-  - 5.4
-  - 5.3
+sudo: false
+language: python
+python: '2.7'
+notifications:
+  email:
+    on_success: always
 
-before_install:
-  - sudo apt-get update
-  - sudo apt-get install python
-
-before_script:
-  - easy_install scripttest
-
+install: pip install -r dev-requirements.txt
 script:
-  - phpunit --coverage-text .
-  - python tests/test.py
+  - manage lint
+  - manage test

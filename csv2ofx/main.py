@@ -2,8 +2,20 @@
 # -*- coding: utf-8 -*-
 # vim: sw=4:ts=4:expandtab
 
-""" csv2ofx converts a csv file to ofx and qif """
+"""
+csv2ofx.main
+~~~~~~~~~~~~
 
+Provides the primary ofx and qif conversion functions
+
+Examples:
+    literal blocks::
+
+        python example_google.py
+
+Attributes:
+    ENCODING (str): Default file encoding.
+"""
 from __future__ import (
     absolute_import, division, print_function, with_statement,
     unicode_literals)
@@ -11,6 +23,7 @@ from __future__ import (
 import time
 import sys
 import argparse
+import itertools as it
 
 from functools import partial
 from operator import itemgetter
@@ -23,7 +36,7 @@ from dateutil.parser import parse
 from argparse import RawTextHelpFormatter, ArgumentParser
 
 from tabutils.io import read_csv
-from tabutils.process import xmlize
+from tabutils.process import xmlize, chunk
 
 from . import utils
 from .ofx import OFX
@@ -88,30 +101,27 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-def gen_groups(chunks, obj, qif):
-    for chunk in chunks:
+
+def gen_groups(chunks, cont, qif):
+    for chnk in chunks:
         if qif:
-            cleansed = chunk
+            cleansed = chnk
         else:
-            # cleansed = chunk
             cleansed = [
-                {k: xmlize([v]).next() for k, v in c.items()} for c in chunk]
+                {k: xmlize([v]).next() for k, v in c.items()} for c in chnk]
 
-        keyfunc = obj.id if obj.is_split else obj.account
-        grouped = utils.group_transactions(cleansed, keyfunc)
-
-        for group, transactions in grouped:
-            yield (group, transactions)
+        keyfunc = cont.id if cont.is_split else cont.account
+        yield utils.group_transactions(cleansed, keyfunc)
 
 
-def gen_trxns(groups, obj, collapse):
+def gen_trxns(groups, cont, collapse=False):
     for group, transactions in groups:
-        if obj.is_split and args.collapse:
-            # group transactions by collapse field and sum the amounts
-            groupby = itemgetter(args.collapse)
+        if cont.is_split and collapse:
+            # group transactions by `collapse` field and sum the amounts
+            groupby = itemgetter(collapse)
             byaccount = utils.group_transactions(transactions, groupby)
             op = lambda values: sum(map(utils.convert_amount, values))
-            merger = partial(utils.merge_dicts, obj.amount, op)
+            merger = partial(utils.merge_dicts, cont.amount, op)
             trxns = [merger(dicts) for _, dicts in byaccount]
         else:
             trxns = transactions
@@ -119,87 +129,114 @@ def gen_trxns(groups, obj, collapse):
         yield (group, trxns)
 
 
-def gen_main_trxns(groups, obj):
+def gen_main_trxns(groups, cont):
     for group, trxns in groups:
-        _args = [trxns, obj.convert_amount]
+        _args = [trxns, cont.convert_amount]
 
         # if it's split, transactions skipping is all or none
-        if obj.is_split and obj.skip_transaction(trxns[0]):
+        if cont.is_split and cont.skip_transaction(trxns[0]):
             continue
-        elif obj.is_split and not utils.verify_splits(*_args):
+        elif cont.is_split and not utils.verify_splits(*_args):
             raise Exception('Splits do not sum to zero.')
-        elif obj.is_split:
+        elif cont.is_split:
             main_pos = utils.get_max_split(*_args)[0]
         else:
             main_pos = 0
 
-        yield (group, main_pos, trxns)
-
-
-def gen_ofx_content(groups, obj):
-    for group, main_pos, trxns in groups:
         keyfunc = lambda enum: enum[0] != main_pos
         sorted_trxns = sorted(enumerate(trxns), key=keyfunc)
+        yield (group, main_pos, sorted_trxns)
 
-        if obj.is_split and len(sorted_trxns) > 2:
-            raise TypeError('Group %s has too many splits.\n' % group)
 
+def gen_base_data(groups, cont):
+    for group, main_pos, sorted_trxns in groups:
         for pos, trxn in sorted_trxns:
-            data = obj.transaction_data(trxn)
-            is_main = pos == main_pos
 
-            if not obj.is_split and obj.skip_transaction(trxn):
+            if not cont.is_split and cont.skip_transaction(trxn):
                 continue
 
-            if is_main and not (obj.is_split or obj.split_account):
-                yield obj.account_start(**data)
+            base_data = {
+                'data': cont.transaction_data(trxn),
+                'account': cont.account(trxn),
+                'is_main': pos == main_pos,
+                'split_account': cont.split_account,
+                'is_split': cont.is_split,
+                'len': len(sorted_trxns),
+                'cont': cont,
+                'group': group
+            }
 
-            if not (obj.is_split or obj.split_account):
-                yield obj.transaction(**data)
-
-            if (obj.is_split and is_main) or obj.split_account:
-                yield obj.transfer(**data)
-
-            if (obj.is_split and not is_main) or obj.split_account:
-                yield obj.split_content(**data)
-
-            if obj.split_account:
-                yield obj.transfer_end(**data)
-
-        if obj.is_split:
-            yield obj.transfer_end(**data)
-        elif not (obj.is_split or obj.split_account):
-            yield obj.account_end(**data)
+            yield base_data
 
 
-def gen_qif_content(groups, obj):
-    prev_account = None
+def splitless_content(gd, prev_group, content=''):
+    if prev_group and prev_group != gd['group']:
+        content += gd['cont'].account_end(**gd['data'])
 
-    for group, main_pos, trxns in groups:
-        keyfunc = lambda enum: enum[0] != main_pos
+    if gd['is_main']:
+        content += gd['cont'].account_start(**gd['data'])
 
-        for pos, trxn in sorted(enumerate(trxns), key=keyfunc):
-            data = obj.transaction_data(trxn)
-            is_main = pos == main_pos
+    content += gd['cont'].transaction(**gd['data'])
+    return content
 
-            if not obj.is_split and obj.skip_transaction(trxn):
-                continue
 
-            if is_main and prev_account != obj.account(trxn):
-                yield obj.account_start(**data)
+def split_like_content(gd, prev_group, content=''):
+    if gd['is_split'] and gd['len'] > 2:
+        # OFX doesn't support more than 2 splits
+        raise TypeError('Group %s has too many splits.\n' % gd['group'])
 
-            if (obj.is_split and is_main) or not obj.is_split:
-                yield obj.transaction(**data)
-                prev_account = obj.account(trxn)
+    if prev_group and prev_group != gd['group'] and gd['is_split']:
+        content += gd['cont'].transfer_end(**gd['data'])
 
-            if (obj.is_split and not is_main) or obj.split_account:
-                yield obj.split_content(**data)
+    if (gd['is_split'] and gd['is_main']) or gd['split_account']:
+        content += gd['cont'].transfer(**gd['data'])
 
-            if not obj.is_split:
-                yield obj.transaction_end()
+    if (gd['is_split'] and not gd['is_main']) or gd['split_account']:
+        content += gd['cont'].split_content(**gd['data'])
 
-        if obj.is_split:
-            yield obj.transaction_end()
+    if gd['split_account']:
+        content += gd['cont'].transfer_end(**gd['data'])
+
+    return content
+
+
+def gen_ofx_content(grouped_data, prev_group=None):
+    for gd in grouped_data:
+        if gd['is_split'] or gd['split_account']:
+            yield split_like_content(gd, prev_group)
+        else:
+            yield splitless_content(gd, prev_group)
+
+        prev_group = gd['group']
+
+    if gd['is_split']:
+        yield gd['cont'].transfer_end(**gd['data'])
+    elif not gd['split_account']:
+        yield gd['cont'].account_end(**gd['data'])
+
+
+def gen_qif_content(grouped_data, prev_account=None, prev_group=None):
+    for gd in grouped_data:
+        if prev_group and prev_group != gd['group'] and gd['is_split']:
+            yield gd['cont'].transaction_end()
+
+        if gd['is_main'] and prev_account != gd['account']:
+            yield gd['cont'].account_start(**gd['data'])
+
+        if (gd['is_split'] and gd['is_main']) or not gd['is_split']:
+            yield gd['cont'].transaction(**gd['data'])
+            prev_account = gd['account']
+
+        if (gd['is_split'] and not gd['is_main']) or gd['split_account']:
+            yield gd['cont'].split_content(**gd['data'])
+
+        if not gd['is_split']:
+            yield gd['cont'].transaction_end()
+
+        prev_group = gd['group']
+
+    if gd['is_split']:
+        yield gd['cont'].transaction_end()
 
 
 def run():
@@ -216,44 +253,40 @@ def run():
 
     okwargs = {
         'def_type': args.account_type,
-        'split_account': args.split,
+        'split_header': args.split,
         'start': parse(args.start),
         'end': parse(args.end)
     }
 
     content_func = gen_qif_content if args.qif else gen_ofx_content
-    OBJ = QIF if args.qif else OFX
-    obj = OBJ(mapping, **okwargs)
+    Content = QIF if args.qif else OFX
+    cont = Content(mapping, **okwargs)
 
     try:
         mtime = p.getmtime(args.source.name)
     except AttributeError:
         mtime = time.time()
 
-    csv_content = read_csv(args.source, has_header=obj.has_header)
-
-    # remove csv header
-    csv_content.next()
+    csv_content = read_csv(args.source, has_header=cont.has_header)
+    csv_content.next()  # remove csv header
     server_date = dt.fromtimestamp(mtime)
     content = utils.IterStringIO()
-
-    # write content header
-    content.write(obj.header(date=server_date, language=args.language))
-
-    # get content body
-    chunks = utils.chunk(csv_content, args.chunksize)
-    groups = gen_groups(chunks, obj, args.qif)
-    gtrxns = gen_trxns(groups, obj, args.collapse)
-    main_gtrxns = gen_main_trxns(gtrxns, obj)
-    body = content_func(main_gtrxns, obj)
-
-    # write content body and footer
+    content.write(cont.header(date=server_date, language=args.language))
+    chunks = chunk(csv_content, args.chunksize)
+    groups = it.chain.from_iterable(gen_groups(chunks, cont, args.qif))
+    grouped_trxns = gen_trxns(groups, cont, args.collapse)
+    main_gtrxns = gen_main_trxns(grouped_trxns, cont)
+    grouped_data = gen_base_data(main_gtrxns, cont)
+    body = content_func(grouped_data)
     content.write(body)
-    content.write(obj.footer())
+    content.write(cont.footer())
 
     try:
-        # write content to file
-        utils.write_file(args.dest, content, overwrite=args.overwrite)
+        kwargs = {
+            'overwrite': args.overwrite,
+            'chunksize': args.chunksize
+        }
+        utils.write_file(args.dest, content, **kwargs)
     except TypeError as e:
         msg = str(e)
 
@@ -261,8 +294,6 @@ def run():
             msg += 'Try again with `-c` option.'
 
         exit(msg)
-
-    # print(groups.next())
 
 
 if __name__ == '__main__':

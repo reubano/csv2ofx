@@ -6,7 +6,7 @@
 csv2ofx.qif
 ~~~~~~~~~~~
 
-Provides methods for generating qif files
+Provides methods for generating qif content
 
 Examples:
     literal blocks::
@@ -21,12 +21,27 @@ from __future__ import (
     unicode_literals)
 
 from datetime import datetime as dt
-from . import File
-from . import utils
+from . import Content, utils
 
 
-class QIF(File):
+class QIF(Content):
     def __init__(self, mapping=None, **kwargs):
+        """ QIF constructor
+        Args:
+            mapping (dict): bank mapper (see csv2ofx.mappings)
+            kwargs (dict): Keyword arguments
+
+        Kwargs:
+            def_type (str): Default account type.
+            split_header (str): Transaction field to use for the split account.
+            start (date): Date from which to begin including transactions.
+            end (date): Date from which to exclude transactions.
+
+        Examples:
+            >>> from mappings.mint import mapping
+            >>> QIF(mapping)  #doctest: +ELLIPSIS
+            <csv2ofx.qif.QIF object at 0x...>
+        """
         super(QIF, self).__init__(mapping, **kwargs)
         self.def_type = kwargs.get('def_type', 'Bank')
         self.account_types = {
@@ -44,12 +59,10 @@ class QIF(File):
         """ gets QIF transaction data
 
         Args:
-            tr (List[str]): the transaction
-
-        Kwargs:
+            tr (dict): the transaction
 
         Returns:
-            (List[str]):   the QIF content
+            (dict): the QIF transaction data
 
         Examples:
             >>> from mappings.mint import mapping
@@ -91,35 +104,48 @@ None, u'type': u'debit'}
     def account_start(self, **kwargs):
         """ Gets QIF format account content
 
+        Args:
+            kwargs (dict): Output from `transaction_data`.
+
         Kwargs:
-            account (str): the account
+            account (str): The account name.
+            account_type (str): The account type. One of ['Bank', 'Oth A',
+                'Oth L', 'CCard', 'Cash'] (required).
 
         Returns:
              (str): the QIF content
 
         Examples:
-            >>> kwargs = {'account': 'account', 'account_type': 'type'}
+            >>> kwargs = {'account': 'account', 'account_type': 'Bank'}
             >>> QIF().account_start(**kwargs).replace('\\n', '').replace(\
 '\\t', '')
-            u'!AccountNaccountTtype^'
+            u'!AccountNaccountTBank^'
         """
         return "!Account\nN%(account)s\nT%(account_type)s\n^\n" % kwargs
 
     def transaction(self, **kwargs):
         """ Gets QIF format transaction content
 
+        Args:
+            kwargs (dict): Output from `transaction_data`.
+
         Kwargs:
-            (str): account_type the account type
+            date (date): the transaction date (required)
+            amount (number): the transaction amount (required)
+            payee (number): the transaction amount (required)
+            memo (str): the transaction memo
+            class (str): the transaction classification
+            check_num (str): a unique transaction identifier
 
         Returns:
             (str): content the QIF content
 
         Examples:
             >>> kwargs = {'payee': 'payee', 'amount': 100, 'check_num': 1, \
-'date': dt(2012, 1, 1), 'account_type': 'type'}
+'date': dt(2012, 1, 1), 'account_type': 'Bank'}
             >>> QIF().transaction(**kwargs).replace('\\n', '').replace(\
 '\\t', '')
-            u'!Type:typeN1D01/01/12PpayeeT100'
+            u'!Type:BankN1D01/01/12PpayeeT100.00'
         """
         kwargs.update({'time_stamp': kwargs['date'].strftime('%m/%d/%y')})
 
@@ -140,15 +166,23 @@ None, u'type': u'debit'}
         if kwargs.get('class'):
             content += "L%(class)s\n" % kwargs
 
-        content += "T%(amount)s\n" % kwargs
+        content += "T%(amount)0.2f\n" % kwargs
         return content
 
     def split_content(self, **kwargs):
         """ Gets QIF format split content
 
         Args:
+            kwargs (dict): Output from `transaction_data`.
 
         Kwargs:
+            split_account (str): Account to use as the transfer recipient.
+                (useful in cases when the transaction data isn't already split)
+
+            account (str): A unique account identifier (required if a
+                `split_account` isn't given).
+
+            split_memo (str): the transaction split memo
 
         Returns:
             (str): the QIF content
@@ -158,7 +192,7 @@ None, u'type': u'debit'}
 'amount': 100}
             >>> QIF().split_content(**kwargs).replace('\\n', '').replace(\
 '\\t', '')
-            u'SaccountEmemo$100'
+            u'SaccountEmemo$100.00'
         """
         if kwargs.get('split_account'):
             content = "S%(split_account)s\n" % kwargs
@@ -168,14 +202,14 @@ None, u'type': u'debit'}
         if kwargs.get('split_memo'):
             content += "E%(split_memo)s\n" % kwargs
 
-        content += "$%(amount)s\n" % kwargs
+        content += "$%(amount)0.2f\n" % kwargs
         return content
 
     def transaction_end(self):
         """ Gets QIF transaction end
 
         Returns:
-            (str): the QIF content
+            (str): the QIF transaction end
 
         Examples:
             >>> QIF().transaction_end().replace('\\n', '').replace('\\t', '')
@@ -184,4 +218,12 @@ None, u'type': u'debit'}
         return "^\n"
 
     def footer(self):
+        """ Gets QIF transaction footer. Kept for compatibility with OFX.
+
+        Returns:
+            (None): the QIF footer
+
+        Examples:
+            >>> QIF().footer()
+        """
         return None

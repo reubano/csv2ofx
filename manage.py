@@ -47,10 +47,15 @@ def require():
     call(cmd, shell=True)
 
 
+@manager.arg('where', 'w', help='Requirement file', default=None)
+@manager.arg(
+    'stop', '-x', help='Stop after first error', type=bool, default=False)
 @manager.command
-def test():
+def test(where=None, stop=False):
     """Run nose and script tests"""
-    call(p.join(_basedir, 'helpers', 'test'), shell=True)
+    opts = '-xv' if stop else '-v'
+    opts += 'w %s' % where if where else ''
+    call([p.join(_basedir, 'helpers', 'test'), opts])
 
 
 @manager.command

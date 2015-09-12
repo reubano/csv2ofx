@@ -30,7 +30,27 @@ from tabutils import process
 
 
 class IterStringIO(TextIOBase):
+    """A lazy StringIO that lets you read/write a generator of strings.
+    Add SO entry
+    """
+
     def __init__(self, iterable=None):
+        """ IterStringIO constructor
+        Args:
+            iterable (dict): bank mapper (see csv2ofx.mappings)
+
+        Examples:
+            >>> from StringIO import StringIO
+            >>> iter_content = iter('Hello World')
+            >>> StringIO(iter_content).getvalue()  #doctest: +ELLIPSIS
+            '<iterator object at 0x...>'
+            >>> iter_sio = IterStringIO(iter_content)
+            >>> iter_sio.read(5)
+            u'Hello'
+            >>> iter_sio.write(iter('ly person'))
+            >>> iter_sio.read(8)
+            u' Worldly'
+        """
         iterable = iterable or []
         not_newline = lambda s: s not in {'\n', '\r', '\r\n'}
         self.iter = self._chain(iterable)
@@ -140,7 +160,7 @@ def write_file(filepath, content, mode='wb', **kwargs):
 
     Args:
         filepath (str): The path of the file or file like object to write to.
-        content (obj): File like object or iterable response data.
+        content (obj): File like object, iterable response, or iterable.
         **kwargs: Keyword arguments.
 
     Kwargs:
@@ -154,12 +174,17 @@ def write_file(filepath, content, mode='wb', **kwargs):
         int: bytes written if chunksize else 0
 
     Examples:
-        >>> import requests
+        >>> from StringIO import StringIO
         >>> from tempfile import NamedTemporaryFile
         >>> tmpfile = NamedTemporaryFile(delete='True')
-        >>> r = requests.get('http://google.com')
-        >>> write_file(tmpfile.name, r.iter_content)
-        10000000000
+        >>> write_file(tmpfile.name, StringIO('Hello World'))
+        11
+        >>> tmpfile = NamedTemporaryFile(delete='True')
+        >>> write_file(tmpfile.name, IterStringIO(iter('Hello World')))
+        11
+        >>> write_file(tmpfile.name, IterStringIO(iter('Hello World')), \
+chunksize=2)
+        12
     """
     def _write_file(f, content, **kwargs):
         chunksize = kwargs.get('chunksize')
@@ -167,15 +192,9 @@ def write_file(filepath, content, mode='wb', **kwargs):
         bar_len = kwargs.get('bar_len', 50)
         progress = 0
 
-        try:
-            chunks = (chunk for chunk in content.read(chunksize))
-        except AttributeError:
-            chunksize = chunksize or pow(10, 10)
-            chunks = (chunk for chunk in content(chunksize))
-
-        for chunk in chunks:
-            f.write(chunk)
-            progress += chunksize or 0
+        for c in chunk(content, chunksize):
+            f.write(c)
+            progress += chunksize or len(c)
 
             if length:
                 bars = min(int(bar_len * progress / length), bar_len)
@@ -191,46 +210,56 @@ def write_file(filepath, content, mode='wb', **kwargs):
             return _write_file(f, content, **kwargs)
 
 
-def chunk(iterable, chunksize=0, start=0, stop=None):
+def chunk(content, chunksize=None):
     """Groups data into fixed-length chunks.
     http://stackoverflow.com/a/22919323/408556
 
     Args:
-        iterable (iterable): Content to group into chunks.
+        content (obj): File like object, iterable response, or iterable.
         chunksize (Optional[int]): Number of chunks to include in a group (
-            default: 0, i.e., all).
-
-        start (Optional[int]): Starting item (zero indexed, default: 0).
-        stop (Optional[int]): Ending item (zero indexed).
+            default: None, i.e., all).
 
     Returns:
         Iter[List]: Chunked content.
 
     Examples:
-        >>> chunk([1, 2, 3, 4, 5, 6], 2, 1).next()
-        [2, 3]
+        >>> from StringIO import StringIO
+        >>> chunk([1, 2, 3, 4, 5, 6], 2).next()
+        [1, 2]
+        >>> chunk(StringIO('Hello World'), 5).next()
+        u'Hello'
+        >>> chunk(IterStringIO('Hello World'), 5).next()
+        u'Hello'
+        >>> chunk(IterStringIO('Hello World')).next()
+        u'Hello World'
     """
-    i = it.islice(iter(iterable), start, stop)
-
-    if chunksize:
-        generator = (list(it.islice(i, chunksize)) for _ in it.count())
-        chunked = it.takewhile(bool, generator)
+    if chunksize and hasattr(content, 'read'):
+        generator = (content.read(chunksize) for _ in it.count())
+    elif chunksize and callable(content):
+        generator = (content(chunksize) for _ in it.count())
+    elif chunksize:
+        generator = (
+            list(it.islice(iter(content), chunksize)) for _ in it.count())
+    elif hasattr(content, 'read'):
+        generator = iter([content.read()])
+    elif callable(content):
+        generator = iter([content()])
     else:
-        chunked = [list(i)]
+        generator = iter([content])
 
-    return chunked
+    return it.takewhile(bool, generator)
 
 
 def get_account_type(account, account_types, def_type='n/a'):
-    """ Detects account types of given account names
+    """ Detects the account type of a given account
 
     Args:
-        accounts (List[str]):  account names
-        account_types (dict):  account types and matching account names
-        def_type (str):  default account type
+        account (str): The account name
+        account_types (dict): The account types with matching account names.
+        def_type (str): The default account type.
 
     Returns:
-        (List[str]): the resulting account types
+        (str): The resulting account type.
 
     Examples:
         >>> get_account_type('somecash', {'Cash': ('cash',)})

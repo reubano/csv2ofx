@@ -6,7 +6,7 @@
 csv2ofx.ofx
 ~~~~~~~~~~~
 
-Provides methods for generating OFX files
+Provides methods for generating OFX content
 
 Examples:
     literal blocks::
@@ -21,20 +21,28 @@ from __future__ import (
     unicode_literals)
 
 from datetime import datetime as dt
-from . import File
-from . import utils
+from . import Content, utils
 
 
-class OFX(File):
+class OFX(Content):
     def __init__(self, mapping=None, **kwargs):
-        """ Gets OFX format transaction content
+        """ OFX constructor
+        Args:
+            mapping (dict): bank mapper (see csv2ofx.mappings)
+            kwargs (dict): Keyword arguments
 
         Kwargs:
             def_type (str): Default account type.
+            split_header (str): Transaction field to use for the split account.
+            start (date): Date from which to begin including transactions.
+            end (date): Date from which to exclude transactions.
 
-        Returns:
-            (str): the OFX content
+        Examples:
+            >>> from mappings.mint import mapping
+            >>> OFX(mapping)  #doctest: +ELLIPSIS
+            <csv2ofx.ofx.OFX object at 0x...>
         """
+        # TODO: Add timezone info
         super(OFX, self).__init__(mapping, **kwargs)
         self.resp_type = 'INTRATRNRS' if self.split_account else 'STMTTRNRS'
         self.def_type = kwargs.get('def_type', 'CHECKING')
@@ -49,7 +57,8 @@ class OFX(File):
         """ Gets OFX format transaction content
 
         Kwargs:
-            date (date): the datetime
+            date (date): The datetime.
+            language (str:) The ISO formatted language (defaul: ENG).
 
         Returns:
             (str): the OFX content
@@ -92,12 +101,10 @@ class OFX(File):
         """ gets OFX transaction data
 
         Args:
-            tr (List[str]): the transaction
-
-        Kwargs:
+            tr (dict): the transaction
 
         Returns:
-            (List[str]):   the QIF content
+            (dict): the OFX transaction data
 
         Examples:
             >>> from mappings.mint import mapping
@@ -151,7 +158,15 @@ u'type': u'debit'}
     def account_start(self, **kwargs):
         """ Gets OFX format transaction account start content
 
+        Args:
+            kwargs (dict): Output from `transaction_data`.
+
         Kwargs:
+            currency (str): The ISO formatted currency (required).
+            bank_id (str): A unique bank identifier (required).
+            account_id (str): A unique account identifier (required).
+            account_type (str): The account type. One of [
+                'CHECKING', 'SAVINGS', 'MONEYMRKT', 'CREDITLINE'] (required).
 
         Returns:
             (str): the OFX content
@@ -159,11 +174,11 @@ u'type': u'debit'}
         Examples:
             >>> kwargs = {'start': dt(2012, 1, 1), 'end': dt(2012, 2, 1)}
             >>> akwargs = {'currency': 'USD', 'bank_id': 1, 'account_id': 1, \
-'account_type': 'type'}
+'account_type': 'CHECKING'}
             >>> OFX(**kwargs).account_start(**akwargs).replace(\
 '\\n', '').replace('\\t', '')
             u'<STMTRS><CURDEF>USD</CURDEF><BANKACCTFROM><BANKID>1</BANKID>\
-<ACCTID>1</ACCTID><ACCTTYPE>type</ACCTTYPE></BANKACCTFROM><BANKTRANLIST>\
+<ACCTID>1</ACCTID><ACCTTYPE>CHECKING</ACCTTYPE></BANKACCTFROM><BANKTRANLIST>\
 <DTSTART>20120101</DTSTART><DTEND>20120201</DTEND>'
         """
         kwargs.update({
@@ -185,18 +200,28 @@ u'type': u'debit'}
     def transaction(self, **kwargs):
         """ Gets OFX format transaction content
 
+        Args:
+            kwargs (dict): Output from `transaction_data`.
+
         Kwargs:
+            date (datetime): the transaction date (required)
+            type (str): the transaction type (required)
+            amount (number): the transaction amount (required)
+            id (str): the transaction id (required)
+            check_num (str): the check num (required)
+            payee (str): the payee (required)
+            memo (str): the transaction memo
 
         Returns:
             (str): the OFX content
 
         Examples:
-            >>> kwargs = {'date': dt(2012, 1, 15), 'type': 'type', \
+            >>> kwargs = {'date': dt(2012, 1, 15), 'type': 'debit', \
 'amount': 100, 'id': 1, 'check_num': 1, 'payee': 'payee', 'memo': 'memo'}
             >>> OFX().transaction(**kwargs).replace('\\n', '').replace( \
 '\\t', '')
-            u'<STMTTRN><TRNTYPE>type</TRNTYPE><DTPOSTED>20120115000000\
-</DTPOSTED><TRNAMT>100</TRNAMT><FITID>1</FITID><CHECKNUM>1</CHECKNUM><NAME>\
+            u'<STMTTRN><TRNTYPE>debit</TRNTYPE><DTPOSTED>20120115000000\
+</DTPOSTED><TRNAMT>100.00</TRNAMT><FITID>1</FITID><CHECKNUM>1</CHECKNUM><NAME>\
 payee</NAME><MEMO>memo</MEMO></STMTTRN>'
         """
         time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
@@ -204,7 +229,7 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
         content = '\t\t\t\t\t<STMTTRN>\n'
         content += '\t\t\t\t\t\t<TRNTYPE>%(type)s</TRNTYPE>\n' % kwargs
         content += '\t\t\t\t\t\t<DTPOSTED>%s</DTPOSTED>\n' % time_stamp
-        content += '\t\t\t\t\t\t<TRNAMT>%(amount)s</TRNAMT>\n' % kwargs
+        content += '\t\t\t\t\t\t<TRNAMT>%(amount)0.2f</TRNAMT>\n' % kwargs
         content += '\t\t\t\t\t\t<FITID>%(id)s</FITID>\n' % kwargs
         content += '\t\t\t\t\t\t<CHECKNUM>%(check_num)s</CHECKNUM>\n' % kwargs
         content += '\t\t\t\t\t\t<NAME>%(payee)s</NAME>\n' % kwargs
@@ -219,6 +244,8 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
         """ Gets OFX format transaction account end content
 
         Kwargs:
+            date (datetime): the transaction date (required)
+            balance (number): the account balance
 
         Returns:
             (str): the OFX content
@@ -227,7 +254,7 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
             >>> kwargs = {'balance': 150, 'date': dt(2012, 1, 15)}
             >>> OFX().account_end(**kwargs).replace('\\n', '').replace(\
 '\\t', '')
-            u'</BANKTRANLIST><LEDGERBAL><BALAMT>150</BALAMT><DTASOF>\
+            u'</BANKTRANLIST><LEDGERBAL><BALAMT>150.00</BALAMT><DTASOF>\
 20120115000000</DTASOF></LEDGERBAL></STMTRS>'
         """
         time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
@@ -235,7 +262,7 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
 
         if kwargs.get('balance'):
             content += '\t\t\t\t<LEDGERBAL>\n'
-            content += '\t\t\t\t\t<BALAMT>%(balance)s</BALAMT>\n' % kwargs
+            content += '\t\t\t\t\t<BALAMT>%(balance)0.2f</BALAMT>\n' % kwargs
             content += '\t\t\t\t\t<DTASOF>%s</DTASOF>\n' % time_stamp
             content += '\t\t\t\t</LEDGERBAL>\n'
 
@@ -245,27 +272,37 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
     def transfer(self, **kwargs):
         """ Gets OFX transfer start
 
+        Args:
+            kwargs (dict): Output from `transaction_data`.
+
         Kwargs:
-            account_type (str): the account type
+            account_type (str): The account type. One of [
+                'CHECKING', 'SAVINGS', 'MONEYMRKT', 'CREDITLINE']
+            currency (str): The ISO formatted currency (required).
+            id (str):
+            amount (number): the transaction amount (required)
+            bank_id (str): A unique bank identifier (required).
+            account_id (str): A unique account identifier (required).
+            account_type (str): The account type. One of [
+                'CHECKING', 'SAVINGS', 'MONEYMRKT', 'CREDITLINE'] (required).
 
         Returns:
-            (str): the QIF content
+            (str): the start of an OFX transfer
 
         Examples:
             >>> kwargs = {'currency': 'USD', 'date': dt(2012, 1, 15), \
-'bank_id': 1, 'account_id': 1, 'account_type': 'type', 'split_account_id': 2, \
-'split_account': 'split_account', 'split_account_type': 'type', 'amount': 100 \
-, 'id': 'jbaevf'}
+'bank_id': 1, 'account_id': 1, 'account_type': 'CHECKING', 'amount': 100, \
+'id': 'jbaevf'}
             >>> OFX().transfer(**kwargs).replace('\\n', '').replace('\\t', '')
             u'<INTRARS><CURDEF>USD</CURDEF><SRVRTID>jbaevf</SRVRTID>\
-<XFERINFO><TRNAMT>100</TRNAMT><BANKACCTFROM><BANKID>1</BANKID><ACCTID>1\
-</ACCTID><ACCTTYPE>type</ACCTTYPE></BANKACCTFROM>'
+<XFERINFO><TRNAMT>100.00</TRNAMT><BANKACCTFROM><BANKID>1</BANKID><ACCTID>1\
+</ACCTID><ACCTTYPE>CHECKING</ACCTTYPE></BANKACCTFROM>'
         """
         content = '\t\t\t<INTRARS>\n'
         content += '\t\t\t\t<CURDEF>%(currency)s</CURDEF>\n' % kwargs
         content += '\t\t\t\t<SRVRTID>%(id)s</SRVRTID>\n' % kwargs
         content += '\t\t\t\t<XFERINFO>\n'
-        content += '\t\t\t\t\t<TRNAMT>%(amount)s</TRNAMT>\n' % kwargs
+        content += '\t\t\t\t\t<TRNAMT>%(amount)0.2f</TRNAMT>\n' % kwargs
         content += '\t\t\t\t\t<BANKACCTFROM>\n'
         content += '\t\t\t\t\t\t<BANKID>%(bank_id)s</BANKID>\n' % kwargs
         content += '\t\t\t\t\t\t<ACCTID>%(account_id)s</ACCTID>\n' % kwargs
@@ -275,6 +312,49 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
         return content
 
     def split_content(self, **kwargs):
+        """ Gets OFX split content
+
+        Args:
+            kwargs (dict): Output from `transaction_data`.
+
+        Kwargs:
+            split_account (str): Account to use as the transfer recipient.
+                (useful in cases when the transaction data isn't already split)
+
+            bank_id (str): A unique bank identifier (required).
+
+            split_account_id (str): A unique account identifier (required if a
+                `split_account` is given).
+
+            split_account_type (str): The account type. One of [
+                'CHECKING', 'SAVINGS', 'MONEYMRKT', 'CREDITLINE'] (required if
+                a `split_account` is given).
+
+            account_id (str): A unique account identifier (required if a
+                `split_account` isn't given).
+
+            account_type (str): The account type. One of [
+                'CHECKING', 'SAVINGS', 'MONEYMRKT', 'CREDITLINE'] (required if
+                a `split_account` isn't given).
+
+        Returns:
+            (str): the OFX split content
+
+        Examples:
+            >>> kwargs = {'bank_id': 1, 'split_account': 'Checking', \
+'split_account_id': 2, 'split_account_type': 'CHECKING', 'amount': 100 , \
+'id': 'jbaevf'}
+            >>> OFX().split_content(**kwargs).replace('\\n', '').replace(\
+'\\t', '')
+            u'<BANKACCTTO><BANKID>1</BANKID><ACCTID>2</ACCTID><ACCTTYPE>\
+CHECKING</ACCTTYPE></BANKACCTTO>'
+            >>> kwargs = {'bank_id': 1, 'account': 'Checking', 'account_id': \
+3, 'account_type': 'CHECKING', 'amount': 100 , 'id': 'jbaevf'}
+            >>> OFX().split_content(**kwargs).replace('\\n', '').replace(\
+'\\t', '')
+            u'<BANKACCTTO><BANKID>1</BANKID><ACCTID>3</ACCTID><ACCTTYPE>\
+CHECKING</ACCTTYPE></BANKACCTTO>'
+        """
         content = '\t\t\t\t\t<BANKACCTTO>\n'
         content += '\t\t\t\t\t\t<BANKID>%(bank_id)s</BANKID>\n' % kwargs
 
@@ -294,8 +374,22 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
         content += '\t\t\t\t\t</BANKACCTTO>\n'
         return content
 
-    def transfer_end(self, **kwargs):
-        time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
+    def transfer_end(self, date=None, **kwargs):
+        """ Gets OFX transfer end
+
+        Args:
+            date (datetime): the transfer date (required)
+
+        Returns:
+            (str): the end of an OFX transfer
+
+        Examples:
+            >>> date = dt(2012, 1, 15)
+            >>> OFX().transfer_end(date=date).replace('\\n', '').replace(\
+'\\t', '')
+            u'</XFERINFO><DTPOSTED>20120115000000</DTPOSTED></INTRARS>'
+        """
+        time_stamp = date.strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
         content = '\t\t\t\t</XFERINFO>\n'
         content += '\t\t\t\t<DTPOSTED>%s</DTPOSTED>\n' % time_stamp
         content += '\t\t\t</INTRARS>\n'
