@@ -394,3 +394,55 @@ CHECKING</ACCTTYPE></BANKACCTTO>'
         content += '\t\t\t\t<DTPOSTED>%s</DTPOSTED>\n' % time_stamp
         content += '\t\t\t</INTRARS>\n'
         return content
+
+    def splitless_content(self, trxn_data, **kwargs):
+        prev_group = kwargs.get('prev_group')
+        content = kwargs.get('content', '')
+
+        if prev_group and prev_group != kwargs.get('group'):
+            content += self.account_end(**trxn_data)
+
+        if kwargs.get('is_main'):
+            content += self.account_start(**trxn_data)
+
+        content += self.transaction(**trxn_data)
+        return content
+
+    def split_like_content(self, trxn_data, **kwargs):
+        prev_group = kwargs.get('prev_group')
+        content = kwargs.get('content', '')
+
+        if prev_group and prev_group != kwargs.get('group') and self.is_split:
+            content += self.transfer_end(**trxn_data)
+
+        if (self.is_split and kwargs.get('is_main')) or self.split_account:
+            content += self.transfer(**trxn_data)
+
+        if (self.is_split and not kwargs.get('is_main')) or self.split_account:
+            content += self.split_content(**trxn_data)
+
+        if self.split_account:
+            content += self.transfer_end(**trxn_data)
+
+        return content
+
+    def gen_content(self, grouped_data, prev_group=None):
+        for gd in grouped_data:
+            group = gd['group']
+            trxn_data = self.transaction_data(gd['trxn'])
+            gd['prev_group'] = prev_group
+
+            if self.is_split and gd['len'] > 2:
+                # OFX doesn't support more than 2 splits
+                raise TypeError('Group %s has too many splits.\n' % group)
+            elif self.is_split or self.split_account:
+                yield self.split_like_content(trxn_data, **gd)
+            else:
+                yield self.splitless_content(trxn_data, **gd)
+
+            prev_group = group
+
+        if self.is_split:
+            yield self.transfer_end(**trxn_data)
+        elif not self.split_account:
+            yield self.account_end(**trxn_data)

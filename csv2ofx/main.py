@@ -156,87 +156,13 @@ def gen_base_data(groups, cont):
                 continue
 
             base_data = {
-                'data': cont.transaction_data(trxn),
-                'account': cont.account(trxn),
+                'trxn': trxn,
                 'is_main': pos == main_pos,
-                'split_account': cont.split_account,
-                'is_split': cont.is_split,
                 'len': len(sorted_trxns),
-                'cont': cont,
                 'group': group
             }
 
             yield base_data
-
-
-def splitless_content(gd, prev_group, content=''):
-    if prev_group and prev_group != gd['group']:
-        content += gd['cont'].account_end(**gd['data'])
-
-    if gd['is_main']:
-        content += gd['cont'].account_start(**gd['data'])
-
-    content += gd['cont'].transaction(**gd['data'])
-    return content
-
-
-def split_like_content(gd, prev_group, content=''):
-    if gd['is_split'] and gd['len'] > 2:
-        # OFX doesn't support more than 2 splits
-        raise TypeError('Group %s has too many splits.\n' % gd['group'])
-
-    if prev_group and prev_group != gd['group'] and gd['is_split']:
-        content += gd['cont'].transfer_end(**gd['data'])
-
-    if (gd['is_split'] and gd['is_main']) or gd['split_account']:
-        content += gd['cont'].transfer(**gd['data'])
-
-    if (gd['is_split'] and not gd['is_main']) or gd['split_account']:
-        content += gd['cont'].split_content(**gd['data'])
-
-    if gd['split_account']:
-        content += gd['cont'].transfer_end(**gd['data'])
-
-    return content
-
-
-def gen_ofx_content(grouped_data, prev_group=None):
-    for gd in grouped_data:
-        if gd['is_split'] or gd['split_account']:
-            yield split_like_content(gd, prev_group)
-        else:
-            yield splitless_content(gd, prev_group)
-
-        prev_group = gd['group']
-
-    if gd['is_split']:
-        yield gd['cont'].transfer_end(**gd['data'])
-    elif not gd['split_account']:
-        yield gd['cont'].account_end(**gd['data'])
-
-
-def gen_qif_content(grouped_data, prev_account=None, prev_group=None):
-    for gd in grouped_data:
-        if prev_group and prev_group != gd['group'] and gd['is_split']:
-            yield gd['cont'].transaction_end()
-
-        if gd['is_main'] and prev_account != gd['account']:
-            yield gd['cont'].account_start(**gd['data'])
-
-        if (gd['is_split'] and gd['is_main']) or not gd['is_split']:
-            yield gd['cont'].transaction(**gd['data'])
-            prev_account = gd['account']
-
-        if (gd['is_split'] and not gd['is_main']) or gd['split_account']:
-            yield gd['cont'].split_content(**gd['data'])
-
-        if not gd['is_split']:
-            yield gd['cont'].transaction_end()
-
-        prev_group = gd['group']
-
-    if gd['is_split']:
-        yield gd['cont'].transaction_end()
 
 
 def run():
@@ -258,7 +184,6 @@ def run():
         'end': parse(args.end)
     }
 
-    content_func = gen_qif_content if args.qif else gen_ofx_content
     Content = QIF if args.qif else OFX
     cont = Content(mapping, **okwargs)
 
@@ -277,8 +202,7 @@ def run():
     grouped_trxns = gen_trxns(groups, cont, args.collapse)
     main_gtrxns = gen_main_trxns(grouped_trxns, cont)
     grouped_data = gen_base_data(main_gtrxns, cont)
-    body = content_func(grouped_data)
-    content.write(body)
+    content.write(cont.gen_content(grouped_data))
     content.write(cont.footer())
 
     try:

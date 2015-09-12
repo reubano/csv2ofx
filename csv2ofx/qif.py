@@ -227,3 +227,28 @@ None, u'type': u'debit'}
             >>> QIF().footer()
         """
         return None
+
+    def gen_content(self, grouped_data, prev_account=None, prev_group=None):
+        for gd in grouped_data:
+            trxn_data = self.transaction_data(gd['trxn'])
+
+            if prev_group and prev_group != gd['group'] and self.is_split:
+                yield self.transaction_end()
+
+            if gd['is_main'] and prev_account != self.account(gd['trxn']):
+                yield self.account_start(**trxn_data)
+
+            if (self.is_split and gd['is_main']) or not self.is_split:
+                yield self.transaction(**trxn_data)
+                prev_account = self.account(gd['trxn'])
+
+            if (self.is_split and not gd['is_main']) or self.split_account:
+                yield self.split_content(**trxn_data)
+
+            if not self.is_split:
+                yield self.transaction_end()
+
+            prev_group = gd['group']
+
+        if self.is_split:
+            yield self.transaction_end()
