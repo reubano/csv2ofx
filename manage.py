@@ -49,7 +49,7 @@ def require():
 
 @manager.arg('where', 'w', help='Requirement file', default=None)
 @manager.arg(
-    'stop', '-x', help='Stop after first error', type=bool, default=False)
+    'stop', 'x', help='Stop after first error', type=bool, default=False)
 @manager.command
 def test(where=None, stop=False):
     """Run nose and script tests"""

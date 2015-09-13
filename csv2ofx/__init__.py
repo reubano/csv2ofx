@@ -18,7 +18,7 @@ Attributes:
 """
 
 from __future__ import (
-    division, print_function, with_statement,
+    absolute_import, division, print_function, with_statement,
     unicode_literals)
 
 import hashlib
@@ -33,11 +33,12 @@ __package_name__ = 'csv2ofx'
 __author__ = 'Reuben Cummings'
 __description__ = 'converts a csv file of transactions to an ofx or qif file'
 __email__ = 'reubano@gmail.com'
-__version__ = '0.16.0'
+__version__ = '0.16.1'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2015 Reuben Cummings'
 
-md5 = lambda content: hashlib.md5(content).hexdigest()
+
+md5 = lambda content: hashlib.md5(content.encode('utf-8')).hexdigest()
 
 
 class Content(object):

@@ -44,6 +44,8 @@ class QIF(Content):
         """
         super(QIF, self).__init__(mapping, **kwargs)
         self.def_type = kwargs.get('def_type', 'Bank')
+        self.prev_account = None
+        self.prev_group = None
         self.account_types = {
             'Bank': ('checking', 'savings', 'market', 'income'),
             'Oth A': ('receivable',),
@@ -217,8 +219,8 @@ None, u'type': u'debit'}
         """
         return "^\n"
 
-    def footer(self):
-        """ Gets QIF transaction footer. Kept for compatibility with OFX.
+    def footer(self, **kwargs):
+        """ Gets QIF transaction footer.
 
         Returns:
             (None): the QIF footer
@@ -226,4 +228,28 @@ None, u'type': u'debit'}
         Examples:
             >>> QIF().footer()
         """
-        return None
+        if self.is_split:
+            return self.transaction_end()
+
+    def gen_body(self, gd):
+        trxn_data = self.transaction_data(gd['trxn'])
+        account = self.account(gd['trxn'])
+        group = gd['group']
+
+        if self.prev_group and self.prev_group != group and self.is_split:
+            yield self.transaction_end()
+
+        if gd['is_main'] and self.prev_account != account:
+            yield self.account_start(**trxn_data)
+
+        if (self.is_split and gd['is_main']) or not self.is_split:
+            yield self.transaction(**trxn_data)
+            self.prev_account = account
+
+        if (self.is_split and not gd['is_main']) or self.split_account:
+            yield self.split_content(**trxn_data)
+
+        if not self.is_split:
+            yield self.transaction_end()
+
+        self.prev_group = group

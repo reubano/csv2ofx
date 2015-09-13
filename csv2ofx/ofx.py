@@ -46,6 +46,7 @@ class OFX(Content):
         super(OFX, self).__init__(mapping, **kwargs)
         self.resp_type = 'INTRATRNRS' if self.split_account else 'STMTTRNRS'
         self.def_type = kwargs.get('def_type', 'CHECKING')
+        self.prev_group = None
         self.account_types = {
             'CHECKING': ('checking', 'income', 'receivable', 'payable'),
             'SAVINGS': ('savings',),
@@ -142,18 +143,6 @@ u'type': u'debit'}
 
         data.update(new_data)
         return data
-
-    def footer(self):
-        """ Gets OFX transfer end
-
-        Returns:
-            (str): the OFX content
-
-        Examples:
-            >>> OFX().footer().replace('\\n', '').replace('\\t', '')
-            u'</STMTTRNRS></BANKMSGSRSV1></OFX>'
-        """
-        return "\t\t</%s>\n\t</BANKMSGSRSV1>\n</OFX>\n" % self.resp_type
 
     def account_start(self, **kwargs):
         """ Gets OFX format transaction account start content
@@ -384,9 +373,8 @@ CHECKING</ACCTTYPE></BANKACCTTO>'
             (str): the end of an OFX transfer
 
         Examples:
-            >>> date = dt(2012, 1, 15)
-            >>> OFX().transfer_end(date=date).replace('\\n', '').replace(\
-'\\t', '')
+            >>> OFX().transfer_end(dt(2012, 1, 15)).replace(\
+'\\n', '').replace('\\t', '')
             u'</XFERINFO><DTPOSTED>20120115000000</DTPOSTED></INTRARS>'
         """
         time_stamp = date.strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
@@ -394,3 +382,68 @@ CHECKING</ACCTTYPE></BANKACCTTO>'
         content += '\t\t\t\t<DTPOSTED>%s</DTPOSTED>\n' % time_stamp
         content += '\t\t\t</INTRARS>\n'
         return content
+
+    def footer(self, **kwargs):
+        """ Gets OFX transfer end
+
+        Returns:
+            (str): the OFX content
+
+        Examples:
+            >>> OFX().footer(date=dt(2012, 1, 15)).replace('\\n', '').replace(\
+'\\t', '')
+            u'</BANKTRANLIST></STMTRS></STMTTRNRS></BANKMSGSRSV1></OFX>'
+        """
+        if self.is_split:
+            content = self.transfer_end(date=kwargs['date'])
+        elif not self.split_account:
+            content = self.account_end(**kwargs)
+        else:
+            content = ''
+
+        content += "\t\t</%s>\n\t</BANKMSGSRSV1>\n</OFX>\n" % self.resp_type
+        return content
+
+    def splitless_body(self, trxn_data, group, is_main=False):
+        body = ''
+
+        if self.prev_group and self.prev_group != group:
+            body += self.account_end(**trxn_data)
+
+        if is_main:
+            body += self.account_start(**trxn_data)
+
+        body += self.transaction(**trxn_data)
+        return body
+
+    def split_like_body(self, trxn_data, group, is_main=False):
+        body = ''
+        new_group = self.prev_group and self.prev_group != group
+
+        if new_group and self.is_split:
+            body += self.transfer_end(**trxn_data)
+
+        if (self.is_split and is_main) or self.split_account:
+            body += self.transfer(**trxn_data)
+
+        if (self.is_split and not is_main) or self.split_account:
+            body += self.split_content(**trxn_data)
+
+        if self.split_account:
+            body += self.transfer_end(**trxn_data)
+
+        return body
+
+    def gen_body(self, gd):
+        group = gd['group']
+        trxn_data = self.transaction_data(gd['trxn'])
+
+        if self.is_split and gd['len'] > 2:
+            # OFX doesn't support more than 2 splits
+            raise TypeError('Group %s has too many splits.\n' % group)
+        elif self.is_split or self.split_account:
+            yield self.split_like_body(trxn_data, group, gd['is_main'])
+        else:
+            yield self.splitless_body(trxn_data, group, gd['is_main'])
+
+        self.prev_group = group

@@ -30,8 +30,10 @@ from tabutils import process
 
 
 class IterStringIO(TextIOBase):
-    """A lazy StringIO that lets you read/write a generator of strings.
-    Add SO entry
+    """A lazy StringIO that lets you writes a generator of strings. And reads
+    bytearrays
+
+    http://stackoverflow.com/a/32020108/408556
     """
 
     def __init__(self, iterable=None):
@@ -42,31 +44,34 @@ class IterStringIO(TextIOBase):
         Examples:
             >>> from StringIO import StringIO
             >>> iter_content = iter('Hello World')
-            >>> StringIO(iter_content).getvalue()  #doctest: +ELLIPSIS
-            '<iterator object at 0x...>'
+            >>> StringIO(iter_content).read(5)
+            '<iter'
             >>> iter_sio = IterStringIO(iter_content)
             >>> iter_sio.read(5)
-            u'Hello'
+            bytearray(b'Hello')
             >>> iter_sio.write(iter('ly person'))
             >>> iter_sio.read(8)
-            u' Worldly'
+            bytearray(b' Worldly')
         """
         iterable = iterable or []
         not_newline = lambda s: s not in {'\n', '\r', '\r\n'}
-        self.iter = self._chain(iterable)
+        chained = self._chain(iterable)
+        self.iter = self._encode(chained)
         self.next_line = it.takewhile(not_newline, self.iter)
+
+    def _encode(self, iterable):
+        return (s.encode('utf-8') for s in iterable)
 
     def _chain(self, iterable):
         iterable = iterable or []
         return it.chain.from_iterable(it.ifilter(None, iterable))
 
     def _read(self, iterable, n):
-        tmp = it.islice(iterable, None, n)
-        # return bytearray(tmp)
-        return ''.join(tmp)
+        return bytearray(it.islice(iterable, None, n))
 
     def write(self, iterable):
-        self.iter = it.chain.from_iterable([self.iter, self._chain(iterable)])
+        chained = self._chain(iterable)
+        self.iter = self._chain([self.iter, self._encode(chained)])
 
     def read(self, n=pow(10, 10)):
         return self._read(self.iter, n)
@@ -229,9 +234,9 @@ def chunk(content, chunksize=None):
         >>> chunk(StringIO('Hello World'), 5).next()
         u'Hello'
         >>> chunk(IterStringIO('Hello World'), 5).next()
-        u'Hello'
+        bytearray(b'Hello')
         >>> chunk(IterStringIO('Hello World')).next()
-        u'Hello World'
+        bytearray(b'Hello World')
     """
     if chunksize and hasattr(content, 'read'):
         generator = (content.read(chunksize) for _ in it.count())
