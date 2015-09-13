@@ -38,7 +38,7 @@ def main():
 
     try:
         env.run(script, cwd=parent_dir)
-        print('\nScripttest: #1 ... ok')
+        print('\nScripttest #1: %s ... ok' % script)
 
         for test_num, example_filename, check_filename, opts in tests:
             example = p.join(example_dir, example_filename)
@@ -58,12 +58,13 @@ def main():
                 sys.stderr.write(msg)
                 sys.exit(''.join(diffs))
             else:
-                print('Scripttest: #%i ... ok' % test_num)
+                short_script = 'csv2ofx -%s %s %s' % (opts, example_filename, check_filename)
+                print('Scripttest #%i: %s ... ok' % (test_num, short_script))
     except Exception as e:
         sys.exit(e)
     else:
         time = timer() - start
-        print('-----------------------------')
+        print('%s' % '-' * 70)
         print('Ran %i scripttests in %0.3fs\n\nOK' % (test_num, time))
         sys.exit(0)
     finally:
