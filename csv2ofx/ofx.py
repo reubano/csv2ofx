@@ -404,30 +404,29 @@ CHECKING</ACCTTYPE></BANKACCTTO>'
         content += "\t\t</%s>\n\t</BANKMSGSRSV1>\n</OFX>\n" % self.resp_type
         return content
 
-    def splitless_body(self, trxn_data, **kwargs):
-        prev_group = kwargs.get('prev_group')
-        body = kwargs.get('body', '')
+    def splitless_body(self, trxn_data, group, is_main=False):
+        body = ''
 
-        if prev_group and prev_group != kwargs.get('group'):
+        if self.prev_group and self.prev_group != group:
             body += self.account_end(**trxn_data)
 
-        if kwargs.get('is_main'):
+        if is_main:
             body += self.account_start(**trxn_data)
 
         body += self.transaction(**trxn_data)
         return body
 
-    def split_like_body(self, trxn_data, **kwargs):
-        prev_group = kwargs.get('prev_group')
-        body = kwargs.get('body', '')
+    def split_like_body(self, trxn_data, group, is_main=False):
+        body = ''
+        new_group = self.prev_group and self.prev_group != group
 
-        if prev_group and prev_group != kwargs.get('group') and self.is_split:
+        if new_group and self.is_split:
             body += self.transfer_end(**trxn_data)
 
-        if (self.is_split and kwargs.get('is_main')) or self.split_account:
+        if (self.is_split and is_main) or self.split_account:
             body += self.transfer(**trxn_data)
 
-        if (self.is_split and not kwargs.get('is_main')) or self.split_account:
+        if (self.is_split and not is_main) or self.split_account:
             body += self.split_content(**trxn_data)
 
         if self.split_account:
@@ -438,12 +437,13 @@ CHECKING</ACCTTYPE></BANKACCTTO>'
     def gen_body(self, gd):
         group = gd['group']
         trxn_data = self.transaction_data(gd['trxn'])
-        gd['prev_group'], self.prev_group = self.prev_group, group
 
         if self.is_split and gd['len'] > 2:
             # OFX doesn't support more than 2 splits
             raise TypeError('Group %s has too many splits.\n' % group)
         elif self.is_split or self.split_account:
-            yield self.split_like_body(trxn_data, **gd)
+            yield self.split_like_body(trxn_data, group, gd['is_main'])
         else:
-            yield self.splitless_body(trxn_data, **gd)
+            yield self.splitless_body(trxn_data, group, gd['is_main'])
+
+        self.prev_group = group
