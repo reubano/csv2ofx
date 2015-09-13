@@ -202,8 +202,8 @@ def run():
     grouped_trxns = gen_trxns(groups, cont, args.collapse)
     main_gtrxns = gen_main_trxns(grouped_trxns, cont)
     grouped_data = gen_base_data(main_gtrxns, cont)
-    content.write(cont.gen_content(grouped_data))
-    content.write(cont.footer())
+    [content.write(cont.gen_body(gd)) for gd in grouped_data]
+    content.write(cont.footer(date=server_date))
 
     try:
         kwargs = {
