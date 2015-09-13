@@ -18,7 +18,7 @@ Attributes:
 """
 
 from __future__ import (
-    division, print_function, with_statement,
+    absolute_import, division, print_function, with_statement,
     unicode_literals)
 
 import hashlib
