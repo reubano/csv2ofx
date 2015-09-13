@@ -58,7 +58,9 @@ def main():
                 sys.stderr.write(msg)
                 sys.exit(''.join(diffs))
             else:
-                short_script = 'csv2ofx -%s %s %s' % (opts, example_filename, check_filename)
+                short_script = 'csv2ofx -%s %s %s' % (
+                    opts, example_filename, check_filename)
+
                 print('Scripttest #%i: %s ... ok' % (test_num, short_script))
     except Exception as e:
         sys.exit(e)
