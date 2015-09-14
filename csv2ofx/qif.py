@@ -86,7 +86,6 @@ None, u'type': u'debit'}
         data = super(QIF, self).transaction_data(tr)
         args = [self.account_types, self.def_type]
         sa = data['split_account']
-        sa_type = utils.get_account_type(sa, *args) if sa else None
         memo = data.get('memo')
         _class = data.get('class')
 
@@ -97,7 +96,6 @@ None, u'type': u'debit'}
 
         new_data = {
             'account_type': utils.get_account_type(data['account'], *args),
-            'split_account_type': sa_type,
             'split_memo': split_memo}
 
         data.update(new_data)
