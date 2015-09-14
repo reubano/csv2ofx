@@ -184,8 +184,7 @@ def run():
         'end': parse(args.end)
     }
 
-    Content = QIF if args.qif else OFX
-    cont = Content(mapping, **okwargs)
+    cont = QIF(mapping, **okwargs) if args.qif else OFX(mapping, **okwargs)
 
     try:
         mtime = p.getmtime(args.source.name)

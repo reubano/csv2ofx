@@ -84,7 +84,6 @@ u'amount': Decimal('-1000.00'), u'check_num': None, u'type': u'debit'}
         """
         data = super(QIF, self).transaction_data(tr)
         args = [self.account_types, self.def_type]
-        sa = data['split_account']
         memo = data.get('memo')
         _class = data.get('class')
 
