@@ -52,6 +52,9 @@ class IterStringIO(TextIOBase):
             >>> iter_sio.write(iter('ly person'))
             >>> iter_sio.read(8)
             bytearray(b' Worldly')
+            >>> iter_sio.write(': Iñtërnâtiônàližætiøn')
+            >>> iter_sio.read() == bytearray(b' person: Iñtërnâtiônàližætiøn')
+            True
         """
         iterable = iterable or []
         not_newline = lambda s: s not in {'\n', '\r', '\r\n'}
@@ -67,7 +70,13 @@ class IterStringIO(TextIOBase):
         return it.chain.from_iterable(it.ifilter(None, iterable))
 
     def _read(self, iterable, n):
-        return bytearray(it.islice(iterable, None, n))
+        sliced = list(it.islice(iterable, None, n))
+
+        try:
+            return bytearray(sliced)
+        except ValueError:  # has unicode chars
+            bys = (bytearray(s) for s in sliced)
+            return reduce(lambda x, y: x + y, bys)
 
     def write(self, iterable):
         chained = self._chain(iterable)
