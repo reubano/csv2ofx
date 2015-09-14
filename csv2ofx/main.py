@@ -178,7 +178,7 @@ def run():
     mapping = import_module('mappings.%s' % args.mapping).mapping
 
     okwargs = {
-        'def_type': args.account_type,
+        'def_type': args.account_type or 'Bank' if args.qif else 'CHECKING',
         'split_header': args.split,
         'start': parse(args.start),
         'end': parse(args.end)

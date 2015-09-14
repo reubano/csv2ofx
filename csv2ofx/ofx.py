@@ -45,7 +45,7 @@ class OFX(Content):
         # TODO: Add timezone info
         super(OFX, self).__init__(mapping, **kwargs)
         self.resp_type = 'INTRATRNRS' if self.split_account else 'STMTTRNRS'
-        self.def_type = kwargs.get('def_type', 'CHECKING')
+        self.def_type = kwargs.get('def_type')
         self.prev_group = None
         self.account_types = {
             'CHECKING': ('checking', 'income', 'receivable', 'payable'),
@@ -113,7 +113,7 @@ class OFX(Content):
 'Date': '06/12/10', 'Description': 'payee', 'Original Description': \
 'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': \
 'account'}
-            >>> OFX(mapping).transaction_data(tr)
+            >>> OFX(mapping, def_type='CHECKING').transaction_data(tr)
             {u'account_type': u'CHECKING', u'account_id': \
 'e268443e43d93dab7ebef303bbe9642f', u'memo': u'description notes', \
 u'split_account_id': None, u'currency': u'USD', u'date': \

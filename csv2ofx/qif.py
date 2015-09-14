@@ -43,7 +43,7 @@ class QIF(Content):
             <csv2ofx.qif.QIF object at 0x...>
         """
         super(QIF, self).__init__(mapping, **kwargs)
-        self.def_type = kwargs.get('def_type', 'Bank')
+        self.def_type = kwargs.get('def_type')
         self.prev_account = None
         self.prev_group = None
         self.account_types = {
@@ -72,7 +72,7 @@ class QIF(Content):
 'Date': '06/12/10', 'Description': 'payee', 'Original Description': \
 'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': \
 'account'}
-            >>> QIF(mapping).transaction_data(tr)
+            >>> QIF(mapping, def_type='Bank').transaction_data(tr)
             {u'account_type': u'Bank', u'account_id': \
 'e268443e43d93dab7ebef303bbe9642f', u'memo': u'description notes', \
 u'split_account_id': None, u'currency': u'USD', u'date': \
@@ -80,8 +80,7 @@ datetime.datetime(2010, 6, 12, 0, 0), u'class': None, u'bank': u'account', \
 u'account': u'account', u'split_memo': u'description notes', \
 u'split_account': None, u'bank_id': 'e268443e43d93dab7ebef303bbe9642f', \
 u'id': 'ee86450a47899254e2faa82dca3c2cf2', u'payee': u'payee', \
-u'amount': Decimal('-1000.00'), u'split_account_type': None, u'check_num': \
-None, u'type': u'debit'}
+u'amount': Decimal('-1000.00'), u'check_num': None, u'type': u'debit'}
         """
         data = super(QIF, self).transaction_data(tr)
         args = [self.account_types, self.def_type]
