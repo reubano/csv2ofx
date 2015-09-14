@@ -138,23 +138,24 @@ def gen_main_trxns(groups, cont):
             continue
         elif cont.is_split and not utils.verify_splits(*_args):
             raise Exception('Splits do not sum to zero.')
-        elif cont.is_split:
+        elif not cont.is_split:
+            filtered_trxns = it.ifilterfalse(cont.skip_transaction, trxns)
+        else:
+            filtered_trxns = trxns
+
+        if cont.is_split:
             main_pos = utils.get_max_split(*_args)[0]
         else:
             main_pos = 0
 
         keyfunc = lambda enum: enum[0] != main_pos
-        sorted_trxns = sorted(enumerate(trxns), key=keyfunc)
+        sorted_trxns = sorted(enumerate(filtered_trxns), key=keyfunc)
         yield (group, main_pos, sorted_trxns)
 
 
-def gen_base_data(groups, cont):
+def gen_base_data(groups):
     for group, main_pos, sorted_trxns in groups:
         for pos, trxn in sorted_trxns:
-
-            if not cont.is_split and cont.skip_transaction(trxn):
-                continue
-
             base_data = {
                 'trxn': trxn,
                 'is_main': pos == main_pos,
@@ -200,7 +201,7 @@ def run():
     groups = it.chain.from_iterable(gen_groups(chunks, cont, args.qif))
     grouped_trxns = gen_trxns(groups, cont, args.collapse)
     main_gtrxns = gen_main_trxns(grouped_trxns, cont)
-    grouped_data = gen_base_data(main_gtrxns, cont)
+    grouped_data = gen_base_data(main_gtrxns)
     [content.write(cont.gen_body(gd)) for gd in grouped_data]
     content.write(cont.footer(date=server_date))
 
