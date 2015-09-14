@@ -278,6 +278,8 @@ def get_account_type(account, account_types, def_type='n/a'):
     Examples:
         >>> get_account_type('somecash', {'Cash': ('cash',)})
         u'Cash'
+        >>> get_account_type('account', {'Cash': ('cash',)})
+        u'n/a'
     """
     _type = def_type
 
