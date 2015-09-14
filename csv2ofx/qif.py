@@ -50,7 +50,7 @@ class QIF(Content):
             'Bank': ('checking', 'savings', 'market', 'income'),
             'Oth A': ('receivable',),
             'Oth L': ('payable',),
-            'CCard': ('visa', 'master', 'express', 'discover'),
+            'CCard': ('visa', 'master', 'express', 'discover', 'platinum'),
             'Cash': ('cash', 'expenses')
         }
 
