@@ -404,46 +404,35 @@ CHECKING</ACCTTYPE></BANKACCTTO>'
         content += "\t\t</%s>\n\t</BANKMSGSRSV1>\n</OFX>\n" % self.resp_type
         return content
 
-    def splitless_body(self, trxn_data, group, is_main=False):
-        body = ''
-
-        if self.prev_group and self.prev_group != group:
-            body += self.account_end(**trxn_data)
-
-        if is_main:
-            body += self.account_start(**trxn_data)
-
-        body += self.transaction(**trxn_data)
-        return body
-
-    def split_like_body(self, trxn_data, group, is_main=False):
-        body = ''
-        new_group = self.prev_group and self.prev_group != group
-
-        if new_group and self.is_split:
-            body += self.transfer_end(**trxn_data)
-
-        if (self.is_split and is_main) or self.split_account:
-            body += self.transfer(**trxn_data)
-
-        if (self.is_split and not is_main) or self.split_account:
-            body += self.split_content(**trxn_data)
-
-        if self.split_account:
-            body += self.transfer_end(**trxn_data)
-
-        return body
-
     def gen_body(self, gd):
         group = gd['group']
-        trxn_data = self.transaction_data(gd['trxn'])
 
         if self.is_split and gd['len'] > 2:
             # OFX doesn't support more than 2 splits
             raise TypeError('Group %s has too many splits.\n' % group)
-        elif self.is_split or self.split_account:
-            yield self.split_like_body(trxn_data, group, gd['is_main'])
+
+        trxn_data = self.transaction_data(gd['trxn'])
+        split_like = self.is_split or self.split_account
+        full_split = self.is_split and self.split_account
+        new_group = self.prev_group and self.prev_group != group
+
+        if new_group and full_split:
+            yield self.transfer_end(**trxn_data)
+        elif new_group and not split_like:
+            yield self.account_end(**trxn_data)
+
+        if self.split_account:
+            yield self.transfer(**trxn_data)
+            yield self.split_content(**trxn_data)
+            yield self.transfer_end(**trxn_data)
+        elif self.is_split and gd['is_main']:
+            yield self.transfer(**trxn_data)
+        elif self.is_split:
+            yield self.split_content(**trxn_data)
+        elif gd['is_main']:
+            yield self.account_start(**trxn_data)
+            yield self.transaction(**trxn_data)
         else:
-            yield self.splitless_body(trxn_data, group, gd['is_main'])
+            yield self.transaction(**trxn_data)
 
         self.prev_group = group
