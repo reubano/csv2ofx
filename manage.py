@@ -17,9 +17,8 @@ _basedir = p.dirname(__file__)
 
 @manager.command
 def clean():
-    """Remove all artifacts"""
-    clean_build()
-    clean_pyc()
+    """Remove Python file and build artifacts"""
+    call(p.join(_basedir, 'helpers', 'clean'), shell=True)
 
 
 @manager.command
@@ -31,7 +30,7 @@ def check():
 @manager.command
 def lint():
     """Check style with flake8"""
-    call('flake8 csv2ofx tests', shell=True)
+    call('flake8 manage.py setup.py csv2ofx tests', shell=True)
 
 
 @manager.command
@@ -59,9 +58,30 @@ def test(where=None, stop=False):
 
 
 @manager.command
+def register():
+    """Register package with PyPI"""
+    call('python %s register' % p.join(_basedir, 'setup.py'), shell=True)
+
+
+@manager.command
 def release():
     """Package and upload a release"""
-    call(p.join(_basedir, 'helpers', 'release'), shell=True)
+    sdist()
+    wheel()
+    upload()
+
+
+@manager.command
+def build():
+    """Create a source distribution and wheel package"""
+    sdist()
+    wheel()
+
+
+@manager.command
+def upload():
+    """Upload distribution files"""
+    call('twine upload %s' % p.join(_basedir, 'dist', '*'), shell=True)
 
 
 @manager.command
