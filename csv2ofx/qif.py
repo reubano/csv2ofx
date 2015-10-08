@@ -38,19 +38,19 @@ class QIF(Content):
             end (date): Date from which to exclude transactions.
 
         Examples:
-            >>> from mappings.mint import mapping
+            >>> from csv2ofx.mappings.mint import mapping
             >>> QIF(mapping)  #doctest: +ELLIPSIS
             <csv2ofx.qif.QIF object at 0x...>
         """
         super(QIF, self).__init__(mapping, **kwargs)
-        self.def_type = kwargs.get('def_type', 'Bank')
+        self.def_type = kwargs.get('def_type')
         self.prev_account = None
         self.prev_group = None
         self.account_types = {
             'Bank': ('checking', 'savings', 'market', 'income'),
             'Oth A': ('receivable',),
             'Oth L': ('payable',),
-            'CCard': ('visa', 'master', 'express', 'discover'),
+            'CCard': ('visa', 'master', 'express', 'discover', 'platinum'),
             'Cash': ('cash', 'expenses')
         }
 
@@ -67,12 +67,12 @@ class QIF(Content):
             (dict): the QIF transaction data
 
         Examples:
-            >>> from mappings.mint import mapping
+            >>> from csv2ofx.mappings.mint import mapping
             >>> tr = {'Transaction Type': 'debit', 'Amount': 1000.00, \
 'Date': '06/12/10', 'Description': 'payee', 'Original Description': \
 'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': \
 'account'}
-            >>> QIF(mapping).transaction_data(tr)
+            >>> QIF(mapping, def_type='Bank').transaction_data(tr)
             {u'account_type': u'Bank', u'account_id': \
 'e268443e43d93dab7ebef303bbe9642f', u'memo': u'description notes', \
 u'split_account_id': None, u'currency': u'USD', u'date': \
@@ -80,13 +80,10 @@ datetime.datetime(2010, 6, 12, 0, 0), u'class': None, u'bank': u'account', \
 u'account': u'account', u'split_memo': u'description notes', \
 u'split_account': None, u'bank_id': 'e268443e43d93dab7ebef303bbe9642f', \
 u'id': 'ee86450a47899254e2faa82dca3c2cf2', u'payee': u'payee', \
-u'amount': Decimal('-1000.00'), u'split_account_type': None, u'check_num': \
-None, u'type': u'debit'}
+u'amount': Decimal('-1000.00'), u'check_num': None, u'type': u'debit'}
         """
         data = super(QIF, self).transaction_data(tr)
         args = [self.account_types, self.def_type]
-        sa = data['split_account']
-        sa_type = utils.get_account_type(sa, *args) if sa else None
         memo = data.get('memo')
         _class = data.get('class')
 
@@ -97,7 +94,6 @@ None, u'type': u'debit'}
 
         new_data = {
             'account_type': utils.get_account_type(data['account'], *args),
-            'split_account_type': sa_type,
             'split_memo': split_memo}
 
         data.update(new_data)

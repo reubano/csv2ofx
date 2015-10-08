@@ -38,14 +38,14 @@ class OFX(Content):
             end (date): Date from which to exclude transactions.
 
         Examples:
-            >>> from mappings.mint import mapping
+            >>> from csv2ofx.mappings.mint import mapping
             >>> OFX(mapping)  #doctest: +ELLIPSIS
             <csv2ofx.ofx.OFX object at 0x...>
         """
         # TODO: Add timezone info
         super(OFX, self).__init__(mapping, **kwargs)
         self.resp_type = 'INTRATRNRS' if self.split_account else 'STMTTRNRS'
-        self.def_type = kwargs.get('def_type', 'CHECKING')
+        self.def_type = kwargs.get('def_type')
         self.prev_group = None
         self.account_types = {
             'CHECKING': ('checking', 'income', 'receivable', 'payable'),
@@ -108,12 +108,12 @@ class OFX(Content):
             (dict): the OFX transaction data
 
         Examples:
-            >>> from mappings.mint import mapping
+            >>> from csv2ofx.mappings.mint import mapping
             >>> tr = {'Transaction Type': 'debit', 'Amount': 1000.00, \
 'Date': '06/12/10', 'Description': 'payee', 'Original Description': \
 'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': \
 'account'}
-            >>> OFX(mapping).transaction_data(tr)
+            >>> OFX(mapping, def_type='CHECKING').transaction_data(tr)
             {u'account_type': u'CHECKING', u'account_id': \
 'e268443e43d93dab7ebef303bbe9642f', u'memo': u'description notes', \
 u'split_account_id': None, u'currency': u'USD', u'date': \
@@ -404,46 +404,35 @@ CHECKING</ACCTTYPE></BANKACCTTO>'
         content += "\t\t</%s>\n\t</BANKMSGSRSV1>\n</OFX>\n" % self.resp_type
         return content
 
-    def splitless_body(self, trxn_data, group, is_main=False):
-        body = ''
-
-        if self.prev_group and self.prev_group != group:
-            body += self.account_end(**trxn_data)
-
-        if is_main:
-            body += self.account_start(**trxn_data)
-
-        body += self.transaction(**trxn_data)
-        return body
-
-    def split_like_body(self, trxn_data, group, is_main=False):
-        body = ''
-        new_group = self.prev_group and self.prev_group != group
-
-        if new_group and self.is_split:
-            body += self.transfer_end(**trxn_data)
-
-        if (self.is_split and is_main) or self.split_account:
-            body += self.transfer(**trxn_data)
-
-        if (self.is_split and not is_main) or self.split_account:
-            body += self.split_content(**trxn_data)
-
-        if self.split_account:
-            body += self.transfer_end(**trxn_data)
-
-        return body
-
     def gen_body(self, gd):
         group = gd['group']
-        trxn_data = self.transaction_data(gd['trxn'])
 
         if self.is_split and gd['len'] > 2:
             # OFX doesn't support more than 2 splits
             raise TypeError('Group %s has too many splits.\n' % group)
-        elif self.is_split or self.split_account:
-            yield self.split_like_body(trxn_data, group, gd['is_main'])
+
+        trxn_data = self.transaction_data(gd['trxn'])
+        split_like = self.is_split or self.split_account
+        full_split = self.is_split and self.split_account
+        new_group = self.prev_group and self.prev_group != group
+
+        if new_group and full_split:
+            yield self.transfer_end(**trxn_data)
+        elif new_group and not split_like:
+            yield self.account_end(**trxn_data)
+
+        if self.split_account:
+            yield self.transfer(**trxn_data)
+            yield self.split_content(**trxn_data)
+            yield self.transfer_end(**trxn_data)
+        elif self.is_split and gd['is_main']:
+            yield self.transfer(**trxn_data)
+        elif self.is_split:
+            yield self.split_content(**trxn_data)
+        elif gd['is_main']:
+            yield self.account_start(**trxn_data)
+            yield self.transaction(**trxn_data)
         else:
-            yield self.splitless_body(trxn_data, group, gd['is_main'])
+            yield self.transaction(**trxn_data)
 
         self.prev_group = group

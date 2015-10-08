@@ -1,10 +1,15 @@
 from operator import itemgetter
 
+
+def note_func(tr):
+    notes = [tr.get('desc1'), tr.get('desc1'), tr.get('desc1')]
+    return ' / '.join(filter(None, notes))
+
 mapping = {
     'has_header': True,
     'is_split': True,
     'bank': lambda tr: tr['Account Name'].split(' - ')[0],
-    'notes': lambda tr: ' / '.join(filter(None, [desc1, desc2, desc3])),
+    'notes': note_func,
     'account': lambda tr: tr['Account Name'].split(' - ')[1:],
     'date': itemgetter('Date'),
     'type': itemgetter('Transaction Type'),

@@ -31,9 +31,13 @@ def main():
         (3, 'default.csv', 'default_w_splits.qif', 'oqS Category'),
         (4, 'xero.csv', 'xero.qif', 'oqc Description -m xero'),
         (5, 'mint.csv', 'mint.qif', 'oqS Category -m mint'),
-        (6, 'default.csv', 'default.ofx', "oe '20150908'"),
-        (7, 'default.csv', 'default_w_splits.ofx', 'oS Category'),
-        (8, 'mint.csv', 'mint.ofx', 'oS Category -m mint'),
+        (
+            6, 'mint.csv', 'mint_alt.qif',
+            'oqs20150613 -e20150614 -S Category -m mint'
+        ),
+        (7, 'default.csv', 'default.ofx', 'oe 20150908'),
+        (8, 'default.csv', 'default_w_splits.ofx', 'oS Category'),
+        (9, 'mint.csv', 'mint.ofx', 'oS Category -m mint'),
     ]
 
     try:
