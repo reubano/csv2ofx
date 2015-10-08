@@ -21,11 +21,10 @@ from __future__ import (
     absolute_import, division, print_function, with_statement,
     unicode_literals)
 
-import sys
 import itertools as it
 
 from operator import itemgetter
-from tabutils.fntools import afterish
+from tabutils.fntools import get_separators
 from tabutils.convert import to_decimal
 
 
@@ -60,26 +59,9 @@ def get_account_type(account, account_types, def_type='n/a'):
     return _type
 
 
-def convert_amount(raw):
-    try:
-        after_comma = afterish(raw, exclude='.')
-        after_decimal = afterish(raw, '.', ',')
-    except AttributeError:
-        # We don't have a string
-        after_comma = 0
-        after_decimal = 0
-
-    if after_comma in {-1, 0, 3} and after_decimal in {-1, 0, 1, 2}:
-        amount = to_decimal(raw)
-    elif after_comma in {-1, 0, 1, 2} and after_decimal in {-1, 0, 3}:
-        kwargs = {'thousand_sep': '.', 'decimal_sep': ','}
-        amount = to_decimal(raw, **kwargs)
-    else:
-        print('after_comma', after_comma)
-        print('after_decimal', after_decimal)
-        raise TypeError('Invalid number format for `%s`.' % raw)
-
-    return amount
+def convert_amount(content):
+    kwargs = get_separators(content)
+    return to_decimal(content, **kwargs)
 
 
 def get_max_split(splits, keyfunc):
