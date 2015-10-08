@@ -35,8 +35,9 @@ from datetime import datetime as dt
 from dateutil.parser import parse
 from argparse import RawTextHelpFormatter, ArgumentParser
 
-from tabutils.io import read_csv
-from tabutils.process import xmlize, chunk
+from tabutils.io import read_csv, IterStringIO, write
+from tabutils.fntools import xmlize, chunk
+from tabutils.process import merge
 
 from . import utils
 from .ofx import OFX
@@ -121,7 +122,7 @@ def gen_trxns(groups, cont, collapse=False):
             groupby = itemgetter(collapse)
             byaccount = utils.group_transactions(transactions, groupby)
             op = lambda values: sum(map(utils.convert_amount, values))
-            merger = partial(utils.merge_dicts, cont.amount, op)
+            merger = partial(merge, predicate=cont.amount, op=op)
             trxns = [merger(dicts) for _, dicts in byaccount]
         else:
             trxns = transactions
@@ -193,9 +194,8 @@ def run():
         mtime = time.time()
 
     csv_content = read_csv(args.source, has_header=cont.has_header)
-    csv_content.next()  # remove csv header
     server_date = dt.fromtimestamp(mtime)
-    content = utils.IterStringIO()
+    content = IterStringIO()
     content.write(cont.header(date=server_date, language=args.language))
     chunks = chunk(csv_content, args.chunksize)
     groups = it.chain.from_iterable(gen_groups(chunks, cont, args.qif))
@@ -206,11 +206,8 @@ def run():
     content.write(cont.footer(date=server_date))
 
     try:
-        kwargs = {
-            'overwrite': args.overwrite,
-            'chunksize': args.chunksize
-        }
-        utils.write_file(args.dest, content, **kwargs)
+        kwargs = {'overwrite': args.overwrite, 'chunksize': args.chunksize}
+        write(args.dest, content, **kwargs)
     except TypeError as e:
         msg = str(e)
 
