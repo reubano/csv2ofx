@@ -38,7 +38,7 @@ class QIF(Content):
             end (date): Date from which to exclude transactions.
 
         Examples:
-            >>> from mappings.mint import mapping
+            >>> from csv2ofx.mappings.mint import mapping
             >>> QIF(mapping)  #doctest: +ELLIPSIS
             <csv2ofx.qif.QIF object at 0x...>
         """
@@ -67,7 +67,7 @@ class QIF(Content):
             (dict): the QIF transaction data
 
         Examples:
-            >>> from mappings.mint import mapping
+            >>> from csv2ofx.mappings.mint import mapping
             >>> tr = {'Transaction Type': 'debit', 'Amount': 1000.00, \
 'Date': '06/12/10', 'Description': 'payee', 'Original Description': \
 'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': \

@@ -38,7 +38,7 @@ class OFX(Content):
             end (date): Date from which to exclude transactions.
 
         Examples:
-            >>> from mappings.mint import mapping
+            >>> from csv2ofx.mappings.mint import mapping
             >>> OFX(mapping)  #doctest: +ELLIPSIS
             <csv2ofx.ofx.OFX object at 0x...>
         """
@@ -108,7 +108,7 @@ class OFX(Content):
             (dict): the OFX transaction data
 
         Examples:
-            >>> from mappings.mint import mapping
+            >>> from csv2ofx.mappings.mint import mapping
             >>> tr = {'Transaction Type': 'debit', 'Amount': 1000.00, \
 'Date': '06/12/10', 'Description': 'payee', 'Original Description': \
 'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': \

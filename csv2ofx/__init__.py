@@ -54,7 +54,7 @@ class Content(object):
             end (date): Date from which to exclude transactions.
 
         Examples:
-            >>> from mappings.mint import mapping
+            >>> from csv2ofx.mappings.mint import mapping
             >>> Content(mapping)  #doctest: +ELLIPSIS
             <csv2ofx.Content object at 0x...>
         """
@@ -88,7 +88,7 @@ class Content(object):
                 transaction, or the value of the attribute.
 
         Examples:
-            >>> from mappings.mint import mapping
+            >>> from csv2ofx.mappings.mint import mapping
             >>> tr = {'Transaction Type': 'debit', 'Amount': 1000.00}
             >>> start = dt(2015, 1, 1)
             >>> Content(mapping, start=start).get('start')  # normal attribute
@@ -126,7 +126,7 @@ class Content(object):
             (bool): Whether or not to skip the transaction.
 
         Examples:
-            >>> from mappings.mint import mapping
+            >>> from csv2ofx.mappings.mint import mapping
             >>> tr = {'Date': '06/12/10', 'Amount': 1000.00}
             >>> Content(mapping, start=dt(2010, 1, 1)).skip_transaction(tr)
             False
@@ -145,7 +145,7 @@ class Content(object):
             (decimal): The converted amount.
 
         Examples:
-            >>> from mappings.mint import mapping
+            >>> from csv2ofx.mappings.mint import mapping
             >>> tr = {'Date': '06/12/10', 'Amount': '$1,000'}
             >>> Content(mapping, start=dt(2010, 1, 1)).convert_amount(tr)
             Decimal('1000.00')
@@ -162,7 +162,7 @@ class Content(object):
             (dict): the QIF content
 
         Examples:
-            >>> from mappings.mint import mapping
+            >>> from csv2ofx.mappings.mint import mapping
             >>> tr = {'Transaction Type': 'debit', 'Amount': 1000.00, \
 'Date': '06/12/10', 'Description': 'payee', 'Original Description': \
 'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': \

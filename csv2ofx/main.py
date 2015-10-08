@@ -50,7 +50,7 @@ parser = ArgumentParser(
 
 _types = ['CHECKING', 'SAVINGS', 'MONEYMRKT', 'CREDITLINE', 'Bank', 'Cash']
 # print(getmembers('csv2ofx'))
-_mappings = [n for n, v in getmembers('mappings', ismodule)]
+_mappings = [n for n, v in getmembers('csv2ofx.mappings', ismodule)]
 _basedir = p.dirname(__file__)
 
 
@@ -176,7 +176,7 @@ def run():
         print('v%s' % version)
         exit(0)
 
-    mapping = import_module('mappings.%s' % args.mapping).mapping
+    mapping = import_module('csv2ofx.mappings.%s' % args.mapping).mapping
 
     okwargs = {
         'def_type': args.account_type or 'Bank' if args.qif else 'CHECKING',
