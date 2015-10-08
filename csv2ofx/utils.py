@@ -28,10 +28,6 @@ from tabutils.fntools import get_separators
 from tabutils.convert import to_decimal
 
 
-def filter_join(items, char=''):
-    return char.join(filter(None, items))
-
-
 def get_account_type(account, account_types, def_type='n/a'):
     """ Detects the account type of a given account
 

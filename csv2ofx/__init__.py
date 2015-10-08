@@ -193,14 +193,9 @@ Decimal('-1000.00'), u'check_num': None, u'type': u'debit'}
         payee = self.get('payee', tr)
         desc = self.get('desc', tr)
         notes = self.get('notes', tr)
-
-        if desc and notes:
-            memo = '%s %s' % (desc, notes)
-        else:
-            memo = desc or notes
-
+        memo = '%s %s' % (desc, notes) if desc and notes else desc or notes
         check_num = self.get('check_num', tr)
-        details = utils.filter_join([date, raw_amount, payee, memo])
+        details = ''.join(filter(None, [date, raw_amount, payee, memo]))
 
         return {
             'date': parse(date),
