@@ -5,7 +5,7 @@ import sys
 import re
 import csv2ofx
 
-from os import system, path as p
+from os import path as p
 
 try:
     from setuptools import setup, find_packages
@@ -32,7 +32,9 @@ def parse_requirements(filename, parent=None, dep=False):
         candidate = line.strip()
 
         if candidate.startswith('-r'):
-            for item in parse_requirements(candidate[2:].strip(), filepath, dep):
+            args = [candidate[2:].strip(), filepath, dep]
+
+            for item in parse_requirements(*args):
                 yield item
         elif not dep and '#egg=' in candidate:
             yield re.sub('.*#egg=(.*)-(.*)', r'\1==\2', candidate)
@@ -47,10 +49,15 @@ sys.dont_write_bytecode = True
 requirements = list(parse_requirements('requirements.txt'))
 dev_requirements = list(parse_requirements('dev-requirements.txt'))
 dependencies = list(parse_requirements('requirements.txt', dep=True))
-readme = read('README.rst')
+readme = read('README.md')
 changes = read('CHANGES.rst').replace('.. :changelog:', '')
 license = csv2ofx.__license__
-classifier = {'GPL': 'GNU General Public', 'MIT': 'The MIT', 'BSD': 'The BSD'}
+
+classifier = {
+    'GPL': 'GNU General Public License (GPL)',
+    'MIT': 'MIT License',
+    'BSD': 'BSD License'
+}
 
 setup(
     name=csv2ofx.__title__,
@@ -70,7 +77,7 @@ setup(
     keywords=csv2ofx.__title__,
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',
-        'License :: OSI Approved :: %s License (%s)' % (classifier[license], license),
+        'License :: OSI Approved :: %s' % classifier[license],
         'Natural Language :: English',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
