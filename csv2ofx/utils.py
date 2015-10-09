@@ -124,3 +124,16 @@ u'amount': u'1,000.00', u'account': u'account1'}])
 
     for account, group in it.groupby(sorted_transactions, keyfunc):
         yield (account, list(group))
+
+
+def gen_base_data(groups):
+    for group, main_pos, sorted_trxns in groups:
+        for pos, trxn in sorted_trxns:
+            base_data = {
+                'trxn': trxn,
+                'is_main': pos == main_pos,
+                'len': len(sorted_trxns),
+                'group': group
+            }
+
+            yield base_data

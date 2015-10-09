@@ -25,7 +25,6 @@ import sys
 import argparse
 import itertools as it
 
-from functools import partial
 from operator import itemgetter
 from inspect import ismodule, getmembers
 from pprint import pprint
@@ -36,8 +35,7 @@ from dateutil.parser import parse
 from argparse import RawTextHelpFormatter, ArgumentParser
 
 from tabutils.io import read_csv, IterStringIO, write
-from tabutils.fntools import xmlize, chunk
-from tabutils.process import merge
+from tabutils.fntools import xmlize
 
 from . import utils
 from .ofx import OFX
@@ -103,70 +101,6 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-def gen_groups(chunks, cont, qif):
-    for chnk in chunks:
-        if qif:
-            cleansed = chnk
-        else:
-            cleansed = [
-                {k: xmlize([v]).next() for k, v in c.items()} for c in chnk]
-
-        keyfunc = cont.id if cont.is_split else cont.account
-        yield utils.group_transactions(cleansed, keyfunc)
-
-
-def gen_trxns(groups, cont, collapse=False):
-    for group, transactions in groups:
-        if cont.is_split and collapse:
-            # group transactions by `collapse` field and sum the amounts
-            groupby = itemgetter(collapse)
-            byaccount = utils.group_transactions(transactions, groupby)
-            op = lambda values: sum(map(utils.convert_amount, values))
-            merger = partial(merge, predicate=cont.amount, op=op)
-            trxns = [merger(dicts) for _, dicts in byaccount]
-        else:
-            trxns = transactions
-
-        yield (group, trxns)
-
-
-def gen_main_trxns(groups, cont):
-    for group, trxns in groups:
-        _args = [trxns, cont.convert_amount]
-
-        # if it's split, transactions skipping is all or none
-        if cont.is_split and cont.skip_transaction(trxns[0]):
-            continue
-        elif cont.is_split and not utils.verify_splits(*_args):
-            raise Exception('Splits do not sum to zero.')
-        elif not cont.is_split:
-            filtered_trxns = it.ifilterfalse(cont.skip_transaction, trxns)
-        else:
-            filtered_trxns = trxns
-
-        if cont.is_split:
-            main_pos = utils.get_max_split(*_args)[0]
-        else:
-            main_pos = 0
-
-        keyfunc = lambda enum: enum[0] != main_pos
-        sorted_trxns = sorted(enumerate(filtered_trxns), key=keyfunc)
-        yield (group, main_pos, sorted_trxns)
-
-
-def gen_base_data(groups):
-    for group, main_pos, sorted_trxns in groups:
-        for pos, trxn in sorted_trxns:
-            base_data = {
-                'trxn': trxn,
-                'is_main': pos == main_pos,
-                'len': len(sorted_trxns),
-                'group': group
-            }
-
-            yield base_data
-
-
 def run():
     if args.debug:
         pprint(dict(args._get_kwargs()))
@@ -187,27 +121,26 @@ def run():
     }
 
     cont = QIF(mapping, **okwargs) if args.qif else OFX(mapping, **okwargs)
+    records = read_csv(args.source, has_header=cont.has_header)
+    groups = cont.gen_groups(records, args.chunksize)
+    trxns = cont.gen_trxns(groups, args.collapse)
+    main_trxns = cont.gen_main_trxns(trxns)
+    data = utils.gen_base_data(main_trxns)
+    body = cont.gen_body(data)
 
     try:
         mtime = p.getmtime(args.source.name)
     except AttributeError:
         mtime = time.time()
 
-    csv_content = read_csv(args.source, has_header=cont.has_header)
     server_date = dt.fromtimestamp(mtime)
-    content = IterStringIO()
-    content.write(cont.header(date=server_date, language=args.language))
-    chunks = chunk(csv_content, args.chunksize)
-    groups = it.chain.from_iterable(gen_groups(chunks, cont, args.qif))
-    grouped_trxns = gen_trxns(groups, cont, args.collapse)
-    main_gtrxns = gen_main_trxns(grouped_trxns, cont)
-    grouped_data = gen_base_data(main_gtrxns)
-    [content.write(cont.gen_body(gd)) for gd in grouped_data]
-    content.write(cont.footer(date=server_date))
+    header = cont.header(date=server_date, language=args.language)
+    footer = cont.footer(date=server_date)
+    content = it.chain([header, body, footer])
+    kwargs = {'overwrite': args.overwrite, 'chunksize': args.chunksize}
 
     try:
-        kwargs = {'overwrite': args.overwrite, 'chunksize': args.chunksize}
-        write(args.dest, content, **kwargs)
+        write(args.dest, IterStringIO(content), **kwargs)
     except TypeError as e:
         msg = str(e)
 

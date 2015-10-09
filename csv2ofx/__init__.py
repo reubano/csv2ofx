@@ -22,10 +22,15 @@ from __future__ import (
     unicode_literals)
 
 import hashlib
+import itertools as it
 
+from functools import partial
 from datetime import datetime as dt
 from operator import itemgetter
+
+from tabutils.process import merge
 from dateutil.parser import parse
+
 from . import utils
 
 __title__ = 'csv2ofx'
@@ -214,3 +219,40 @@ Decimal('-1000.00'), u'check_num': None, u'type': u'debit'}
             'check_num': check_num,
             'type': _type,
         }
+
+    def gen_trxns(self, groups, collapse=False):
+        for group, transactions in groups:
+            if self.is_split and collapse:
+                # group transactions by `collapse` field and sum the amounts
+                groupby = itemgetter(collapse)
+                byaccount = utils.group_transactions(transactions, groupby)
+                op = lambda values: sum(map(utils.convert_amount, values))
+                merger = partial(merge, predicate=self.amount, op=op)
+                trxns = [merger(dicts) for _, dicts in byaccount]
+            else:
+                trxns = transactions
+
+            yield (group, trxns)
+
+    def gen_main_trxns(self, groups):
+        for group, trxns in groups:
+            _args = [trxns, self.convert_amount]
+
+            # if it's split, transactions skipping is all or none
+            if self.is_split and self.skip_transaction(trxns[0]):
+                continue
+            elif self.is_split and not utils.verify_splits(*_args):
+                raise Exception('Splits do not sum to zero.')
+            elif not self.is_split:
+                filtered_trxns = it.ifilterfalse(self.skip_transaction, trxns)
+            else:
+                filtered_trxns = trxns
+
+            if self.is_split:
+                main_pos = utils.get_max_split(*_args)[0]
+            else:
+                main_pos = 0
+
+            keyfunc = lambda enum: enum[0] != main_pos
+            sorted_trxns = sorted(enumerate(filtered_trxns), key=keyfunc)
+            yield (group, main_pos, sorted_trxns)
