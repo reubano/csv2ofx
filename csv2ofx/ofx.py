@@ -20,8 +20,6 @@ from __future__ import (
     absolute_import, division, print_function, with_statement,
     unicode_literals)
 
-import itertools as it
-
 from datetime import datetime as dt
 from tabutils.fntools import chunk, xmlize
 

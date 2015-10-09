@@ -25,7 +25,6 @@ import sys
 import argparse
 import itertools as it
 
-from operator import itemgetter
 from inspect import ismodule, getmembers
 from pprint import pprint
 from importlib import import_module
@@ -35,7 +34,6 @@ from dateutil.parser import parse
 from argparse import RawTextHelpFormatter, ArgumentParser
 
 from tabutils.io import read_csv, IterStringIO, write
-from tabutils.fntools import xmlize
 
 from . import utils
 from .ofx import OFX
