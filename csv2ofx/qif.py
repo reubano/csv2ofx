@@ -20,8 +20,6 @@ from __future__ import (
     absolute_import, division, print_function, with_statement,
     unicode_literals)
 
-import itertools as it
-
 from datetime import datetime as dt
 from tabutils.fntools import chunk
 
@@ -261,5 +259,3 @@ u'amount': Decimal('-1000.00'), u'check_num': None, u'type': u'debit'}
 
             for group in utils.group_transactions(chnk, keyfunc):
                 yield group
-
-
