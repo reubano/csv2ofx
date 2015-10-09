@@ -62,7 +62,7 @@ class OFX(Content):
         """ Gets OFX format transaction content
 
         Kwargs:
-            date (date): The datetime.
+            date (datetime): The datetime (default: `datetime.now()`).
             language (str:) The ISO formatted language (defaul: ENG).
 
         Returns:
@@ -78,7 +78,9 @@ class OFX(Content):
 </STATUS>'
         """
         kwargs.setdefault('language', 'ENG')
-        time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
+
+        # yyyymmddhhmmss
+        time_stamp = kwargs.get('date', dt.now()).strftime('%Y%m%d%H%M%S')
 
         content = 'DATA:OFXSGML\n'
         content += 'ENCODING:UTF-8\n'
@@ -390,6 +392,9 @@ CHECKING</ACCTTYPE></BANKACCTTO>'
     def footer(self, **kwargs):
         """ Gets OFX transfer end
 
+        Kwargs:
+            date (datetime): The datetime (default: `datetime.now()`).
+
         Returns:
             (str): the OFX content
 
@@ -398,8 +403,10 @@ CHECKING</ACCTTYPE></BANKACCTTO>'
 '\\t', '')
             u'</BANKTRANLIST></STMTRS></STMTTRNRS></BANKMSGSRSV1></OFX>'
         """
+        kwargs.setdefault('date', dt.now())
+
         if self.is_split:
-            content = self.transfer_end(date=kwargs['date'])
+            content = self.transfer_end(**kwargs)
         elif not self.split_account:
             content = self.account_end(**kwargs)
         else:
