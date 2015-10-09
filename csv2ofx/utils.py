@@ -126,7 +126,7 @@ u'amount': u'1,000.00', u'account': u'account1'}])
         yield (account, list(group))
 
 
-def gen_base_data(groups):
+def gen_data(groups):
     for group, main_pos, sorted_trxns in groups:
         for pos, trxn in sorted_trxns:
             base_data = {

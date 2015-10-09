@@ -124,8 +124,8 @@ def run():
     records = read_csv(args.source, has_header=cont.has_header)
     groups = cont.gen_groups(records, args.chunksize)
     trxns = cont.gen_trxns(groups, args.collapse)
-    main_trxns = cont.gen_main_trxns(trxns)
-    data = utils.gen_base_data(main_trxns)
+    cleaned_trxns = cont.clean_trxns(trxns)
+    data = utils.gen_data(cleaned_trxns)
     body = cont.gen_body(data)
 
     try:

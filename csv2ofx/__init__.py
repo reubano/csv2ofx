@@ -234,7 +234,7 @@ Decimal('-1000.00'), u'check_num': None, u'type': u'debit'}
 
             yield (group, trxns)
 
-    def gen_main_trxns(self, groups):
+    def clean_trxns(self, groups):
         for group, trxns in groups:
             _args = [trxns, self.convert_amount]
 
