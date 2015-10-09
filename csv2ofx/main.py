@@ -73,11 +73,11 @@ parser.add_argument(
     '-m', '--mapping', help="the account mapping",
     default='default')
 parser.add_argument(
-    '-c', '--collapse', metavar='FIELD NAME', help=(
+    '-c', '--collapse', metavar='FIELD_NAME', help=(
         'field used to combine transactions within a split for double entry '
         'statements'))
 parser.add_argument(
-    '-S', '--split', metavar='FIELD NAME', help=(
+    '-S', '--split', metavar='FIELD_NAME', help=(
         'field used for the split account for single entry statements'))
 parser.add_argument(
     '-C', '--chunksize', metavar='ROWS', default=10 ** 6,
