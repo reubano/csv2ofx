@@ -2,7 +2,7 @@
 
 ## INTRODUCTION
 
-[csv2ofx](http://github.com/reubano/csv2ofx) is a [Python library](#library_example) and [command line interface program](#cli_examples) that converts CSV files to OFX and QIF files for importing into GnuCash or similar financial accounting programs. csv2ofx has built in support for importing csv files from mint, yoodle, and xero. csv2ofx has been tested on the following configuration:
+[csv2ofx](http://github.com/reubano/csv2ofx) is a [Python library](#library-examples) and [command line interface program](#cli-examples) that converts CSV files to OFX and QIF files for importing into GnuCash or similar financial accounting programs. csv2ofx has built in support for importing csv files from mint, yoodlee, and xero. csv2ofx has been tested on the following configuration:
 
 * MacOS X 10.9.5
 * Python 2.7.10
@@ -23,7 +23,7 @@ csv2ofx requires the following programs in order to run properly:
 
 csv2ofx is intended to be used either directly from Python or from the command line.
 
-### Library Example
+### Library Examples
 
 *normal OFX usage*
 
@@ -132,9 +132,9 @@ optional arguments:
 
 	csv2ofx -s '-1 year' -e yesterday -q file.csv
 
-*use yoodle settings*
+*use yoodlee settings*
 
-	csv2ofx -m yoodle file.csv
+	csv2ofx -m yoodlee file.csv
 
 ## CUSTOMIZATION
 
@@ -198,7 +198,6 @@ attribute | description | default field | default value | example
 `type`|transaction account type|n/a|checking|savings
 `balance`|account balance|n/a|n/a|$23.00
 `class`|transaction class|n/a|n/a|travel
-
 
 ## Scripts
 
