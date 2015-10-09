@@ -20,7 +20,11 @@ from __future__ import (
     absolute_import, division, print_function, with_statement,
     unicode_literals)
 
+import itertools as it
+
 from datetime import datetime as dt
+from tabutils.fntools import chunk
+
 from . import Content, utils
 
 
@@ -227,25 +231,35 @@ u'amount': Decimal('-1000.00'), u'check_num': None, u'type': u'debit'}
         if self.is_split:
             return self.transaction_end()
 
-    def gen_body(self, gd):
-        trxn_data = self.transaction_data(gd['trxn'])
-        account = self.account(gd['trxn'])
-        group = gd['group']
+    def gen_body(self, data):
+        for gd in data:
+            trxn_data = self.transaction_data(gd['trxn'])
+            account = self.account(gd['trxn'])
+            group = gd['group']
 
-        if self.prev_group and self.prev_group != group and self.is_split:
-            yield self.transaction_end()
+            if self.prev_group and self.prev_group != group and self.is_split:
+                yield self.transaction_end()
 
-        if gd['is_main'] and self.prev_account != account:
-            yield self.account_start(**trxn_data)
+            if gd['is_main'] and self.prev_account != account:
+                yield self.account_start(**trxn_data)
 
-        if (self.is_split and gd['is_main']) or not self.is_split:
-            yield self.transaction(**trxn_data)
-            self.prev_account = account
+            if (self.is_split and gd['is_main']) or not self.is_split:
+                yield self.transaction(**trxn_data)
+                self.prev_account = account
 
-        if (self.is_split and not gd['is_main']) or self.split_account:
-            yield self.split_content(**trxn_data)
+            if (self.is_split and not gd['is_main']) or self.split_account:
+                yield self.split_content(**trxn_data)
 
-        if not self.is_split:
-            yield self.transaction_end()
+            if not self.is_split:
+                yield self.transaction_end()
 
-        self.prev_group = group
+            self.prev_group = group
+
+    def gen_groups(self, records, chunksize=None):
+        for chnk in chunk(records, chunksize):
+            keyfunc = self.id if self.is_split else self.account
+
+            for group in utils.group_transactions(chnk, keyfunc):
+                yield group
+
+

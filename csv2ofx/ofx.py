@@ -20,7 +20,11 @@ from __future__ import (
     absolute_import, division, print_function, with_statement,
     unicode_literals)
 
+import itertools as it
+
 from datetime import datetime as dt
+from tabutils.fntools import chunk, xmlize
+
 from . import Content, utils
 
 
@@ -58,7 +62,7 @@ class OFX(Content):
         """ Gets OFX format transaction content
 
         Kwargs:
-            date (date): The datetime.
+            date (datetime): The datetime (default: `datetime.now()`).
             language (str:) The ISO formatted language (defaul: ENG).
 
         Returns:
@@ -74,7 +78,9 @@ class OFX(Content):
 </STATUS>'
         """
         kwargs.setdefault('language', 'ENG')
-        time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
+
+        # yyyymmddhhmmss
+        time_stamp = kwargs.get('date', dt.now()).strftime('%Y%m%d%H%M%S')
 
         content = 'DATA:OFXSGML\n'
         content += 'ENCODING:UTF-8\n'
@@ -386,6 +392,9 @@ CHECKING</ACCTTYPE></BANKACCTTO>'
     def footer(self, **kwargs):
         """ Gets OFX transfer end
 
+        Kwargs:
+            date (datetime): The datetime (default: `datetime.now()`).
+
         Returns:
             (str): the OFX content
 
@@ -394,8 +403,10 @@ CHECKING</ACCTTYPE></BANKACCTTO>'
 '\\t', '')
             u'</BANKTRANLIST></STMTRS></STMTTRNRS></BANKMSGSRSV1></OFX>'
         """
+        kwargs.setdefault('date', dt.now())
+
         if self.is_split:
-            content = self.transfer_end(date=kwargs['date'])
+            content = self.transfer_end(**kwargs)
         elif not self.split_account:
             content = self.account_end(**kwargs)
         else:
@@ -404,35 +415,45 @@ CHECKING</ACCTTYPE></BANKACCTTO>'
         content += "\t\t</%s>\n\t</BANKMSGSRSV1>\n</OFX>\n" % self.resp_type
         return content
 
-    def gen_body(self, gd):
-        group = gd['group']
+    def gen_body(self, data):
+        for gd in data:
+            group = gd['group']
 
-        if self.is_split and gd['len'] > 2:
-            # OFX doesn't support more than 2 splits
-            raise TypeError('Group %s has too many splits.\n' % group)
+            if self.is_split and gd['len'] > 2:
+                # OFX doesn't support more than 2 splits
+                raise TypeError('Group %s has too many splits.\n' % group)
 
-        trxn_data = self.transaction_data(gd['trxn'])
-        split_like = self.is_split or self.split_account
-        full_split = self.is_split and self.split_account
-        new_group = self.prev_group and self.prev_group != group
+            trxn_data = self.transaction_data(gd['trxn'])
+            split_like = self.is_split or self.split_account
+            full_split = self.is_split and self.split_account
+            new_group = self.prev_group and self.prev_group != group
 
-        if new_group and full_split:
-            yield self.transfer_end(**trxn_data)
-        elif new_group and not split_like:
-            yield self.account_end(**trxn_data)
+            if new_group and full_split:
+                yield self.transfer_end(**trxn_data)
+            elif new_group and not split_like:
+                yield self.account_end(**trxn_data)
 
-        if self.split_account:
-            yield self.transfer(**trxn_data)
-            yield self.split_content(**trxn_data)
-            yield self.transfer_end(**trxn_data)
-        elif self.is_split and gd['is_main']:
-            yield self.transfer(**trxn_data)
-        elif self.is_split:
-            yield self.split_content(**trxn_data)
-        elif gd['is_main']:
-            yield self.account_start(**trxn_data)
-            yield self.transaction(**trxn_data)
-        else:
-            yield self.transaction(**trxn_data)
+            if self.split_account:
+                yield self.transfer(**trxn_data)
+                yield self.split_content(**trxn_data)
+                yield self.transfer_end(**trxn_data)
+            elif self.is_split and gd['is_main']:
+                yield self.transfer(**trxn_data)
+            elif self.is_split:
+                yield self.split_content(**trxn_data)
+            elif gd['is_main']:
+                yield self.account_start(**trxn_data)
+                yield self.transaction(**trxn_data)
+            else:
+                yield self.transaction(**trxn_data)
 
-        self.prev_group = group
+            self.prev_group = group
+
+    def gen_groups(self, records, chunksize=None):
+        for chnk in chunk(records, chunksize):
+            cleansed = [
+                {k: xmlize([v]).next() for k, v in c.items()} for c in chnk]
+            keyfunc = self.id if self.is_split else self.account
+
+            for group in utils.group_transactions(cleansed, keyfunc):
+                yield group

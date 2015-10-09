@@ -2,151 +2,251 @@
 
 ## INTRODUCTION
 
-[csv2ofx](http://github.com/reubano/csv2ofx) is a command line program that converts CSV files to OFX and QIF files for importing into GnuCash or similar financial accounting programs. csv2ofx has built in support for importing csv files from mint, yoodle, and xero. csv2ofx was ported from [mulicheng/csv2ofx](http://github.com/mulicheng/csv2ofx) and has been tested on the following configuration:
+[csv2ofx](http://github.com/reubano/csv2ofx) is a [Python library](#library_example) and [command line interface program](#cli_examples) that converts CSV files to OFX and QIF files for importing into GnuCash or similar financial accounting programs. csv2ofx has built in support for importing csv files from mint, yoodle, and xero. csv2ofx has been tested on the following configuration:
 
-* MacOS X 10.7.4
-* PHP 5.3.15
-* Console_CommandLine 1.1.3
+* MacOS X 10.9.5
+* Python 2.7.10
 
-## REQUIREMENTS
+## Requirements
 
 csv2ofx requires the following programs in order to run properly:
 
-* [PHP 5.3+](http://pear.php.net/manual/en/installation.php)
-* [PEAR](http://us2.php.net/downloads.php)
+* [Python >= 2.7](http://www.python.org/download) (MacOS X comes with python preinstalled)
 
 ## INSTALLATION
 
-	sudo pear channel-discover reubano.github.com/pear
-	sudo pear install reubano/csv2ofx
+(You are using a [virtualenv](http://www.virtualenv.org/en/latest/index.html), right?)
 
-## USING csv2ofx
-### Usage
-	csv2ofx [options] <src_file> <dest_file>
+    sudo pip install csv2ofx
 
-### Examples
+## Usage
 
-_normal usage_
+csv2ofx is intended to be used either directly from Python or from the command line.
+
+### Library Example
+
+*normal OFX usage*
+
+```python
+from __future__ import absolute_import, print_function
+
+import itertools as it
+
+from tabutils.io import read_csv, IterStringIO
+from csv2ofx import utils
+from csv2ofx.ofx import OFX
+from csv2ofx.mappings.default import mapping
+
+ofx = OFX(mapping)
+records = read_csv('path/to/file.csv')
+groups = ofx.gen_groups(records)
+trxns = ofx.gen_trxns(groups)
+cleaned_trxns = ofx.clean_trxns(trxns)
+data = utils.gen_data(cleaned_trxns)
+content = it.chain([ofx.header(), ofx.gen_body(data), ofx.footer()])
+
+for line in IterStringIO(content):
+    print(line)
+```
+
+*normal QIF usage*
+
+```python
+from __future__ import absolute_import, print_function
+
+import itertools as it
+
+from tabutils.io import read_csv, IterStringIO
+from csv2ofx import utils
+from csv2ofx.qif import QIF
+from csv2ofx.mappings.default import mapping
+
+qif = QIF(mapping)
+records = read_csv('path/to/file.csv')
+groups = qif.gen_groups(records)
+trxns = qif.gen_trxns(groups)
+cleaned_trxns = qif.clean_trxns(trxns)
+data = utils.gen_data(cleaned_trxns)
+content = it.chain([qif.gen_body(data), qif.footer()])
+
+for line in IterStringIO(content):
+    print(line)
+```
+
+### CLI Examples
+
+*show help*
+
+    csv2ofx -h
+
+```bash
+usage: csv2ofx [options] <source> <dest>
+
+description: csv2ofx converts a csv file to ofx and qif
+
+positional arguments:
+  source                the source csv file (defaults to stdin)
+  dest                  the output file (defaults to stdout)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -a TYPE, --account TYPE
+                        default account type 'CHECKING' for OFX and 'Bank' for QIF.
+  -e DATE, --end DATE   end date
+  -l LANGUAGE, --language LANGUAGE
+                        the language
+  -s DATE, --start DATE
+                        the start date
+  -m MAPPING, --mapping MAPPING
+                        the account mapping
+  -c FIELD_NAME, --collapse FIELD_NAME
+                        field used to combine transactions within a split for double entry statements
+  -S FIELD_NAME, --split FIELD_NAME
+                        field used for the split account for single entry statements
+  -C ROWS, --chunksize ROWS
+                        number of rows to process at a time
+  -V, --version         show version and exit
+  -q, --qif             enables 'QIF' output instead of 'OFX'
+  -o, --overwrite       overwrite destination file if it exists
+  -d, --debug           display the options and arguments passed to the parser
+  -v, --verbose         verbose output
+```
+
+*normal usage*
 
 	csv2ofx file.csv file.ofx
 
-_print output to stdout_
+*print output to stdout*
 
-	csv2ofx ~/Downloads/transactions.csv $
+	csv2ofx ~/Downloads/transactions.csv
 
-_read input from stdin_
+*read input from stdin*
 
-	cat file.csv | csv2ofx -
+	cat file.csv | csv2ofx
 
-_qif output_
+*qif output*
 
 	csv2ofx -q file.csv
 
-_specify date range from one year ago to yesterday with qif output_
+*specify date range from one year ago to yesterday with qif output*
 
 	csv2ofx -s '-1 year' -e yesterday -q file.csv
 
-_use yoodle settings_
+*use yoodle settings*
 
 	csv2ofx -m yoodle file.csv
-
-### Options
-	  -A type, --account-type=type          account type to use if no match is
-	                                        found, defaults to 'CHECKING' for
-	                                        OFX and 'Bank' for QIF.
-	  -c account(s), --collapse=account(s)  account(s) to summarize by date if
-	                                        the transaction are recorded double
-	                                        entry stlye (e.g. full data export
-	                                        from xero.com or Quickbooks),
-	                                        defaults to 'Accounts Receivable'
-	  -C currency, --currency=currency      set currency, defaults to 'USD'
-	  -d, --debug                           enables debug mode, displays the
-	                                        options and arguments passed to the
-	                                        parser
-	  -D character, --delimiter=character   one character field delimiter,
-	                                        defaults to ','
-	  -e date, --end=date                   end date, defaults to today
-	  -l lang, --language=lang              set language, defaults to 'ENG'
-	  -o, --overwrite                       overwrite destination file if it
-	                                        exists
-	  -p name, --primary=name               primary account used to pay credit
-	                                        cards, defaults to 'MITFCU
-	                                        Checking'
-	  -q, --qif                             enables 'QIF' output instead of
-	                                        'OFX'
-	  -s date, --start=date                 start date, defaults to '1/1/1900'
-	  -m name, --mapping=name               mapping to use, defaults to 'mint'
-	  -t, --transfer                        treats ofx transactions as
-	                                        transfers from one account to
-	                                        another (sets 'category' as the
-	                                        destination account)
-	  -v, --verbose                         verbose output
-	  -V, --variables                       enables variable mode, displays the
-	                                        value of all program variables
-	  -h, --help                            show this help message and exit
-	  --version                             show the program version and exit
-
-### Arguments
-	  src_file   the source csv file or data, enter '-' to read data from
-	             standard input
-	  dest_file  (optional) the destination file, enter '$' to print to
-	             standard output, defaults to '.../csv2ofx/exports/...'
-
-### Where does csv2ofx save files?
-
-csv2ofx saves resultant qif and ofx files to the current directory.
-
-### Additional date format examples
-
-	'10 September 2000'
-	'08/10/00'
-	'-2 years 1 week'
-	'-1 month'
-	'last friday'
-	'next monday'
 
 ## CUSTOMIZATION
 
 ### Code modification
 
-If you would like to import csv files that aren't from mint or yoodle, you will have to modify the code below in the csv2ofx.php file to match your csv header fields.
+If you would like to import csv files with field names different from the default, you can modify the mapping file or create your own. New mappings must be placed in the `csv2ofx/mappings` folder. The mapping object consists of a dictionary whose keys are OFX/QIF attributes and whose values are functions which should return the corresponding value from a record (csv row). The mapping function will take in a record, e.g.,
 
-	default:
-		$this->headAccount	= 'Field';
-		$this->headAccountId= 'Field';
-		$this->headDate 	= 'Field';
-		$this->headTranType = 'Field';
-		$this->headAmount 	= 'Field';
-		$this->headDesc 	= 'Field';
-		$this->headPayee 	= 'Field';
-		$this->headNotes 	= 'Field';
-		$this->headSplitAccount = 'Field';
-		$this->headClass 	= 'Field';
-		$this->headTranId 	= 'Field';
-		$this->headCheckNum = 'Field';
-		$this->split		= FALSE;
+```python
+{'Account': 'savings 2', 'Date': '1/3/15', 'Amount': '5,000'}
+```
 
-### Required variables
+The most basic mapping function just returns a specific field or value, e.g.,
 
-variable				| description
----------------------	| -------------
-$this->headAccount		| account name
-$this->headDate			| date the transaction was posted
-$this->headAmount		| amount of transaction
-$this->split			| is each split of the transaction on its own line? (true/false)
+```python
+from operator import itemgetter
 
-### Optional variables
+mapping = {
+    'bank': 'BetterBank',
+    'account': itemgetter('account_num'),
+    'date': itemgetter('trx_date'),
+    'amount': itemgetter('trx_amount')}
+```
 
-variable				| description
----------------------	| -------------
-$this->headDesc			| transaction description
-$this->headSplitAccount	| transaction split account name
-$this->headTranType		| type of transaction (credit/debit)
-$this->headNotes		| notes/memo
-$this->headPayee		| transaction payee
-$this->headClass		| transaction classification
-$this->headTranId		| unique transaction identifier
+But more complex parsing is also possible, e.g.,
 
-## LICENSE
+```python
+mapping = {
+    'account': lambda r: r['details'].split(':')[0],
+    'date': lambda r: '%s/%s/%s' % (r['month'], r['day'], r['year']),
+    'amount': lambda r: r['amount'] * 2}
+```
 
-csv2ofx is distributed under the [MIT License](http://opensource.org/licenses/mit-license.php), the same as [Console_CommandLine](http://pear.php.net/package/Console_CommandLine/) on which this program depends.
+### Required field attributes
+
+attribute | description | default field | example
+----------|-------------|---------------------|--------
+`account`|transaction account|Account|BetterBank Checking
+`date`|transaction date|Date|5/4/10
+`amount`|transaction amount|Amount|$30.52
+
+### Optional value attributes
+
+attribute | description | default value
+----------|-------------|---------------
+`has_header`|does the csv file have a header row|True
+`is_split`|does the csv file contain split (double entry) transactions|False
+`currency`|the currency ISO code|USD
+`delimiter`|the csv field delimiter|,
+
+### Optional field attributes
+
+attribute | description | default field | default value | example
+----------|-------------|---------------|---------------|--------
+`desc`|transaction description|Reference|n/a|shell station
+`payee`|transaction payee|Description|n/a|Shell
+`notes`|transaction notes|Notes|n/a|for gas
+`check_num`|the check or transaction number|Row|n/a|2
+`id`|transaction id|`check_num`|Num|n/a|531
+`bank`|the bank name|n/a|`account`|Bank
+`account_id`|transaction account id|n/a|hash of `account`|bb_checking
+`type`|transaction account type|n/a|checking|savings
+`balance`|account balance|n/a|n/a|$23.00
+`class`|transaction class|n/a|n/a|travel
+
+
+## Scripts
+
+csv2ofx comes with a built in task manager `manage.py`.
+
+### Setup
+
+    pip install -r dev-requirements.txt
+
+### Examples
+
+*Run python linter and nose tests*
+
+```bash
+manage lint
+manage test
+```
+
+## Contributing
+
+Please mimic the coding style/conventions used in this repo. If you add new classes or functions, please add the appropriate doc blocks with examples. Also, make sure the python linter and nose tests pass.
+
+Ready to contribute? Here's how:
+
+1. Fork and clone.
+
+```bash
+git clone git@github.com:<your_username>/csv2ofx.git
+cd csv2ofx
+```
+
+2. Setup a new [virtualenv](http://www.virtualenv.org/en/latest/index.html)
+
+```bash
+mkvirtualenv --no-site-packages csv2ofx
+activate csv2ofx
+python setup.py develop
+pip install -r dev-requirements.txt
+```
+
+3. Create a branch for local development
+
+```bash
+git checkout -b name-of-your-bugfix-or-feature
+```
+
+4. Make your changes, run linter and tests, and submit a pull request through the GitHub website.
+
+## License
+
+csv2ofx is distributed under the [MIT License](http://opensource.org/licenses/MIT), the same as [tabutils](https://github.com/reubano/tabutils).
