@@ -25,9 +25,11 @@ import sys
 import argparse
 import itertools as it
 
-from inspect import ismodule, getmembers
 from pprint import pprint
 from importlib import import_module
+from pkgutil import iter_modules
+from operator import itemgetter
+
 from os import path as p
 from io import open
 from datetime import datetime as dt
@@ -48,9 +50,9 @@ parser = ArgumentParser(
     formatter_class=RawTextHelpFormatter)
 
 _types = ['CHECKING', 'SAVINGS', 'MONEYMRKT', 'CREDITLINE', 'Bank', 'Cash']
-# print(getmembers('csv2ofx'))
-_mappings = [n for n, v in getmembers('csv2ofx.mappings', ismodule)]
 _basedir = p.dirname(__file__)
+mappings = import_module('csv2ofx.mappings')
+MODULES = tuple(itemgetter(1)(m) for m in iter_modules(mappings.__path__))
 
 
 parser.add_argument(
@@ -68,8 +70,8 @@ parser.add_argument(
     '-s', '--start', metavar='DATE', help="the start date",
     default='2000-01-01')
 parser.add_argument(
-    '-m', '--mapping', help="the account mapping",
-    default='default')
+    '-m', '--mapping', metavar='MAPPING_NAME', help="the account mapping",
+    default='default', choices=MODULES)
 parser.add_argument(
     '-c', '--collapse', metavar='FIELD_NAME', help=(
         'field used to combine transactions within a split for double entry '
