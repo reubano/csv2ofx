@@ -166,8 +166,10 @@ def run():
 
     try:
         write(dest, IterStringIO(content), **kwargs)
-    except TypeError as e:
-        msg = str(e)
+    except KeyError as err:
+        msg = 'Field %s is missing from file. Check `mapping` option.' % err
+    except TypeError as err:
+        msg = str(err)
 
         if not args.collapse:
             msg += 'Try again with `-c` option.'
