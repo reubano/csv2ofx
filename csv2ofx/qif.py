@@ -69,20 +69,25 @@ class QIF(Content):
             (dict): the QIF transaction data
 
         Examples:
+            >>> import datetime
+            >>> from decimal import Decimal
             >>> from csv2ofx.mappings.mint import mapping
-            >>> tr = {'Transaction Type': 'debit', 'Amount': 1000.00, \
-'Date': '06/12/10', 'Description': 'payee', 'Original Description': \
-'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': \
-'account'}
-            >>> QIF(mapping, def_type='Bank').transaction_data(tr)
-            {u'account_type': u'Bank', u'account_id': \
-'e268443e43d93dab7ebef303bbe9642f', u'memo': u'description notes', \
-u'split_account_id': None, u'currency': u'USD', u'date': \
-datetime.datetime(2010, 6, 12, 0, 0), u'class': None, u'bank': u'account', \
-u'account': u'account', u'split_memo': u'description notes', \
-u'split_account': None, u'bank_id': 'e268443e43d93dab7ebef303bbe9642f', \
-u'id': 'ee86450a47899254e2faa82dca3c2cf2', u'payee': u'payee', \
-u'amount': Decimal('-1000.00'), u'check_num': None, u'type': u'debit'}
+            >>> tr = {
+            ...     'Transaction Type': 'debit', 'Amount': 1000.00,
+            ...     'Date': '06/12/10', 'Description': 'payee',
+            ...     'Original Description': 'description', 'Notes': 'notes',
+            ...     'Category': 'Checking', 'Account Name': 'account'}
+            >>> QIF(mapping, def_type='Bank').transaction_data(tr) == {
+            ...     'account_type': 'Bank',
+            ...     'account_id': 'e268443e43d93dab7ebef303bbe9642f',
+            ...     'memo': 'description notes', 'split_account_id': None,
+            ...     'currency': 'USD', 'date': datetime.datetime(2010, 6, 12, 0, 0),
+            ...     'class': None, 'bank': 'account', 'account': 'account',
+            ...     'split_memo': 'description notes', 'split_account': None,
+            ...     'bank_id': 'e268443e43d93dab7ebef303bbe9642f',
+            ...     'id': 'ee86450a47899254e2faa82dca3c2cf2', 'payee': 'payee',
+            ...     'amount': Decimal('-1000.00'), 'check_num': None, 'type': 'debit'}
+            True
         """
         data = super(QIF, self).transaction_data(tr)
         args = [self.account_types, self.def_type]
