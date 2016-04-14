@@ -28,7 +28,7 @@ from functools import partial
 from datetime import datetime as dt
 from operator import itemgetter
 
-from tabutils.process import merge
+from meza.process import merge
 from dateutil.parser import parse
 
 from . import utils
@@ -233,7 +233,7 @@ class Content(object):
                 groupby = itemgetter(collapse)
                 byaccount = utils.group_transactions(transactions, groupby)
                 op = lambda values: sum(map(utils.convert_amount, values))
-                merger = partial(merge, predicate=self.amount, op=op)
+                merger = partial(merge, pred=self.amount, op=op)
                 trxns = [merger(dicts) for _, dicts in byaccount]
             else:
                 trxns = transactions

@@ -33,7 +33,7 @@ from datetime import datetime as dt
 from dateutil.parser import parse
 from argparse import RawTextHelpFormatter, ArgumentParser
 
-from tabutils.io import read_csv, IterStringIO, write
+from meza.io import read_csv, IterStringIO, write
 
 from . import utils
 from .ofx import OFX
@@ -134,7 +134,8 @@ def run():
     server_date = dt.fromtimestamp(mtime)
     header = cont.header(date=server_date, language=args.language)
     footer = cont.footer(date=server_date)
-    content = it.chain([header, body, footer])
+    filtered = filter(None, [header, body, footer])
+    content = it.chain.from_iterable(filtered)
     kwargs = {'overwrite': args.overwrite, 'chunksize': args.chunksize}
 
     try:

@@ -32,7 +32,7 @@ from __future__ import absolute_import, print_function
 
 import itertools as it
 
-from tabutils.io import read_csv, IterStringIO
+from meza.io import read_csv, IterStringIO
 from csv2ofx import utils
 from csv2ofx.ofx import OFX
 from csv2ofx.mappings.default import mapping

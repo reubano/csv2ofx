@@ -24,8 +24,8 @@ from __future__ import (
 import itertools as it
 
 from operator import itemgetter
-from tabutils.fntools import get_separators
-from tabutils.convert import to_decimal
+from meza.fntools import get_separators
+from meza.convert import to_decimal
 
 
 def get_account_type(account, account_types, def_type='n/a'):

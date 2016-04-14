@@ -21,7 +21,7 @@ from __future__ import (
     unicode_literals)
 
 from datetime import datetime as dt
-from tabutils.fntools import chunk
+from meza.fntools import chunk
 
 from . import Content, utils
 
