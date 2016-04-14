@@ -49,19 +49,18 @@ parser = ArgumentParser(
     prog='csv2ofx', usage='%(prog)s [options] <source> <dest>',
     formatter_class=RawTextHelpFormatter)
 
-_types = ['CHECKING', 'SAVINGS', 'MONEYMRKT', 'CREDITLINE', 'Bank', 'Cash']
-_basedir = p.dirname(__file__)
+TYPES = ['CHECKING', 'SAVINGS', 'MONEYMRKT', 'CREDITLINE', 'Bank', 'Cash']
 mappings = import_module('csv2ofx.mappings')
 MODULES = tuple(itemgetter(1)(m) for m in iter_modules(mappings.__path__))
 
 
 parser.add_argument(
-    dest='source', nargs='?', help=('the source csv file (defaults to stdin)'))
+    dest='source', nargs='?', help='the source csv file (defaults to stdin)')
 parser.add_argument(
-    dest='dest', nargs='?', help=('the output file (defaults to stdout)'))
+    dest='dest', nargs='?', help='the output file (defaults to stdout)')
 parser.add_argument(
-    '-a', '--account', metavar='TYPE', dest='account_type', choices=_types,
-    help=("default account type 'CHECKING' for OFX and 'Bank' for QIF."))
+    '-a', '--account', metavar='TYPE', dest='account_type', choices=TYPES,
+    help="default account type 'CHECKING' for OFX and 'Bank' for QIF.")
 parser.add_argument(
     '-e', '--end', metavar='DATE', help="end date", default=str(dt.now()))
 parser.add_argument(
