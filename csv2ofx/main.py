@@ -27,6 +27,7 @@ import itertools as it
 
 from pprint import pprint
 from importlib import import_module
+from imp import find_module, load_module
 from pkgutil import iter_modules
 from operator import itemgetter
 
@@ -72,6 +73,8 @@ parser.add_argument(
     '-m', '--mapping', metavar='MAPPING_NAME', help="the account mapping",
     default='default', choices=MODULES)
 parser.add_argument(
+    '-x', '--custom', metavar='FILE_PATH', help="path to a custom mapping file")
+parser.add_argument(
     '-c', '--collapse', metavar='FIELD_NAME', help=(
         'field used to combine transactions within a split for double entry '
         'statements'))
@@ -110,7 +113,14 @@ def run():
         print('v%s' % version)
         exit(0)
 
-    mapping = import_module('csv2ofx.mappings.%s' % args.mapping).mapping
+    if args.custom:
+        name = p.splitext(p.split(args.custom)[1])[0]
+        found = find_module(name, [p.dirname(p.abspath(args.custom))])
+        module = load_module(name, *found)
+    else:
+        module = import_module('csv2ofx.mappings.%s' % args.mapping)
+
+    mapping = module.mapping
 
     okwargs = {
         'def_type': args.account_type or 'Bank' if args.qif else 'CHECKING',
