@@ -85,6 +85,9 @@ parser.add_argument(
     '-C', '--chunksize', metavar='ROWS', default=10 ** 6,
     help="number of rows to process at a time")
 parser.add_argument(
+    '-L', '--list-mappings', help="list the available mappings",
+    action='store_true', default=False)
+parser.add_argument(
     '-V', '--version', help="show version and exit", action='store_true',
     default=False)
 parser.add_argument(
@@ -111,6 +114,10 @@ def run():
     if args.version:
         from . import __version__ as version
         print('v%s' % version)
+        exit(0)
+
+    if args.list_mappings:
+        print(', '.join(MODULES))
         exit(0)
 
     if args.custom:
