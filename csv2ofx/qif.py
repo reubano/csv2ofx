@@ -20,7 +20,6 @@ from __future__ import (
     absolute_import, division, print_function, with_statement,
     unicode_literals)
 
-from datetime import datetime as dt
 from meza.fntools import chunk
 from meza.process import group
 
@@ -147,6 +146,7 @@ class QIF(Content):
             (str): content the QIF content
 
         Examples:
+            >>> from datetime import datetime as dt
             >>> kwargs = {'payee': 'payee', 'amount': 100, 'check_num': 1, \
 'date': dt(2012, 1, 1), 'account_type': 'Bank'}
             >>> QIF().transaction(**kwargs).replace('\\n', '').replace(\

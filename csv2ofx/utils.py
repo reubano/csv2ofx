@@ -21,9 +21,6 @@ from __future__ import (
     absolute_import, division, print_function, with_statement,
     unicode_literals)
 
-import itertools as it
-
-from operator import itemgetter
 from meza.fntools import get_separators
 from meza.convert import to_decimal
 
@@ -70,6 +67,7 @@ def get_max_split(splits, keyfunc):
         (Tuple[str]): splits collapsed content
 
     Examples:
+        >>> from operator import itemgetter
         >>> splits = [{'amount': 350}, {'amount': -450}, {'amount': 100}]
         >>> get_max_split(splits, itemgetter('amount'))
         (1, {u'amount': -450})
@@ -92,6 +90,7 @@ def verify_splits(splits, keyfunc):
         (bool): true on success
 
     Examples:
+        >>> from operator import itemgetter
         >>> splits = [{'amount': 100}, {'amount': -150}, {'amount': 50}]
         >>> verify_splits(splits, itemgetter('amount'))
         True

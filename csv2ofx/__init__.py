@@ -93,7 +93,10 @@ class Content(object):
                 transaction, or the value of the attribute.
 
         Examples:
+            >>> import datetime
+            >>> from datetime import datetime as dt
             >>> from csv2ofx.mappings.mint import mapping
+            >>>
             >>> tr = {'Transaction Type': 'debit', 'Amount': 1000.00}
             >>> start = dt(2015, 1, 1)
             >>> Content(mapping, start=start).get('start')  # normal attribute
@@ -132,6 +135,8 @@ class Content(object):
 
         Examples:
             >>> from csv2ofx.mappings.mint import mapping
+            >>> from datetime import datetime as dt
+            >>>
             >>> tr = {'Date': '06/12/10', 'Amount': 1000.00}
             >>> Content(mapping, start=dt(2010, 1, 1)).skip_transaction(tr)
             False
@@ -150,7 +155,10 @@ class Content(object):
             (decimal): The converted amount.
 
         Examples:
+            >>> from decimal import Decimal
+            >>> from datetime import datetime as dt
             >>> from csv2ofx.mappings.mint import mapping
+            >>>
             >>> tr = {'Date': '06/12/10', 'Amount': '$1,000'}
             >>> Content(mapping, start=dt(2010, 1, 1)).convert_amount(tr)
             Decimal('1000.00')
