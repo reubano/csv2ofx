@@ -66,7 +66,7 @@ parser.add_argument(
     '-l', '--language', help="the language", default='ENG')
 parser.add_argument(
     '-s', '--start', metavar='DATE', help="the start date",
-    default='2015-01-01')
+    default='2000-01-01')
 parser.add_argument(
     '-m', '--mapping', help="the account mapping",
     default='default')
