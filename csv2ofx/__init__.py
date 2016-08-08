@@ -74,7 +74,7 @@ class Content(object):
         else:
             self.split_account = None
 
-        self.start = kwargs.get('start', dt.now())
+        self.start = kwargs.get('start', dt(2000, 1, 1))
         self.end = kwargs.get('end', dt.now())
 
     def get(self, name, tr=None, default=None):
