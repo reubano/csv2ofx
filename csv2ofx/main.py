@@ -67,8 +67,7 @@ parser.add_argument(
 parser.add_argument(
     '-l', '--language', help="the language", default='ENG')
 parser.add_argument(
-    '-s', '--start', metavar='DATE', help="the start date",
-    default='2000-01-01')
+    '-s', '--start', metavar='DATE', help="the start date")
 parser.add_argument(
     '-m', '--mapping', metavar='MAPPING_NAME', help="the account mapping",
     default='default', choices=MODULES)
@@ -132,8 +131,8 @@ def run():
     okwargs = {
         'def_type': args.account_type or 'Bank' if args.qif else 'CHECKING',
         'split_header': args.split,
-        'start': parse(args.start),
-        'end': parse(args.end)
+        'start': parse(args.start) if args.start else None,
+        'end': parse(args.end) if args.end else None
     }
 
     source = open(args.source, newline=None) if args.source else sys.stdin
