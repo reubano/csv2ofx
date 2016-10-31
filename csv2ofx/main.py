@@ -94,6 +94,8 @@ parser.add_argument(
     '-o', '--overwrite', action='store_true', default=False,
     help="overwrite destination file if it exists")
 parser.add_argument(
+    '-D', '--server-date', help="OFX server date (default: source file mtime)")
+parser.add_argument(
     '-d', '--debug', action='store_true', default=False,
     help="display the options and arguments passed to the parser")
 parser.add_argument(
@@ -144,12 +146,16 @@ def run():  # noqa: C901
         data = utils.gen_data(cleaned_trxns)
         body = cont.gen_body(data)
 
-        try:
-            mtime = p.getmtime(source.name)
-        except AttributeError:
-            mtime = time.time()
+        if args.server_date:
+            server_date = parse(args.server_date)
+        else:
+            try:
+                mtime = p.getmtime(source.name)
+            except AttributeError:
+                mtime = time.time()
 
-        server_date = dt.fromtimestamp(mtime)
+            server_date = dt.fromtimestamp(mtime)
+
         header = cont.header(date=server_date, language=args.language)
         footer = cont.footer(date=server_date)
         filtered = filter(None, [header, body, footer])

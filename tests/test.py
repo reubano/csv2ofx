@@ -110,6 +110,7 @@ if __name__ == '__main__':
                 yield (opts, _in, _out)
 
     mint_alt_opts = ['-oqs20150613', '-e20150614', '-S Category', '-m mint']
+    server_date = '-D 20161031112908'
     pre_tests = [
         (['--help'], [], True),
         (['-oq'], 'default.csv', 'default.qif'),
@@ -117,9 +118,9 @@ if __name__ == '__main__':
         (['-oqc Description', '-m xero'], 'xero.csv', 'xero.qif'),
         (['-oqS Category', '-m mint'], 'mint.csv', 'mint.qif'),
         (mint_alt_opts, 'mint.csv', 'mint_alt.qif'),
-        (['-oe 20150908'], 'default.csv', 'default.ofx'),
-        (['-oS Category'], 'default.csv', 'default_w_splits.ofx'),
-        (['-oS Category', '-m mint'], 'mint.csv', 'mint.ofx'),
+        (['-oe 20150908', server_date], 'default.csv', 'default.ofx'),
+        (['-oS Category', server_date], 'default.csv', 'default_w_splits.ofx'),
+        (['-oS Category', '-m mint', server_date], 'mint.csv', 'mint.ofx'),
     ]
 
     main(csv2ofx, gen_test(pre_tests))
