@@ -250,7 +250,7 @@ class Content(object):
             yield (grp, trxns)
 
     def clean_trxns(self, groups):
-        for group, trxns in groups:
+        for grp, trxns in groups:
             _args = [trxns, self.convert_amount]
 
             # if it's split, transactions skipping is all or none
@@ -270,4 +270,4 @@ class Content(object):
 
             keyfunc = lambda enum: enum[0] != main_pos
             sorted_trxns = sorted(enumerate(filtered_trxns), key=keyfunc)
-            yield (group, main_pos, sorted_trxns)
+            yield (grp, main_pos, sorted_trxns)

@@ -433,7 +433,7 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
         content += "\t\t</%s>\n\t</BANKMSGSRSV1>\n</OFX>\n" % self.resp_type
         return content
 
-    def gen_body(self, data):
+    def gen_body(self, data):  # noqa: C901
         for gd in data:
             group = gd['group']
 

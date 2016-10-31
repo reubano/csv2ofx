@@ -103,7 +103,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-def run():
+def run():  # noqa: C901
     if args.debug:
         pprint(dict(args._get_kwargs()))
         exit(0)

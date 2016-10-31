@@ -30,6 +30,7 @@ PARENT_DIR = p.abspath(p.dirname(p.dirname(__file__)))
 EXAMPLE_DIR = p.join(PARENT_DIR, 'data', 'test')
 CHECK_DIR = p.join(PARENT_DIR, 'data', 'converted')
 
+
 def filter_output(outlines, debug_stmts=None):
     def_stmts = ['File was opened in', 'Decoding file with encoding']
     debug_stmts = debug_stmts or def_stmts
@@ -103,17 +104,19 @@ if __name__ == '__main__':
     def gen_test(raw):
         for opts, _in, _out in raw:
             if _in and _out:
-                yield (opts, [p.join(EXAMPLE_DIR, _in)], p.join(CHECK_DIR, _out))
+                args = [p.join(EXAMPLE_DIR, _in)]
+                yield (opts, args, p.join(CHECK_DIR, _out))
             else:
                 yield (opts, _in, _out)
 
+    mint_alt_opts = ['-oqs20150613', '-e20150614', '-S Category', '-m mint']
     pre_tests = [
         (['--help'], [], True),
         (['-oq'], 'default.csv', 'default.qif'),
         (['-oqS Category'], 'default.csv', 'default_w_splits.qif', ),
         (['-oqc Description', '-m xero'], 'xero.csv', 'xero.qif'),
         (['-oqS Category', '-m mint'], 'mint.csv', 'mint.qif'),
-        (['-oqs20150613', '-e20150614', '-S Category', '-m mint'], 'mint.csv', 'mint_alt.qif'),
+        (mint_alt_opts, 'mint.csv', 'mint_alt.qif'),
         (['-oe 20150908'], 'default.csv', 'default.ofx'),
         (['-oS Category'], 'default.csv', 'default_w_splits.ofx'),
         (['-oS Category', '-m mint'], 'mint.csv', 'mint.ofx'),
