@@ -1,100 +1,177 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# vim: sw=4:ts=4:expandtab
 
 """ A script to manage development tasks """
-
 from __future__ import (
     absolute_import, division, print_function, with_statement,
     unicode_literals)
 
 from os import path as p
+from subprocess import call, check_call, CalledProcessError
 from manager import Manager
-from subprocess import call
 
 manager = Manager()
-_basedir = p.dirname(__file__)
+BASEDIR = p.dirname(__file__)
 
 
-@manager.command
-def clean():
+def upload_():
+    """Upload distribution files"""
+    check_call(['twine', 'upload', p.join(BASEDIR, 'dist', '*')])
+
+
+def sdist_():
+    """Create a source distribution package"""
+    check_call(p.join(BASEDIR, 'helpers', 'srcdist'))
+
+
+def wheel_():
+    """Create a wheel package"""
+    check_call(p.join(BASEDIR, 'helpers', 'wheel'))
+
+
+def clean_():
     """Remove Python file and build artifacts"""
-    call(p.join(_basedir, 'helpers', 'clean'), shell=True)
+    check_call(p.join(BASEDIR, 'helpers', 'clean'))
 
 
 @manager.command
 def check():
     """Check staged changes for lint errors"""
-    call(p.join(_basedir, 'helpers', 'check-stage'), shell=True)
+    exit(call(p.join(BASEDIR, 'helpers', 'check-stage')))
 
 
+@manager.arg('where', 'w', help='Modules to check')
+@manager.arg('strict', 's', help='Check with pylint')
 @manager.command
-def lint():
-    """Check style with flake8"""
-    call('flake8 manage.py setup.py csv2ofx tests', shell=True)
+def lint(where=None, strict=False):
+    """Check style with linters"""
+    args = [
+        'pylint', '--rcfile=tests/standard.rc', '-rn', '-fparseable', 'csv2ofx']
+
+    try:
+        check_call(['flake8', where] if where else 'flake8')
+        check_call(args + ['--py3k'])
+        check_call(args) if strict else None
+    except CalledProcessError as e:
+        exit(e.returncode)
 
 
 @manager.command
 def pipme():
     """Install requirements.txt"""
-    call('pip install -r requirements.txt', shell=True)
+    exit(call('pip', 'install', '-r', 'requirements.txt'))
 
 
 @manager.command
 def require():
     """Create requirements.txt"""
     cmd = 'pip freeze -l | grep -vxFf dev-requirements.txt > requirements.txt'
-    call(cmd, shell=True)
+    exit(call(cmd, shell=True))
 
 
-@manager.arg('where', 'w', help='Requirement file', default=None)
+@manager.arg('where', 'w', help='test path', default=None)
 @manager.arg(
     'stop', 'x', help='Stop after first error', type=bool, default=False)
+@manager.arg(
+    'failed', 'f', help='Run failed tests', type=bool, default=False)
+@manager.arg(
+    'cover', 'c', help='Add coverage report', type=bool, default=False)
+@manager.arg('tox', 't', help='Run tox tests', type=bool, default=False)
+@manager.arg('detox', 'd', help='Run detox tests', type=bool, default=False)
+@manager.arg(
+    'verbose', 'v', help='Use detailed errors', type=bool, default=False)
+@manager.arg(
+    'parallel', 'p', help='Run tests in parallel in multiple processes',
+    type=bool, default=False)
+@manager.arg(
+    'debug', 'D', help='Use nose.loader debugger', type=bool, default=False)
 @manager.command
-def test(where=None, stop=False):
-    """Run nose and script tests"""
+def test(where=None, stop=None, **kwargs):
+    """Run nose, tox, and script tests"""
     opts = '-xv' if stop else '-v'
-    opts += 'w %s' % where if where else ''
-    call([p.join(_basedir, 'helpers', 'test'), opts])
+    opts += ' --with-coverage' if kwargs.get('cover') else ''
+    opts += ' --failed' if kwargs.get('failed') else ' --with-id'
+    opts += ' --processes=-1' if kwargs.get('parallel') else ''
+    opts += ' --detailed-errors' if kwargs.get('verbose') else ''
+    opts += ' --debug=nose.loader' if kwargs.get('debug') else ''
+    opts += ' -w %s' % where if where else ''
+
+    try:
+        if kwargs.get('tox'):
+            check_call('tox')
+        elif kwargs.get('detox'):
+            check_call('detox')
+        else:
+            check_call(('nosetests %s' % opts).split(' '))
+            check_call(['python', p.join(BASEDIR, 'tests', 'test.py')])
+    except CalledProcessError as e:
+        exit(e.returncode)
 
 
 @manager.command
 def register():
     """Register package with PyPI"""
-    call('python %s register' % p.join(_basedir, 'setup.py'), shell=True)
+    exit(call('python', p.join(BASEDIR, 'setup.py'), 'register'))
 
 
 @manager.command
 def release():
     """Package and upload a release"""
-    sdist()
-    wheel()
-    upload()
+    try:
+        clean_()
+        sdist_()
+        wheel_()
+        upload_()
+    except CalledProcessError as e:
+        exit(e.returncode)
 
 
 @manager.command
 def build():
     """Create a source distribution and wheel package"""
-    sdist()
-    wheel()
+    try:
+        clean_()
+        sdist_()
+        wheel_()
+    except CalledProcessError as e:
+        exit(e.returncode)
 
 
 @manager.command
 def upload():
     """Upload distribution files"""
-    call('twine upload %s' % p.join(_basedir, 'dist', '*'), shell=True)
+    try:
+        upload_()
+    except CalledProcessError as e:
+        exit(e.returncode)
 
 
 @manager.command
 def sdist():
     """Create a source distribution package"""
-    call(p.join(_basedir, 'helpers', 'sdist'), shell=True)
+    try:
+        sdist_()
+    except CalledProcessError as e:
+        exit(e.returncode)
 
 
 @manager.command
 def wheel():
     """Create a wheel package"""
-    call(p.join(_basedir, 'helpers', 'wheel'), shell=True)
+    try:
+        wheel_()
+    except CalledProcessError as e:
+        exit(e.returncode)
 
+
+@manager.command
+def clean():
+    """Remove Python file and build artifacts"""
+    try:
+        clean_()
+    except CalledProcessError as e:
+        exit(e.returncode)
 
 if __name__ == '__main__':
     manager.main()

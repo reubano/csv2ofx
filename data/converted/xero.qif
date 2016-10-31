@@ -1,0 +1,65 @@
+!Account
+NIncome
+TBank
+^
+!Type:Bank
+NINV-0001
+D01/23/15
+PSales
+T149000.00
+SCash
+EBicycle Office
+$113000.00
+SCash
+ECharger Office
+$36000.00
+^
+!Account
+NCash
+TCash
+^
+!Type:Cash
+NINV-0198
+D01/25/15
+PBaisikeli
+MBicycle
+LJohn
+T-113000.00
+SIncome
+$-113000.00
+^
+!Account
+NChecking
+TBank
+^
+!Type:Bank
+D02/14/15
+PTransfer from Cash
+T-209000.00
+SCash
+$-209000.00
+^
+!Account
+NCash
+TCash
+^
+!Type:Cash
+NINV-0003
+D01/24/15
+PCharger-baisikeli (distributor price)
+MCharger
+LOffice
+T-30000.00
+SIncome
+$-30000.00
+^
+!Type:Cash
+NINV-0006
+D01/25/15
+PCharger-baisikeli (distributor price)
+MCharger
+LJohn
+T-30000.00
+SIncome
+$-30000.00
+^

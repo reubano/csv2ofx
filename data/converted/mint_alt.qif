@@ -1,0 +1,22 @@
+!Account
+NChecking
+TBank
+^
+!Type:Bank
+D06/13/15
+PTransfer to Savings
+MAccount Transfer
+T2000.00
+SSavings
+EAccount Transfer
+$2000.00
+^
+!Type:Bank
+D06/14/15
+PTransfer from Savings
+MAccount Transfer
+T-2500.00
+SSavings
+EAccount Transfer
+$-2500.00
+^

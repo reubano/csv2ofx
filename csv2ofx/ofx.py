@@ -21,7 +21,10 @@ from __future__ import (
     unicode_literals)
 
 from datetime import datetime as dt
-from tabutils.fntools import chunk, xmlize
+
+from builtins import *
+from meza.fntools import chunk, xmlize
+from meza.process import group
 
 from . import Content, utils
 
@@ -41,7 +44,7 @@ class OFX(Content):
 
         Examples:
             >>> from csv2ofx.mappings.mint import mapping
-            >>> OFX(mapping)  #doctest: +ELLIPSIS
+            >>> OFX(mapping)  # doctest: +ELLIPSIS
             <csv2ofx.ofx.OFX object at 0x...>
         """
         # TODO: Add timezone info
@@ -68,12 +71,14 @@ class OFX(Content):
 
         Examples:
             >>> kwargs = {'date': dt(2012, 1, 15)}
-            >>> OFX().header(**kwargs).replace('\\n', '').replace('\\t', '')
-            u'DATA:OFXSGMLENCODING:UTF-8<OFX><SIGNONMSGSRSV1><SONRS><STATUS>\
-<CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS><DTSERVER>20120115000000\
-</DTSERVER><LANGUAGE>ENG</LANGUAGE></SONRS></SIGNONMSGSRSV1><BANKMSGSRSV1>\
-<STMTTRNRS><TRNUID></TRNUID><STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY>\
-</STATUS>'
+            >>> header = 'DATA:OFXSGMLENCODING:UTF-8<OFX><SIGNONMSGSRSV1>\
+<SONRS><STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS><DTSERVER>\
+20120115000000</DTSERVER><LANGUAGE>ENG</LANGUAGE></SONRS></SIGNONMSGSRSV1>\
+<BANKMSGSRSV1><STMTTRNRS><TRNUID></TRNUID><STATUS><CODE>0</CODE><SEVERITY>INFO\
+</SEVERITY></STATUS>'
+            >>> result = OFX().header(**kwargs)
+            >>> header == result.replace('\\n', '').replace('\\t', '')
+            True
         """
         kwargs.setdefault('language', 'ENG')
 
@@ -112,21 +117,27 @@ class OFX(Content):
             (dict): the OFX transaction data
 
         Examples:
+            >>> import datetime
             >>> from csv2ofx.mappings.mint import mapping
-            >>> tr = {'Transaction Type': 'debit', 'Amount': 1000.00, \
-'Date': '06/12/10', 'Description': 'payee', 'Original Description': \
-'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': \
-'account'}
-            >>> OFX(mapping, def_type='CHECKING').transaction_data(tr)
-            {u'account_type': u'CHECKING', u'account_id': \
-'e268443e43d93dab7ebef303bbe9642f', u'memo': u'description notes', \
-u'split_account_id': None, u'currency': u'USD', u'date': \
-datetime.datetime(2010, 6, 12, 0, 0), u'class': None, u'bank': u'account', \
-u'account': u'account', u'split_account': None, u'bank_id': \
-'e268443e43d93dab7ebef303bbe9642f', u'id': \
-'ee86450a47899254e2faa82dca3c2cf2', u'payee': u'payee', u'amount': \
-Decimal('-1000.00'), u'split_account_type': None, u'check_num': None, \
-u'type': u'debit'}
+            >>> from decimal import Decimal
+            >>> tr = {
+            ...     'Transaction Type': 'debit', 'Amount': 1000.00,
+            ...     'Date': '06/12/10', 'Description': 'payee',
+            ...     'Original Description': 'description', 'Notes': 'notes',
+            ...     'Category': 'Checking', 'Account Name': 'account'}
+            >>> OFX(mapping, def_type='CHECKING').transaction_data(tr) == {
+            ...     'account_type': 'CHECKING',
+            ...     'account_id': 'e268443e43d93dab7ebef303bbe9642f',
+            ...     'memo': 'description notes', 'split_account_id': None,
+            ...     'currency': 'USD',
+            ...     'date': datetime.datetime(2010, 6, 12, 0, 0),
+            ...     'class': None, 'bank': 'account', 'account': 'account',
+            ...     'split_account': None,
+            ...     'bank_id': 'e268443e43d93dab7ebef303bbe9642f',
+            ...     'id': 'ee86450a47899254e2faa82dca3c2cf2', 'payee': 'payee',
+            ...     'amount': Decimal('-1000.00'), 'split_account_type': None,
+            ...     'check_num': None, 'type': 'debit'}
+            True
         """
         data = super(OFX, self).transaction_data(tr)
         args = [self.account_types, self.def_type]
@@ -168,11 +179,12 @@ u'type': u'debit'}
             >>> kwargs = {'start': dt(2012, 1, 1), 'end': dt(2012, 2, 1)}
             >>> akwargs = {'currency': 'USD', 'bank_id': 1, 'account_id': 1, \
 'account_type': 'CHECKING'}
-            >>> OFX(**kwargs).account_start(**akwargs).replace(\
-'\\n', '').replace('\\t', '')
-            u'<STMTRS><CURDEF>USD</CURDEF><BANKACCTFROM><BANKID>1</BANKID>\
-<ACCTID>1</ACCTID><ACCTTYPE>CHECKING</ACCTTYPE></BANKACCTFROM><BANKTRANLIST>\
-<DTSTART>20120101</DTSTART><DTEND>20120201</DTEND>'
+            >>> start = '<STMTRS><CURDEF>USD</CURDEF><BANKACCTFROM><BANKID>1\
+</BANKID><ACCTID>1</ACCTID><ACCTTYPE>CHECKING</ACCTTYPE></BANKACCTFROM>\
+<BANKTRANLIST><DTSTART>20120101</DTSTART><DTEND>20120201</DTEND>'
+            >>> result = OFX(**kwargs).account_start(**akwargs)
+            >>> start == result.replace('\\n', '').replace('\\t', '')
+            True
         """
         kwargs.update({
             'start_date': self.start.strftime('%Y%m%d'),
@@ -211,11 +223,12 @@ u'type': u'debit'}
         Examples:
             >>> kwargs = {'date': dt(2012, 1, 15), 'type': 'debit', \
 'amount': 100, 'id': 1, 'check_num': 1, 'payee': 'payee', 'memo': 'memo'}
-            >>> OFX().transaction(**kwargs).replace('\\n', '').replace( \
-'\\t', '')
-            u'<STMTTRN><TRNTYPE>debit</TRNTYPE><DTPOSTED>20120115000000\
+            >>> tr = '<STMTTRN><TRNTYPE>debit</TRNTYPE><DTPOSTED>20120115000000\
 </DTPOSTED><TRNAMT>100.00</TRNAMT><FITID>1</FITID><CHECKNUM>1</CHECKNUM><NAME>\
 payee</NAME><MEMO>memo</MEMO></STMTTRN>'
+            >>> result = OFX().transaction(**kwargs)
+            >>> tr == result.replace('\\n', '').replace('\\t', '')
+            True
         """
         time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
 
@@ -245,10 +258,11 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
 
         Examples:
             >>> kwargs = {'balance': 150, 'date': dt(2012, 1, 15)}
-            >>> OFX().account_end(**kwargs).replace('\\n', '').replace(\
-'\\t', '')
-            u'</BANKTRANLIST><LEDGERBAL><BALAMT>150.00</BALAMT><DTASOF>\
-20120115000000</DTASOF></LEDGERBAL></STMTRS>'
+            >>> end = '</BANKTRANLIST><LEDGERBAL><BALAMT>150.00</BALAMT>\
+<DTASOF>20120115000000</DTASOF></LEDGERBAL></STMTRS>'
+            >>> result = OFX().account_end(**kwargs)
+            >>> end == result.replace('\\n', '').replace('\\t', '')
+            True
         """
         time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
         content = '\t\t\t\t</BANKTRANLIST>\n'
@@ -286,10 +300,12 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
             >>> kwargs = {'currency': 'USD', 'date': dt(2012, 1, 15), \
 'bank_id': 1, 'account_id': 1, 'account_type': 'CHECKING', 'amount': 100, \
 'id': 'jbaevf'}
-            >>> OFX().transfer(**kwargs).replace('\\n', '').replace('\\t', '')
-            u'<INTRARS><CURDEF>USD</CURDEF><SRVRTID>jbaevf</SRVRTID>\
+            >>> tr = '<INTRARS><CURDEF>USD</CURDEF><SRVRTID>jbaevf</SRVRTID>\
 <XFERINFO><TRNAMT>100.00</TRNAMT><BANKACCTFROM><BANKID>1</BANKID><ACCTID>1\
 </ACCTID><ACCTTYPE>CHECKING</ACCTTYPE></BANKACCTFROM>'
+            >>> result = OFX().transfer(**kwargs)
+            >>> tr == result.replace('\\n', '').replace('\\t', '')
+            True
         """
         content = '\t\t\t<INTRARS>\n'
         content += '\t\t\t\t<CURDEF>%(currency)s</CURDEF>\n' % kwargs
@@ -337,16 +353,18 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
             >>> kwargs = {'bank_id': 1, 'split_account': 'Checking', \
 'split_account_id': 2, 'split_account_type': 'CHECKING', 'amount': 100 , \
 'id': 'jbaevf'}
-            >>> OFX().split_content(**kwargs).replace('\\n', '').replace(\
-'\\t', '')
-            u'<BANKACCTTO><BANKID>1</BANKID><ACCTID>2</ACCTID><ACCTTYPE>\
-CHECKING</ACCTTYPE></BANKACCTTO>'
+            >>> split = '<BANKACCTTO><BANKID>1</BANKID><ACCTID>2</ACCTID>\
+<ACCTTYPE>CHECKING</ACCTTYPE></BANKACCTTO>'
+            >>> result = OFX().split_content(**kwargs)
+            >>> split == result.replace('\\n', '').replace('\\t', '')
+            True
             >>> kwargs = {'bank_id': 1, 'account': 'Checking', 'account_id': \
 3, 'account_type': 'CHECKING', 'amount': 100 , 'id': 'jbaevf'}
-            >>> OFX().split_content(**kwargs).replace('\\n', '').replace(\
-'\\t', '')
-            u'<BANKACCTTO><BANKID>1</BANKID><ACCTID>3</ACCTID><ACCTTYPE>\
-CHECKING</ACCTTYPE></BANKACCTTO>'
+            >>> split = '<BANKACCTTO><BANKID>1</BANKID><ACCTID>3</ACCTID>\
+<ACCTTYPE>CHECKING</ACCTTYPE></BANKACCTTO>'
+            >>> result = OFX().split_content(**kwargs)
+            >>> split == result.replace('\\n', '').replace('\\t', '')
+            True
         """
         content = '\t\t\t\t\t<BANKACCTTO>\n'
         content += '\t\t\t\t\t\t<BANKID>%(bank_id)s</BANKID>\n' % kwargs
@@ -377,9 +395,10 @@ CHECKING</ACCTTYPE></BANKACCTTO>'
             (str): the end of an OFX transfer
 
         Examples:
-            >>> OFX().transfer_end(dt(2012, 1, 15)).replace(\
-'\\n', '').replace('\\t', '')
-            u'</XFERINFO><DTPOSTED>20120115000000</DTPOSTED></INTRARS>'
+            >>> end = '</XFERINFO><DTPOSTED>20120115000000</DTPOSTED></INTRARS>'
+            >>> result = OFX().transfer_end(dt(2012, 1, 15))
+            >>> end == result.replace('\\n', '').replace('\\t', '')
+            True
         """
         time_stamp = date.strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
         content = '\t\t\t\t</XFERINFO>\n'
@@ -397,9 +416,10 @@ CHECKING</ACCTTYPE></BANKACCTTO>'
             (str): the OFX content
 
         Examples:
-            >>> OFX().footer(date=dt(2012, 1, 15)).replace('\\n', '').replace(\
-'\\t', '')
-            u'</BANKTRANLIST></STMTRS></STMTTRNRS></BANKMSGSRSV1></OFX>'
+            >>> ft = '</BANKTRANLIST></STMTRS></STMTTRNRS></BANKMSGSRSV1></OFX>'
+            >>> result = OFX().footer(date=dt(2012, 1, 15))
+            >>> ft == result.replace('\\n', '').replace('\\t', '')
+            True
         """
         kwargs.setdefault('date', dt.now())
 
@@ -413,7 +433,7 @@ CHECKING</ACCTTYPE></BANKACCTTO>'
         content += "\t\t</%s>\n\t</BANKMSGSRSV1>\n</OFX>\n" % self.resp_type
         return content
 
-    def gen_body(self, data):
+    def gen_body(self, data):  # noqa: C901
         for gd in data:
             group = gd['group']
 
@@ -450,8 +470,8 @@ CHECKING</ACCTTYPE></BANKACCTTO>'
     def gen_groups(self, records, chunksize=None):
         for chnk in chunk(records, chunksize):
             cleansed = [
-                {k: xmlize([v]).next() for k, v in c.items()} for c in chnk]
+                {k: next(xmlize([v])) for k, v in c.items()} for c in chnk]
             keyfunc = self.id if self.is_split else self.account
 
-            for group in utils.group_transactions(cleansed, keyfunc):
-                yield group
+            for g in group(cleansed, keyfunc):
+                yield g

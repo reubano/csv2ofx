@@ -21,11 +21,9 @@ from __future__ import (
     absolute_import, division, print_function, with_statement,
     unicode_literals)
 
-import itertools as it
-
-from operator import itemgetter
-from tabutils.fntools import get_separators
-from tabutils.convert import to_decimal
+from builtins import *
+from meza.fntools import get_separators
+from meza.convert import to_decimal
 
 
 def get_account_type(account, account_types, def_type='n/a'):
@@ -40,10 +38,10 @@ def get_account_type(account, account_types, def_type='n/a'):
         (str): The resulting account type.
 
     Examples:
-        >>> get_account_type('somecash', {'Cash': ('cash',)})
-        u'Cash'
-        >>> get_account_type('account', {'Cash': ('cash',)})
-        u'n/a'
+        >>> get_account_type('somecash', {'Cash': ('cash',)}) == 'Cash'
+        True
+        >>> get_account_type('account', {'Cash': ('cash',)}) == 'n/a'
+        True
     """
     _type = def_type
 
@@ -56,8 +54,7 @@ def get_account_type(account, account_types, def_type='n/a'):
 
 
 def convert_amount(content):
-    kwargs = get_separators(content)
-    return to_decimal(content, **kwargs)
+    return to_decimal(content, **get_separators(content))
 
 
 def get_max_split(splits, keyfunc):
@@ -71,12 +68,13 @@ def get_max_split(splits, keyfunc):
         (Tuple[str]): splits collapsed content
 
     Examples:
+        >>> from operator import itemgetter
         >>> splits = [{'amount': 350}, {'amount': -450}, {'amount': 100}]
-        >>> get_max_split(splits, itemgetter('amount'))
-        (1, {u'amount': -450})
+        >>> get_max_split(splits, itemgetter('amount')) == (1, {'amount': -450})
+        True
         >>> splits = [{'amount': 350}, {'amount': -350}]
-        >>> get_max_split(splits, itemgetter('amount'))
-        (0, {u'amount': 350})
+        >>> get_max_split(splits, itemgetter('amount')) == (0, {'amount': 350})
+        True
     """
     maxfunc = lambda enum: abs(keyfunc(enum[1]))
     return max(enumerate(splits), key=maxfunc)
@@ -93,6 +91,7 @@ def verify_splits(splits, keyfunc):
         (bool): true on success
 
     Examples:
+        >>> from operator import itemgetter
         >>> splits = [{'amount': 100}, {'amount': -150}, {'amount': 50}]
         >>> verify_splits(splits, itemgetter('amount'))
         True
@@ -101,29 +100,6 @@ def verify_splits(splits, keyfunc):
         False
     """
     return not sum(map(keyfunc, splits))
-
-
-def group_transactions(transactions, keyfunc):
-    """Groups transactions by keyfunc
-
-    Args:
-        transactions (List[dict]): csv content
-        keyfunc (func):
-    Returns:
-        (List[dict]): csv content organized by transaction
-
-    Examples:
-        >>> transactions = [{'amount': '1,000.00', 'Date': '06/12/10', \
-'Category': 'Checking', 'account': 'account1'}, {'amount': '1,000.00', \
-'Date': '06/12/10', 'Category': 'Checking', 'account': 'account2'}]
-        >>> group_transactions(transactions, itemgetter('account')).next()
-        (u'account1', [{u'Date': u'06/12/10', u'Category': u'Checking', \
-u'amount': u'1,000.00', u'account': u'account1'}])
-    """
-    sorted_transactions = sorted(transactions, key=keyfunc)
-
-    for account, group in it.groupby(sorted_transactions, keyfunc):
-        yield (account, list(group))
 
 
 def gen_data(groups):

@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 from operator import itemgetter
 
 
@@ -17,7 +19,6 @@ mapping = {
     'currency': itemgetter('Currency'),
     'desc': itemgetter('Original Description'),
     'payee': itemgetter('User Description'),
-    'notes': itemgetter('Memo'),
     'class': itemgetter('Classification'),
     'id': itemgetter('Transaction Id'),
 }

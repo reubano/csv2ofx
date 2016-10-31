@@ -1,81 +1,126 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# vim: sw=4:ts=4:expandtab
 
-""" A script to test csv2ofx functionality """
+"""
+tests.test
+~~~~~~~~~~
 
-import os
+Provides scripttests to test csv2ofx CLI functionality.
+"""
+
+from __future__ import (
+    absolute_import, division, print_function, unicode_literals)
+
 import sys
+import os
+import pygogo as gogo
 
 from difflib import unified_diff
 from os import path as p
-from tempfile import NamedTemporaryFile
-from scripttest import TestFileEnvironment
+from io import StringIO, open
 from timeit import default_timer as timer
 
-parent_dir = p.abspath(p.dirname(p.dirname(__file__)))
-example_dir = p.join(parent_dir, 'data', 'test')
-check_dir = p.join(parent_dir, 'data', 'converted')
+from builtins import *
+from scripttest import TestFileEnvironment
+
+sys.path.append('../csv2ofx')
+
+PARENT_DIR = p.abspath(p.dirname(p.dirname(__file__)))
+EXAMPLE_DIR = p.join(PARENT_DIR, 'data', 'test')
+CHECK_DIR = p.join(PARENT_DIR, 'data', 'converted')
 
 
-def main():
+def filter_output(outlines, debug_stmts=None):
+    def_stmts = ['File was opened in', 'Decoding file with encoding']
+    debug_stmts = debug_stmts or def_stmts
+
+    for line in outlines:
+        if not any(stmt in line for stmt in debug_stmts):
+            yield line
+
+
+def main(script, tests, verbose=False, stop=True):
     """ Main method
     Returns 0 on success, 1 on failure
     """
-    start = timer()
-    script = 'bin/csv2ofx --help'
+    failures = 0
+    logger = gogo.Gogo(__name__, verbose=verbose).logger
+    short_script = p.basename(script)
     env = TestFileEnvironment('.scripttest')
-    tmpfile = NamedTemporaryFile(dir=parent_dir, delete=False)
-    tmpname = tmpfile.name
 
-    tests = [
-        (2, 'default.csv', 'default.qif', 'oq'),
-        (3, 'default.csv', 'default_w_splits.qif', 'oqS Category'),
-        (4, 'xero.csv', 'xero.qif', 'oqc Description -m xero'),
-        (5, 'mint.csv', 'mint.qif', 'oqS Category -m mint'),
-        (
-            6, 'mint.csv', 'mint_alt.qif',
-            'oqs20150613 -e20150614 -S Category -m mint'
-        ),
-        (7, 'default.csv', 'default.ofx', 'oe 20150908'),
-        (8, 'default.csv', 'default_w_splits.ofx', 'oS Category'),
-        (9, 'mint.csv', 'mint.ofx', 'oS Category -m mint'),
-    ]
+    start = timer()
 
-    try:
-        env.run(script, cwd=parent_dir)
-        print('\nScripttest #1: %s ... ok' % script)
+    for pos, test in enumerate(tests):
+        num = pos + 1
+        opts, arguments, expected = test
+        joined_opts = ' '.join(opts) if opts else ''
+        joined_args = '"%s"' % '" "'.join(arguments) if arguments else ''
+        command = "%s %s %s" % (script, joined_opts, joined_args)
+        short_command = "%s %s %s" % (short_script, joined_opts, joined_args)
+        result = env.run(command, cwd=PARENT_DIR, expect_stderr=True)
+        output = result.stdout
 
-        for test_num, example_filename, check_filename, opts in tests:
-            example = p.join(example_dir, example_filename)
-            check = p.join(check_dir, check_filename)
-            checkfile = open(check)
+        if isinstance(expected, bool):
+            text = StringIO(output).read()
+            outlines = [str(bool(text))]
+            checklines = StringIO(str(expected)).readlines()
+        elif p.isfile(expected):
+            outlines = StringIO(output).readlines()
 
-            script = 'bin/csv2ofx -%s %s %s' % (opts, example, tmpname)
-            env.run(script, cwd=parent_dir)
-            args = [checkfile.readlines(), open(tmpname).readlines()]
-            kwargs = {'fromfile': 'expected', 'tofile': 'got'}
-            diffs = list(unified_diff(*args, **kwargs))
+            with open(expected, encoding='utf-8') as f:
+                checklines = f.readlines()
+        else:
+            outlines = StringIO(output).readlines()
+            checklines = StringIO(expected).readlines()
 
-            if diffs:
-                loc = ' '.join(script.split(' ')[:-1])
-                msg = "ERROR from test #%i! Output:\n\t%s\n" % (test_num, loc)
-                msg += "doesn't match hash of\n\t%s\n" % check
-                sys.stderr.write(msg)
-                sys.exit(''.join(diffs))
-            else:
-                short_script = 'csv2ofx -%s %s %s' % (
-                    opts, example_filename, check_filename)
+        args = [checklines, list(filter_output(outlines))]
+        kwargs = {'fromfile': 'expected', 'tofile': 'got'}
+        diffs = ''.join(unified_diff(*args, **kwargs))
 
-                print('Scripttest #%i: %s ... ok' % (test_num, short_script))
-    except Exception as e:
-        sys.exit(e)
-    else:
-        time = timer() - start
-        print('%s' % '-' * 70)
-        print('Ran %i scripttests in %0.3fs\n\nOK' % (test_num, time))
-        sys.exit(0)
-    finally:
-        checkfile.close
-        os.unlink(tmpname)
+        if diffs:
+            failures += 1
+            msg = "ERROR! Output from test #%i:\n  %s\n" % (num, short_command)
+            msg += "doesn't match:\n  %s\n" % expected
+            msg += diffs if diffs else ''
+        else:
+            logger.debug(output)
+            msg = 'Scripttest #%i: %s ... ok' % (num, short_command)
+
+        logger.info(msg)
+
+        if stop and failures:
+            break
+
+    time = timer() - start
+    logger.info('%s' % '-' * 70)
+    end = 'FAILED (failures=%i)' % failures if failures else 'OK'
+    logger.info('Ran %i scripttests in %0.3fs\n\n%s' % (num, time, end))
+    sys.exit(failures)
 
 if __name__ == '__main__':
-    main()
+    csv2ofx = p.join(PARENT_DIR, 'bin', 'csv2ofx')
+
+    def gen_test(raw):
+        for opts, _in, _out in raw:
+            if _in and _out:
+                args = [p.join(EXAMPLE_DIR, _in)]
+                yield (opts, args, p.join(CHECK_DIR, _out))
+            else:
+                yield (opts, _in, _out)
+
+    mint_alt_opts = ['-oqs20150613', '-e20150614', '-S Category', '-m mint']
+    server_date = '-D 20161031112908'
+    pre_tests = [
+        (['--help'], [], True),
+        (['-oq'], 'default.csv', 'default.qif'),
+        (['-oqS Category'], 'default.csv', 'default_w_splits.qif', ),
+        (['-oqc Description', '-m xero'], 'xero.csv', 'xero.qif'),
+        (['-oqS Category', '-m mint'], 'mint.csv', 'mint.qif'),
+        (mint_alt_opts, 'mint.csv', 'mint_alt.qif'),
+        (['-oe 20150908', server_date], 'default.csv', 'default.ofx'),
+        (['-oS Category', server_date], 'default.csv', 'default_w_splits.ofx'),
+        (['-oS Category', '-m mint', server_date], 'mint.csv', 'mint.ofx'),
+    ]
+
+    main(csv2ofx, gen_test(pre_tests))

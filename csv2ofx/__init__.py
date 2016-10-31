@@ -28,7 +28,9 @@ from functools import partial
 from datetime import datetime as dt
 from operator import itemgetter
 
-from tabutils.process import merge
+from builtins import *
+from six.moves import filterfalse
+from meza.process import merge, group
 from dateutil.parser import parse
 
 from . import utils
@@ -38,7 +40,7 @@ __package_name__ = 'csv2ofx'
 __author__ = 'Reuben Cummings'
 __description__ = 'converts a csv file of transactions to an ofx or qif file'
 __email__ = 'reubano@gmail.com'
-__version__ = '0.18.2'
+__version__ = '0.19.0'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2015 Reuben Cummings'
 
@@ -74,8 +76,8 @@ class Content(object):
         else:
             self.split_account = None
 
-        self.start = kwargs.get('start', dt(2000, 1, 1))
-        self.end = kwargs.get('end', dt.now())
+        self.start = kwargs.get('start') or dt(1970, 1, 1)
+        self.end = kwargs.get('end') or dt.now()
 
     def get(self, name, tr=None, default=None):
         """ Gets an attribute which could be either a normal attribute,
@@ -93,7 +95,10 @@ class Content(object):
                 transaction, or the value of the attribute.
 
         Examples:
+            >>> import datetime
+            >>> from datetime import datetime as dt
             >>> from csv2ofx.mappings.mint import mapping
+            >>>
             >>> tr = {'Transaction Type': 'debit', 'Amount': 1000.00}
             >>> start = dt(2015, 1, 1)
             >>> Content(mapping, start=start).get('start')  # normal attribute
@@ -132,6 +137,8 @@ class Content(object):
 
         Examples:
             >>> from csv2ofx.mappings.mint import mapping
+            >>> from datetime import datetime as dt
+            >>>
             >>> tr = {'Date': '06/12/10', 'Amount': 1000.00}
             >>> Content(mapping, start=dt(2010, 1, 1)).skip_transaction(tr)
             False
@@ -150,7 +157,10 @@ class Content(object):
             (decimal): The converted amount.
 
         Examples:
+            >>> from decimal import Decimal
+            >>> from datetime import datetime as dt
             >>> from csv2ofx.mappings.mint import mapping
+            >>>
             >>> tr = {'Date': '06/12/10', 'Amount': '$1,000'}
             >>> Content(mapping, start=dt(2010, 1, 1)).convert_amount(tr)
             Decimal('1000.00')
@@ -167,19 +177,25 @@ class Content(object):
             (dict): the QIF content
 
         Examples:
+            >>> import datetime
+            >>> from decimal import Decimal
             >>> from csv2ofx.mappings.mint import mapping
             >>> tr = {'Transaction Type': 'debit', 'Amount': 1000.00, \
 'Date': '06/12/10', 'Description': 'payee', 'Original Description': \
 'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': \
 'account'}
-            >>> Content(mapping).transaction_data(tr)
-            {u'account_id': 'e268443e43d93dab7ebef303bbe9642f', u'memo': \
-u'description notes', u'split_account_id': None, u'currency': u'USD', \
-u'date': datetime.datetime(2010, 6, 12, 0, 0), u'class': None, u'bank': \
-u'account', u'account': u'account', u'split_account': None, u'bank_id': \
-'e268443e43d93dab7ebef303bbe9642f', u'id': \
-'ee86450a47899254e2faa82dca3c2cf2', u'payee': u'payee', u'amount': \
-Decimal('-1000.00'), u'check_num': None, u'type': u'debit'}
+            >>> Content(mapping).transaction_data(tr) == {
+            ...     'account_id': 'e268443e43d93dab7ebef303bbe9642f',
+            ...     'memo': 'description notes', 'split_account_id':
+            ...     None, 'currency': 'USD',
+            ...     'date': datetime.datetime(2010, 6, 12, 0, 0),
+            ...     'class': None, 'bank': 'account', 'account': 'account',
+            ...     'split_account': None,
+            ...     'bank_id': 'e268443e43d93dab7ebef303bbe9642f',
+            ...     'id': 'ee86450a47899254e2faa82dca3c2cf2', 'payee': 'payee',
+            ...     'amount': Decimal('-1000.00'), 'check_num': None,
+            ...     'type': 'debit'}
+            True
         """
         account = self.get('account', tr)
         split_account = self.get('split_account', tr)
@@ -221,21 +237,20 @@ Decimal('-1000.00'), u'check_num': None, u'type': u'debit'}
         }
 
     def gen_trxns(self, groups, collapse=False):
-        for group, transactions in groups:
+        for grp, transactions in groups:
             if self.is_split and collapse:
                 # group transactions by `collapse` field and sum the amounts
-                groupby = itemgetter(collapse)
-                byaccount = utils.group_transactions(transactions, groupby)
+                byaccount = group(transactions, collapse)
                 op = lambda values: sum(map(utils.convert_amount, values))
-                merger = partial(merge, predicate=self.amount, op=op)
+                merger = partial(merge, pred=self.amount, op=op)
                 trxns = [merger(dicts) for _, dicts in byaccount]
             else:
                 trxns = transactions
 
-            yield (group, trxns)
+            yield (grp, trxns)
 
     def clean_trxns(self, groups):
-        for group, trxns in groups:
+        for grp, trxns in groups:
             _args = [trxns, self.convert_amount]
 
             # if it's split, transactions skipping is all or none
@@ -244,7 +259,7 @@ Decimal('-1000.00'), u'check_num': None, u'type': u'debit'}
             elif self.is_split and not utils.verify_splits(*_args):
                 raise Exception('Splits do not sum to zero.')
             elif not self.is_split:
-                filtered_trxns = it.ifilterfalse(self.skip_transaction, trxns)
+                filtered_trxns = filterfalse(self.skip_transaction, trxns)
             else:
                 filtered_trxns = trxns
 
@@ -255,4 +270,4 @@ Decimal('-1000.00'), u'check_num': None, u'type': u'debit'}
 
             keyfunc = lambda enum: enum[0] != main_pos
             sorted_trxns = sorted(enumerate(filtered_trxns), key=keyfunc)
-            yield (group, main_pos, sorted_trxns)
+            yield (grp, main_pos, sorted_trxns)
