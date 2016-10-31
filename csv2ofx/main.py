@@ -22,22 +22,20 @@ from __future__ import (
 
 import time
 import sys
-import argparse
 import itertools as it
 
-from pprint import pprint
 from importlib import import_module
 from imp import find_module, load_module
 from pkgutil import iter_modules
 from operator import itemgetter
-
 from os import path as p
 from io import open
 from datetime import datetime as dt
-from dateutil.parser import parse
 from argparse import RawTextHelpFormatter, ArgumentParser
 
 from builtins import *
+from dateutil.parser import parse
+from pprint import pprint
 from meza.io import read_csv, IterStringIO, write
 
 from . import utils
