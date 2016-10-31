@@ -168,10 +168,14 @@ def run():
     except KeyError as err:
         msg = 'Field %s is missing from file. Check `mapping` option.' % err
     except TypeError as err:
-        msg = str(err)
+        msg = 'No data to write. %s. ' % str(err)
 
-        if not args.collapse:
+        if args.collapse:
+            msg += 'Check `start` and `end` options.'
+        else:
             msg += 'Try again with `-c` option.'
+    else:
+        msg = 0
 
         exit(msg)
     finally:
