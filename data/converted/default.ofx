@@ -34,7 +34,7 @@ ENCODING:UTF-8
 						<TRNAMT>45000.00</TRNAMT>
 						<FITID>6313fd711bc8f4288a27a757a2aa1495</FITID>
 						<CHECKNUM>INV-7</CHECKNUM>
-						<NAME>Tchenzema Tchenzema</NAME>
+						<NAME>Tchênzema Tchênzema</NAME>
 					</STMTTRN>
 					<STMTTRN>
 						<TRNTYPE>CREDIT</TRNTYPE>
@@ -42,7 +42,7 @@ ENCODING:UTF-8
 						<TRNAMT>50000.00</TRNAMT>
 						<FITID>c18f9b25f4eb7202c77c1806547cc9d2</FITID>
 						<CHECKNUM>INV-8</CHECKNUM>
-						<NAME>Bunduki Chairman</NAME>
+						<NAME>Ƣunȡuƙi Chairman</NAME>
 					</STMTTRN>
 				</BANKTRANLIST>
 			</STMTRS>
@@ -70,7 +70,7 @@ ENCODING:UTF-8
 						<TRNAMT>50000.00</TRNAMT>
 						<FITID>3d7edd42734ac30cfda810e6e319cbec</FITID>
 						<CHECKNUM>INV-2</CHECKNUM>
-						<NAME>Omary Akida</NAME>
+						<NAME>Ómary Akida</NAME>
 					</STMTTRN>
 					<STMTTRN>
 						<TRNTYPE>CREDIT</TRNTYPE>
@@ -86,7 +86,7 @@ ENCODING:UTF-8
 						<TRNAMT>65000.00</TRNAMT>
 						<FITID>dad7ac4f00802814ed54e3ff6da18fc0</FITID>
 						<CHECKNUM>INV-4</CHECKNUM>
-						<NAME>Habiba Said</NAME>
+						<NAME>Habibœ Said</NAME>
 					</STMTTRN>
 					<STMTTRN>
 						<TRNTYPE>CREDIT</TRNTYPE>
@@ -94,7 +94,7 @@ ENCODING:UTF-8
 						<TRNAMT>60000.00</TRNAMT>
 						<FITID>a09e46729f72618bf0ce373c15d1f9bf</FITID>
 						<CHECKNUM>INV-5</CHECKNUM>
-						<NAME>Nguluko Omary Yahya</NAME>
+						<NAME>Nguluko Ómary Yahya</NAME>
 					</STMTTRN>
 					<STMTTRN>
 						<TRNTYPE>CREDIT</TRNTYPE>
@@ -102,7 +102,7 @@ ENCODING:UTF-8
 						<TRNAMT>75000.00</TRNAMT>
 						<FITID>00a385fab455b4d6f969b8411899484e</FITID>
 						<CHECKNUM>INV-6</CHECKNUM>
-						<NAME>Asha Ramadhani</NAME>
+						<NAME>Ȣasha Ramadhani</NAME>
 					</STMTTRN>
 				</BANKTRANLIST>
 			</STMTRS>
