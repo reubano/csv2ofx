@@ -56,8 +56,7 @@ def get_account_type(account, account_types, def_type='n/a'):
 
 
 def convert_amount(content):
-    kwargs = get_separators(content)
-    return to_decimal(content, **kwargs)
+    return to_decimal(content, **get_separators(content))
 
 
 def get_max_split(splits, keyfunc):
