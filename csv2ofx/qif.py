@@ -22,6 +22,7 @@ from __future__ import (
 
 from datetime import datetime as dt
 from meza.fntools import chunk
+from meza.process import group
 
 from . import Content, utils
 
@@ -262,5 +263,5 @@ class QIF(Content):
         for chnk in chunk(records, chunksize):
             keyfunc = self.id if self.is_split else self.account
 
-            for group in utils.group_transactions(chnk, keyfunc):
-                yield group
+            for g in group(chnk, keyfunc):
+                yield g

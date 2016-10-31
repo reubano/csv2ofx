@@ -22,6 +22,7 @@ from __future__ import (
 
 from datetime import datetime as dt
 from meza.fntools import chunk, xmlize
+from meza.process import group
 
 from . import Content, utils
 
@@ -459,5 +460,5 @@ CHECKING</ACCTTYPE></BANKACCTTO>'
                 {k: xmlize([v]).next() for k, v in c.items()} for c in chnk]
             keyfunc = self.id if self.is_split else self.account
 
-            for group in utils.group_transactions(cleansed, keyfunc):
-                yield group
+            for g in group(cleansed, keyfunc):
+                yield g

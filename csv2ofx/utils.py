@@ -103,30 +103,6 @@ def verify_splits(splits, keyfunc):
     return not sum(map(keyfunc, splits))
 
 
-def group_transactions(transactions, keyfunc):
-    """Groups transactions by keyfunc
-
-    Args:
-        transactions (List[dict]): csv content
-        keyfunc (func):
-    Returns:
-        (List[dict]): csv content organized by transaction
-
-    Examples:
-        >>> transactions = [{'amount': '1,000.00', 'Date': '06/12/10', \
-'Category': 'Checking', 'account': 'account1'}, {'amount': '1,000.00', \
-'Date': '06/12/10', 'Category': 'Checking', 'account': 'account2'}]
-        >>> group_transactions(transactions, itemgetter('account')).next() == \
-(u'account1', [{u'Date': u'06/12/10', u'Category': u'Checking', \
-u'amount': u'1,000.00', u'account': u'account1'}])
-        True
-    """
-    sorted_transactions = sorted(transactions, key=keyfunc)
-
-    for account, group in it.groupby(sorted_transactions, keyfunc):
-        yield (account, list(group))
-
-
 def gen_data(groups):
     for group, main_pos, sorted_trxns in groups:
         for pos, trxn in sorted_trxns:

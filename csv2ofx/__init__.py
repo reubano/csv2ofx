@@ -28,7 +28,7 @@ from functools import partial
 from datetime import datetime as dt
 from operator import itemgetter
 
-from meza.process import merge
+from meza.process import merge, group
 from dateutil.parser import parse
 
 from . import utils
@@ -227,18 +227,17 @@ class Content(object):
         }
 
     def gen_trxns(self, groups, collapse=False):
-        for group, transactions in groups:
+        for grp, transactions in groups:
             if self.is_split and collapse:
                 # group transactions by `collapse` field and sum the amounts
-                groupby = itemgetter(collapse)
-                byaccount = utils.group_transactions(transactions, groupby)
+                byaccount = group(transactions, collapse)
                 op = lambda values: sum(map(utils.convert_amount, values))
                 merger = partial(merge, pred=self.amount, op=op)
                 trxns = [merger(dicts) for _, dicts in byaccount]
             else:
                 trxns = transactions
 
-            yield (group, trxns)
+            yield (grp, trxns)
 
     def clean_trxns(self, groups):
         for group, trxns in groups:
