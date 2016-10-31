@@ -81,7 +81,7 @@ parser.add_argument(
     '-S', '--split', metavar='FIELD_NAME', help=(
         'field used for the split account for single entry statements'))
 parser.add_argument(
-    '-C', '--chunksize', metavar='ROWS', default=10 ** 6,
+    '-C', '--chunksize', metavar='ROWS', type=int, default=2 ** 14,
     help="number of rows to process at a time")
 parser.add_argument(
     '-L', '--list-mappings', help="list the available mappings",
