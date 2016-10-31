@@ -1,0 +1,46 @@
+DATA:OFXSGML
+ENCODING:UTF-8
+<OFX>
+    <SIGNONMSGSRSV1>
+        <SONRS>
+            <STATUS>
+                <CODE>0</CODE>
+                <SEVERITY>INFO</SEVERITY>
+            </STATUS>
+            <DTSERVER>20050831165153.000[-8:PST]</DTSERVER>
+            <LANGUAGE>ENG</LANGUAGE>
+        </SONRS>
+    </SIGNONMSGSRSV1>
+    <BANKMSGSRSV1>
+        <STMTTRNRS>
+            <TRNUID>0</TRNUID>
+            <STATUS>
+                <CODE>0</CODE>
+                <SEVERITY>INFO</SEVERITY>
+            </STATUS>
+            <STMTRS>
+                <CURDEF>USD</CURDEF>
+                <BANKACCTFROM>
+                    <BANKID>000000123</BANKID>
+                    <ACCTID>123456</ACCTID>
+                    <ACCTTYPE>CHECKING</ACCTTYPE>
+                </BANKACCTFROM>
+                <BANKTRANLIST>
+                    <DTSTART>20050801</DTSTART>
+                    <DTEND>20050831165153.000[-8:PST]</DTEND>
+                    <STMTTRN>
+                        <TRNTYPE>POS</TRNTYPE>
+                        <DTPOSTED>20050824080000</DTPOSTED>
+                        <TRNAMT>-80</TRNAMT>
+                        <FITID>219378</FITID>
+                        <NAME>FrogKick Scuba Gear</NAME>
+                    </STMTTRN>
+                </BANKTRANLIST>
+                <LEDGERBAL>
+                    <BALAMT>2156.56</BALAMT>
+                    <DTASOF>20050831165153</DTASOF>
+                </LEDGERBAL>
+            </STMTRS>
+        </STMTTRNRS>
+    </BANKMSGSRSV1>
+</OFX>

@@ -1,0 +1,56 @@
+!Account
+NCash
+TCash
+^
+!Type:Cash
+NINV-7
+D03/24/15
+PTchenzema Tchenzema
+T45000.00
+^
+!Type:Cash
+NINV-8
+D03/25/15
+PBunduki Chairman
+T50000.00
+^
+!Account
+NChecking
+TBank
+^
+!Type:Bank
+NINV-1
+D02/08/15
+PAdolph Noya
+T50000.00
+^
+!Type:Bank
+NINV-2
+D02/08/15
+POmary Akida
+T50000.00
+^
+!Type:Bank
+NINV-3
+D02/24/15
+PSadrick Mtel
+T70000.00
+^
+!Type:Bank
+NINV-4
+D02/28/15
+PHabiba Said
+T65000.00
+^
+!Type:Bank
+NINV-5
+D03/04/15
+PNguluko Omary Yahya
+T60000.00
+^
+!Type:Bank
+NINV-6
+D03/09/15
+PAsha Ramadhani
+T75000.00
+^
