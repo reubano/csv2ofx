@@ -70,7 +70,6 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: Implementation :: PyPy',
-        'Programming Language :: Python :: Implementation :: PyPy3',
         'Environment :: Console',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Intended Audience :: Developers',
