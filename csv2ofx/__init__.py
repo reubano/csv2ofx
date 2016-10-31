@@ -28,6 +28,8 @@ from functools import partial
 from datetime import datetime as dt
 from operator import itemgetter
 
+from builtins import *
+from six.moves import filterfalse
 from meza.process import merge, group
 from dateutil.parser import parse
 
@@ -257,7 +259,7 @@ class Content(object):
             elif self.is_split and not utils.verify_splits(*_args):
                 raise Exception('Splits do not sum to zero.')
             elif not self.is_split:
-                filtered_trxns = it.ifilterfalse(self.skip_transaction, trxns)
+                filtered_trxns = filterfalse(self.skip_transaction, trxns)
             else:
                 filtered_trxns = trxns
 

@@ -21,6 +21,7 @@ from __future__ import (
     absolute_import, division, print_function, with_statement,
     unicode_literals)
 
+from builtins import *
 from meza.fntools import get_separators
 from meza.convert import to_decimal
 
@@ -37,10 +38,10 @@ def get_account_type(account, account_types, def_type='n/a'):
         (str): The resulting account type.
 
     Examples:
-        >>> get_account_type('somecash', {'Cash': ('cash',)})
-        u'Cash'
-        >>> get_account_type('account', {'Cash': ('cash',)})
-        u'n/a'
+        >>> get_account_type('somecash', {'Cash': ('cash',)}) == 'Cash'
+        True
+        >>> get_account_type('account', {'Cash': ('cash',)}) == 'n/a'
+        True
     """
     _type = def_type
 
@@ -69,11 +70,11 @@ def get_max_split(splits, keyfunc):
     Examples:
         >>> from operator import itemgetter
         >>> splits = [{'amount': 350}, {'amount': -450}, {'amount': 100}]
-        >>> get_max_split(splits, itemgetter('amount'))
-        (1, {u'amount': -450})
+        >>> get_max_split(splits, itemgetter('amount')) == (1, {'amount': -450})
+        True
         >>> splits = [{'amount': 350}, {'amount': -350}]
-        >>> get_max_split(splits, itemgetter('amount'))
-        (0, {u'amount': 350})
+        >>> get_max_split(splits, itemgetter('amount')) == (0, {'amount': 350})
+        True
     """
     maxfunc = lambda enum: abs(keyfunc(enum[1]))
     return max(enumerate(splits), key=maxfunc)

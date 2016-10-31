@@ -20,6 +20,7 @@ from __future__ import (
     absolute_import, division, print_function, with_statement,
     unicode_literals)
 
+from builtins import *
 from meza.fntools import chunk
 from meza.process import group
 
@@ -122,9 +123,10 @@ class QIF(Content):
 
         Examples:
             >>> kwargs = {'account': 'account', 'account_type': 'Bank'}
-            >>> QIF().account_start(**kwargs).replace('\\n', '').replace(\
-'\\t', '')
-            u'!AccountNaccountTBank^'
+            >>> start = '!AccountNaccountTBank^'
+            >>> result = QIF().account_start(**kwargs)
+            >>> start == result.replace('\\n', '').replace('\\t', '')
+            True
         """
         return "!Account\nN%(account)s\nT%(account_type)s\n^\n" % kwargs
 
@@ -149,9 +151,10 @@ class QIF(Content):
             >>> from datetime import datetime as dt
             >>> kwargs = {'payee': 'payee', 'amount': 100, 'check_num': 1, \
 'date': dt(2012, 1, 1), 'account_type': 'Bank'}
-            >>> QIF().transaction(**kwargs).replace('\\n', '').replace(\
-'\\t', '')
-            u'!Type:BankN1D01/01/12PpayeeT100.00'
+            >>> tr = '!Type:BankN1D01/01/12PpayeeT100.00'
+            >>> result = QIF().transaction(**kwargs)
+            >>> tr == result.replace('\\n', '').replace('\\t', '')
+            True
         """
         kwargs.update({'time_stamp': kwargs['date'].strftime('%m/%d/%y')})
 
@@ -196,9 +199,10 @@ class QIF(Content):
         Examples:
             >>> kwargs =  {'account': 'account', 'split_memo': 'memo', \
 'amount': 100}
-            >>> QIF().split_content(**kwargs).replace('\\n', '').replace(\
-'\\t', '')
-            u'SaccountEmemo$100.00'
+            >>> split = 'SaccountEmemo$100.00'
+            >>> result = QIF().split_content(**kwargs)
+            >>> split == result.replace('\\n', '').replace('\\t', '')
+            True
         """
         if kwargs.get('split_account'):
             content = "S%(split_account)s\n" % kwargs
@@ -218,8 +222,9 @@ class QIF(Content):
             (str): the QIF transaction end
 
         Examples:
-            >>> QIF().transaction_end().replace('\\n', '').replace('\\t', '')
-            u'^'
+            >>> result = QIF().transaction_end()
+            >>> result.replace('\\n', '').replace('\\t', '') == '^'
+            True
         """
         return "^\n"
 
