@@ -32,10 +32,10 @@ from os import path as p
 from io import open
 from datetime import datetime as dt
 from argparse import RawTextHelpFormatter, ArgumentParser
+from pprint import pprint
 
 from builtins import *
 from dateutil.parser import parse
-from pprint import pprint
 from meza.io import read_csv, IterStringIO, write
 
 from . import utils
@@ -43,14 +43,14 @@ from .ofx import OFX
 from .qif import QIF
 
 
-parser = ArgumentParser(
+parser = ArgumentParser(  # pylint: disable=C0103
     description="description: csv2ofx converts a csv file to ofx and qif",
     prog='csv2ofx', usage='%(prog)s [options] <source> <dest>',
     formatter_class=RawTextHelpFormatter)
 
 TYPES = ['CHECKING', 'SAVINGS', 'MONEYMRKT', 'CREDITLINE', 'Bank', 'Cash']
-mappings = import_module('csv2ofx.mappings')
-MODULES = tuple(itemgetter(1)(m) for m in iter_modules(mappings.__path__))
+MAPPINGS = import_module('csv2ofx.mappings')
+MODULES = tuple(itemgetter(1)(m) for m in iter_modules(MAPPINGS.__path__))
 
 
 parser.add_argument(
@@ -102,12 +102,14 @@ parser.add_argument(
     '-v', '--verbose', help="verbose output", action='store_true',
     default=False)
 
-args = parser.parse_args()
+args = parser.parse_args()  # pylint: disable=C0103
 
 
 def run():  # noqa: C901
+    """Parses the CLI options and runs the main program
+    """
     if args.debug:
-        pprint(dict(args._get_kwargs()))
+        pprint(dict(args._get_kwargs()))  # pylint: disable=W0212
         exit(0)
 
     if args.version:
