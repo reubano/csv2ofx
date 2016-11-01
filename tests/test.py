@@ -13,15 +13,15 @@ from __future__ import (
     absolute_import, division, print_function, unicode_literals)
 
 import sys
-import os
-import pygogo as gogo
 
 from difflib import unified_diff
 from os import path as p
 from io import StringIO, open
 from timeit import default_timer as timer
-
 from builtins import *
+
+import pygogo as gogo
+
 from scripttest import TestFileEnvironment
 
 sys.path.append('../csv2ofx')
@@ -32,6 +32,7 @@ CHECK_DIR = p.join(PARENT_DIR, 'data', 'converted')
 
 
 def filter_output(outlines, debug_stmts=None):
+    """Remove meza debugging statements"""
     def_stmts = ['File was opened in', 'Decoding file with encoding']
     debug_stmts = debug_stmts or def_stmts
 
@@ -41,7 +42,7 @@ def filter_output(outlines, debug_stmts=None):
 
 
 def main(script, tests, verbose=False, stop=True):
-    """ Main method
+    """
     Returns 0 on success, 1 on failure
     """
     failures = 0
@@ -50,7 +51,6 @@ def main(script, tests, verbose=False, stop=True):
     env = TestFileEnvironment('.scripttest')
 
     start = timer()
-
     for pos, test in enumerate(tests):
         num = pos + 1
         opts, arguments, expected = test
@@ -95,13 +95,15 @@ def main(script, tests, verbose=False, stop=True):
     time = timer() - start
     logger.info('%s' % '-' * 70)
     end = 'FAILED (failures=%i)' % failures if failures else 'OK'
-    logger.info('Ran %i scripttests in %0.3fs\n\n%s' % (num, time, end))
+    logger.info('Ran %i scripttests in %0.3fs\n\n%s', num, time, end)
     sys.exit(failures)
 
 if __name__ == '__main__':
+    # pylint: disable=invalid-name
     csv2ofx = p.join(PARENT_DIR, 'bin', 'csv2ofx')
 
     def gen_test(raw):
+        """Generate test arguments"""
         for opts, _in, _out in raw:
             if _in and _out:
                 args = [p.join(EXAMPLE_DIR, _in)]
@@ -109,18 +111,18 @@ if __name__ == '__main__':
             else:
                 yield (opts, _in, _out)
 
-    mint_alt_opts = ['-oqs20150613', '-e20150614', '-S Category', '-m mint']
-    server_date = '-D 20161031112908'
-    pre_tests = [
+    MINT_ALT_OPTS = ['-oqs20150613', '-e20150614', '-S Category', '-m mint']
+    SERVER_DATE = '-D 20161031112908'
+    PRE_TESTS = [
         (['--help'], [], True),
         (['-oq'], 'default.csv', 'default.qif'),
         (['-oqS Category'], 'default.csv', 'default_w_splits.qif', ),
         (['-oqc Description', '-m xero'], 'xero.csv', 'xero.qif'),
         (['-oqS Category', '-m mint'], 'mint.csv', 'mint.qif'),
-        (mint_alt_opts, 'mint.csv', 'mint_alt.qif'),
-        (['-oe 20150908', server_date], 'default.csv', 'default.ofx'),
-        (['-oS Category', server_date], 'default.csv', 'default_w_splits.ofx'),
-        (['-oS Category', '-m mint', server_date], 'mint.csv', 'mint.ofx'),
+        (MINT_ALT_OPTS, 'mint.csv', 'mint_alt.qif'),
+        (['-oe 20150908', SERVER_DATE], 'default.csv', 'default.ofx'),
+        (['-oS Category', SERVER_DATE], 'default.csv', 'default_w_splits.ofx'),
+        (['-oS Category', '-m mint', SERVER_DATE], 'mint.csv', 'mint.ofx'),
     ]
 
-    main(csv2ofx, gen_test(pre_tests))
+    main(csv2ofx, gen_test(PRE_TESTS))
