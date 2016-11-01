@@ -21,10 +21,10 @@ from __future__ import (
     unicode_literals)
 
 import time
-import sys
 import itertools as it
 import traceback
 
+from sys import stdin, stdout
 from importlib import import_module
 from imp import find_module, load_module
 from pkgutil import iter_modules
@@ -140,12 +140,8 @@ def run():  # noqa: C901
         'end': parse(args.end) if args.end else None
     }
 
-    if args.source:
-        source = open(args.source, encoding=args.encoding)
-    else:
-        source = sys.stdin
-
     cont = QIF(mapping, **okwargs) if args.qif else OFX(mapping, **okwargs)
+    source = open(args.source, encoding=args.encoding) if args.source else stdin
 
     try:
         records = read_csv(source, has_header=cont.has_header)
@@ -177,7 +173,7 @@ def run():  # noqa: C901
         source.close()
         raise
 
-    dest = open(args.dest, encoding=args.encoding) if args.dest else sys.stdout
+    dest = open(args.dest, 'w', encoding=args.encoding) if args.dest else stdout
 
     try:
         res = write(dest, IterStringIO(content), **kwargs)
