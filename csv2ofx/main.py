@@ -23,6 +23,7 @@ from __future__ import (
 import time
 import sys
 import itertools as it
+import traceback
 
 from importlib import import_module
 from imp import find_module, load_module
@@ -96,6 +97,8 @@ parser.add_argument(
 parser.add_argument(
     '-D', '--server-date', help="OFX server date (default: source file mtime)")
 parser.add_argument(
+    '-E', '--encoding', default='utf-8', help="File encoding (default: utf-8)")
+parser.add_argument(
     '-d', '--debug', action='store_true', default=False,
     help="display the options and arguments passed to the parser")
 parser.add_argument(
@@ -137,7 +140,11 @@ def run():  # noqa: C901
         'end': parse(args.end) if args.end else None
     }
 
-    source = open(args.source, newline=None) if args.source else sys.stdin
+    if args.source:
+        source = open(args.source, encoding=args.encoding)
+    else:
+        source = sys.stdin
+
     cont = QIF(mapping, **okwargs) if args.qif else OFX(mapping, **okwargs)
 
     try:
@@ -162,15 +169,18 @@ def run():  # noqa: C901
         footer = cont.footer(date=server_date)
         filtered = filter(None, [header, body, footer])
         content = it.chain.from_iterable(filtered)
-        kwargs = {'overwrite': args.overwrite, 'chunksize': args.chunksize}
+        kwargs = {
+            'overwrite': args.overwrite,
+            'chunksize': args.chunksize,
+            'encoding': args.encoding}
     except:
         source.close()
         raise
 
-    dest = open(args.dest, newline=None) if args.dest else sys.stdout
+    dest = open(args.dest, encoding=args.encoding) if args.dest else sys.stdout
 
     try:
-        write(dest, IterStringIO(content), **kwargs)
+        res = write(dest, IterStringIO(content), **kwargs)
     except KeyError as err:
         msg = 'Field %s is missing from file. Check `mapping` option.' % err
     except TypeError as err:
@@ -180,11 +190,13 @@ def run():  # noqa: C901
             msg += 'Check `start` and `end` options.'
         else:
             msg += 'Try again with `-c` option.'
+    except Exception as err:  # pylint: disable=broad-except
+        msg = 1
+        traceback.print_exc()
     else:
-        msg = 0
-
-        exit(msg)
+        msg = 0 if res else 'No data to write. Check `start` and `end` options.'
     finally:
+        exit(msg)
         source.close() if args.source else None
         dest.close() if args.dest else None
 
