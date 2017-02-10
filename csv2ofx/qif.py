@@ -28,6 +28,7 @@ from . import Content, utils
 
 
 class QIF(Content):
+    """ A QIF object """
     def __init__(self, mapping=None, **kwargs):
         """ QIF constructor
         Args:
@@ -58,6 +59,7 @@ class QIF(Content):
         }
 
     def header(self, **kwargs):
+        """ Get the QIF header """
         return None
 
     def transaction_data(self, tr):
@@ -266,6 +268,7 @@ class QIF(Content):
             self.prev_group = group
 
     def gen_groups(self, records, chunksize=None):
+        """ Generate the QIF groups """
         for chnk in chunk(records, chunksize):
             keyfunc = self.id if self.is_split else self.account
 

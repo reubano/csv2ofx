@@ -44,11 +44,12 @@ __version__ = '0.19.3'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2015 Reuben Cummings'
 
-
 md5 = lambda content: hashlib.md5(content.encode('utf-8')).hexdigest()
 
 
 class Content(object):
+    """A transaction holding object
+    """
     def __init__(self, mapping=None, **kwargs):
         """ Base content constructor
         Args:
@@ -237,6 +238,7 @@ class Content(object):
         }
 
     def gen_trxns(self, groups, collapse=False):
+        """ Generate transactions """
         for grp, transactions in groups:
             if self.is_split and collapse:
                 # group transactions by `collapse` field and sum the amounts
@@ -250,10 +252,11 @@ class Content(object):
             yield (grp, trxns)
 
     def clean_trxns(self, groups):
+        """ Clean transactions """
         for grp, trxns in groups:
             _args = [trxns, self.convert_amount]
 
-            # if it's split, transactions skipping is all or none
+            # if it's split, transaction skipping is all or none
             if self.is_split and self.skip_transaction(trxns[0]):
                 continue
             elif self.is_split and not utils.verify_splits(*_args):

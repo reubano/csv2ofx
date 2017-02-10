@@ -30,6 +30,7 @@ from . import Content, utils
 
 
 class OFX(Content):
+    """ An OFX object """
     def __init__(self, mapping=None, **kwargs):
         """ OFX constructor
         Args:
@@ -468,6 +469,7 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
             self.prev_group = group
 
     def gen_groups(self, records, chunksize=None):
+        """ Generate the OFX groups """
         for chnk in chunk(records, chunksize):
             cleansed = [
                 {k: next(xmlize([v])) for k, v in c.items()} for c in chnk]

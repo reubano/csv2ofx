@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+# vim: sw=4:ts=4:expandtab
+"""
+csv2ofx.mappings.mintapi
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Provides a mapping for transactions obtained via mint.com
+"""
 from __future__ import absolute_import
 
 from operator import itemgetter

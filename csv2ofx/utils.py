@@ -27,7 +27,7 @@ from meza.convert import to_decimal
 
 
 def get_account_type(account, account_types, def_type='n/a'):
-    """ Detects the account type of a given account
+    """ Detect the account type of a given account
 
     Args:
         account (str): The account name
@@ -54,6 +54,7 @@ def get_account_type(account, account_types, def_type='n/a'):
 
 
 def convert_amount(content):
+    """ Convert number to a decimal amount """
     return to_decimal(content, **get_separators(content))
 
 
@@ -103,6 +104,7 @@ def verify_splits(splits, keyfunc):
 
 
 def gen_data(groups):
+    """ Generate the transaction data """
     for group, main_pos, sorted_trxns in groups:
         for pos, trxn in sorted_trxns:
             base_data = {
