@@ -186,6 +186,10 @@ def run():  # noqa: C901
             msg += 'Check `start` and `end` options.'
         else:
             msg += 'Try again with `-c` option.'
+    except ValueError:
+        # csv2ofx called with no arguments
+        msg = 0
+        parser.print_help()
     except Exception as err:  # pylint: disable=broad-except
         msg = 1
         traceback.print_exc()
