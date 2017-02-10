@@ -76,7 +76,7 @@ class QIF(Content):
             >>> from decimal import Decimal
             >>> from csv2ofx.mappings.mint import mapping
             >>> tr = {
-            ...     'Transaction Type': 'debit', 'Amount': 1000.00,
+            ...     'Transaction Type': 'DEBIT', 'Amount': 1000.00,
             ...     'Date': '06/12/10', 'Description': 'payee',
             ...     'Original Description': 'description', 'Notes': 'notes',
             ...     'Category': 'Checking', 'Account Name': 'account'}
@@ -90,7 +90,7 @@ class QIF(Content):
             ...     'split_memo': 'description notes', 'split_account': None,
             ...     'bank_id': 'e268443e43d93dab7ebef303bbe9642f',
             ...     'id': 'ee86450a47899254e2faa82dca3c2cf2', 'payee': 'payee',
-            ...     'amount': amount, 'check_num': None, 'type': 'debit'}
+            ...     'amount': amount, 'check_num': None, 'type': 'DEBIT'}
             True
         """
         data = super(QIF, self).transaction_data(tr)
@@ -154,9 +154,9 @@ class QIF(Content):
             >>> from datetime import datetime as dt
             >>> kwargs = {'payee': 'payee', 'amount': 100, 'check_num': 1, \
 'date': dt(2012, 1, 1), 'account_type': 'Bank'}
-            >>> tr = '!Type:BankN1D01/01/12PpayeeT100.00'
+            >>> trxn = '!Type:BankN1D01/01/12PpayeeT100.00'
             >>> result = QIF().transaction(**kwargs)
-            >>> tr == result.replace('\\n', '').replace('\\t', '')
+            >>> trxn == result.replace('\\n', '').replace('\\t', '')
             True
         """
         kwargs.update({'time_stamp': kwargs['date'].strftime('%m/%d/%y')})
@@ -244,33 +244,34 @@ class QIF(Content):
             return self.transaction_end()
 
     def gen_body(self, data):
-        for gd in data:
-            trxn_data = self.transaction_data(gd['trxn'])
-            account = self.account(gd['trxn'])
-            group = gd['group']
+        """ Generate the QIF body """
+        for datum in data:
+            trxn_data = self.transaction_data(datum['trxn'])
+            account = self.account(datum['trxn'])
+            grp = datum['group']
 
-            if self.prev_group and self.prev_group != group and self.is_split:
+            if self.prev_group and self.prev_group != grp and self.is_split:
                 yield self.transaction_end()
 
-            if gd['is_main'] and self.prev_account != account:
+            if datum['is_main'] and self.prev_account != account:
                 yield self.account_start(**trxn_data)
 
-            if (self.is_split and gd['is_main']) or not self.is_split:
+            if (self.is_split and datum['is_main']) or not self.is_split:
                 yield self.transaction(**trxn_data)
                 self.prev_account = account
 
-            if (self.is_split and not gd['is_main']) or self.split_account:
+            if (self.is_split and not datum['is_main']) or self.split_account:
                 yield self.split_content(**trxn_data)
 
             if not self.is_split:
                 yield self.transaction_end()
 
-            self.prev_group = group
+            self.prev_group = grp
 
     def gen_groups(self, records, chunksize=None):
         """ Generate the QIF groups """
         for chnk in chunk(records, chunksize):
             keyfunc = self.id if self.is_split else self.account
 
-            for g in group(chnk, keyfunc):
-                yield g
+            for gee in group(chnk, keyfunc):
+                yield gee

@@ -108,11 +108,11 @@ class OFX(Content):
         content += '\t\t\t</STATUS>\n'
         return content
 
-    def transaction_data(self, tr):
+    def transaction_data(self, trxn):
         """ gets OFX transaction data
 
         Args:
-            tr (dict): the transaction
+            trxn (dict): the transaction
 
         Returns:
             (dict): the OFX transaction data
@@ -121,12 +121,12 @@ class OFX(Content):
             >>> import datetime
             >>> from csv2ofx.mappings.mint import mapping
             >>> from decimal import Decimal
-            >>> tr = {
-            ...     'Transaction Type': 'debit', 'Amount': 1000.00,
+            >>> trxn = {
+            ...     'Transaction Type': 'DEBIT', 'Amount': 1000.00,
             ...     'Date': '06/12/10', 'Description': 'payee',
             ...     'Original Description': 'description', 'Notes': 'notes',
             ...     'Category': 'Checking', 'Account Name': 'account'}
-            >>> OFX(mapping, def_type='CHECKING').transaction_data(tr) == {
+            >>> OFX(mapping, def_type='CHECKING').transaction_data(trxn) == {
             ...     'account_type': 'CHECKING',
             ...     'account_id': 'e268443e43d93dab7ebef303bbe9642f',
             ...     'memo': 'description notes', 'split_account_id': None,
@@ -137,13 +137,13 @@ class OFX(Content):
             ...     'bank_id': 'e268443e43d93dab7ebef303bbe9642f',
             ...     'id': 'ee86450a47899254e2faa82dca3c2cf2', 'payee': 'payee',
             ...     'amount': Decimal('-1000.00'), 'split_account_type': None,
-            ...     'check_num': None, 'type': 'debit'}
+            ...     'check_num': None, 'type': 'DEBIT'}
             True
         """
-        data = super(OFX, self).transaction_data(tr)
+        data = super(OFX, self).transaction_data(trxn)
         args = [self.account_types, self.def_type]
-        sa = data['split_account']
-        sa_type = utils.get_account_type(sa, *args) if sa else None
+        split = data['split_account']
+        sa_type = utils.get_account_type(split, *args) if split else None
         memo = data.get('memo')
         _class = data.get('class')
 
@@ -222,13 +222,13 @@ class OFX(Content):
             (str): the OFX content
 
         Examples:
-            >>> kwargs = {'date': dt(2012, 1, 15), 'type': 'debit', \
+            >>> kwargs = {'date': dt(2012, 1, 15), 'type': 'DEBIT', \
 'amount': 100, 'id': 1, 'check_num': 1, 'payee': 'payee', 'memo': 'memo'}
-            >>> tr = '<STMTTRN><TRNTYPE>debit</TRNTYPE><DTPOSTED>20120115000000\
-</DTPOSTED><TRNAMT>100.00</TRNAMT><FITID>1</FITID><CHECKNUM>1</CHECKNUM><NAME>\
-payee</NAME><MEMO>memo</MEMO></STMTTRN>'
+            >>> trxn = '<STMTTRN><TRNTYPE>DEBIT</TRNTYPE><DTPOSTED>\
+20120115000000</DTPOSTED><TRNAMT>100.00</TRNAMT><FITID>1</FITID><CHECKNUM>1\
+</CHECKNUM><NAME>payee</NAME><MEMO>memo</MEMO></STMTTRN>'
             >>> result = OFX().transaction(**kwargs)
-            >>> tr == result.replace('\\n', '').replace('\\t', '')
+            >>> trxn == result.replace('\\n', '').replace('\\t', '')
             True
         """
         time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
@@ -301,11 +301,11 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
             >>> kwargs = {'currency': 'USD', 'date': dt(2012, 1, 15), \
 'bank_id': 1, 'account_id': 1, 'account_type': 'CHECKING', 'amount': 100, \
 'id': 'jbaevf'}
-            >>> tr = '<INTRARS><CURDEF>USD</CURDEF><SRVRTID>jbaevf</SRVRTID>\
+            >>> trxn = '<INTRARS><CURDEF>USD</CURDEF><SRVRTID>jbaevf</SRVRTID>\
 <XFERINFO><TRNAMT>100.00</TRNAMT><BANKACCTFROM><BANKID>1</BANKID><ACCTID>1\
 </ACCTID><ACCTTYPE>CHECKING</ACCTTYPE></BANKACCTFROM>'
             >>> result = OFX().transfer(**kwargs)
-            >>> tr == result.replace('\\n', '').replace('\\t', '')
+            >>> trxn == result.replace('\\n', '').replace('\\t', '')
             True
         """
         content = '\t\t\t<INTRARS>\n'
@@ -435,17 +435,18 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
         return content
 
     def gen_body(self, data):  # noqa: C901
-        for gd in data:
-            group = gd['group']
+        """ Generate the OFX body """
+        for datum in data:
+            grp = datum['group']
 
-            if self.is_split and gd['len'] > 2:
+            if self.is_split and datum['len'] > 2:
                 # OFX doesn't support more than 2 splits
-                raise TypeError('Group %s has too many splits.\n' % group)
+                raise TypeError('Group %s has too many splits.\n' % grp)
 
-            trxn_data = self.transaction_data(gd['trxn'])
+            trxn_data = self.transaction_data(datum['trxn'])
             split_like = self.is_split or self.split_account
             full_split = self.is_split and self.split_account
-            new_group = self.prev_group and self.prev_group != group
+            new_group = self.prev_group and self.prev_group != grp
 
             if new_group and full_split:
                 yield self.transfer_end(**trxn_data)
@@ -456,17 +457,17 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
                 yield self.transfer(**trxn_data)
                 yield self.split_content(**trxn_data)
                 yield self.transfer_end(**trxn_data)
-            elif self.is_split and gd['is_main']:
+            elif self.is_split and datum['is_main']:
                 yield self.transfer(**trxn_data)
             elif self.is_split:
                 yield self.split_content(**trxn_data)
-            elif gd['is_main']:
+            elif datum['is_main']:
                 yield self.account_start(**trxn_data)
                 yield self.transaction(**trxn_data)
             else:
                 yield self.transaction(**trxn_data)
 
-            self.prev_group = group
+            self.prev_group = grp
 
     def gen_groups(self, records, chunksize=None):
         """ Generate the OFX groups """
@@ -475,5 +476,5 @@ payee</NAME><MEMO>memo</MEMO></STMTTRN>'
                 {k: next(xmlize([v])) for k, v in c.items()} for c in chnk]
             keyfunc = self.id if self.is_split else self.account
 
-            for g in group(cleansed, keyfunc):
-                yield g
+            for gee in group(cleansed, keyfunc):
+                yield gee
