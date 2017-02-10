@@ -272,8 +272,8 @@ class QIF(Content):
             (str): the QIF footer
 
         Examples:
-            >>> QIF().footer()
-            ''
+            >>> QIF().footer() == ''
+            True
         """
         return self.transaction_end() if self.is_split else ''
 
