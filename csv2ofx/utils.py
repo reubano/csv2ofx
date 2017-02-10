@@ -38,6 +38,7 @@ ACTION_TYPES = {
 
 TRANSFERABLE = {'Buy', 'Div', 'Int', 'Sell'}
 
+
 def get_account_type(account, account_types, def_type='n/a'):
     """ Detect the account type of a given account
 
@@ -94,6 +95,7 @@ def get_action(category, transfer=False, def_action='ShrsIn'):
         return '%sX' % _type
     else:
         return _type
+
 
 def convert_amount(content):
     """ Convert number to a decimal amount """
