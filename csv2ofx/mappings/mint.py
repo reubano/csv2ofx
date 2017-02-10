@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # vim: sw=4:ts=4:expandtab
+# pylint: disable=invalid-name
 """
 csv2ofx.mappings.mintapi
 ~~~~~~~~~~~~~~~~~~~~~~~~

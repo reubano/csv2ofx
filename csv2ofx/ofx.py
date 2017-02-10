@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # vim: sw=4:ts=4:expandtab
+# pylint: disable=no-self-use
 
 """
 csv2ofx.ofx
@@ -48,7 +49,7 @@ class OFX(Content):
             >>> OFX(mapping)  # doctest: +ELLIPSIS
             <csv2ofx.ofx.OFX object at 0x...>
         """
-        # TODO: Add timezone info
+        # TODO: Add timezone info  # pylint: disable=fixme
         super(OFX, self).__init__(mapping, **kwargs)
         self.resp_type = 'INTRATRNRS' if self.split_account else 'STMTTRNRS'
         self.def_type = kwargs.get('def_type')
@@ -384,6 +385,7 @@ class OFX(Content):
         content += '\t\t\t\t\t</BANKACCTTO>\n'
         return content
 
+    # pylint: disable=unused-argument
     def transfer_end(self, date=None, **kwargs):
         """ Gets OFX transfer end
 

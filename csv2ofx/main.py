@@ -44,7 +44,7 @@ from .ofx import OFX
 from .qif import QIF
 
 
-parser = ArgumentParser(  # pylint: disable=C0103
+parser = ArgumentParser(  # pylint: disable=invalid-name
     description="description: csv2ofx converts a csv file to ofx and qif",
     prog='csv2ofx', usage='%(prog)s [options] <source> <dest>',
     formatter_class=RawTextHelpFormatter)

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # vim: sw=4:ts=4:expandtab
+# pylint: disable=no-self-use
 
 """
 csv2ofx.qif
@@ -59,7 +60,7 @@ class QIF(Content):
             'Cash': ('cash', 'expenses')
         }
 
-    def header(self, **kwargs):
+    def header(self, **kwargs):  # pylint: disable=unused-argument
         """ Get the QIF header """
         return None
 
@@ -263,7 +264,7 @@ class QIF(Content):
         """
         return "^\n"
 
-    def footer(self, **kwargs):
+    def footer(self, **kwargs):  # pylint: disable=unused-argument
         """ Gets QIF transaction footer.
 
         Returns:

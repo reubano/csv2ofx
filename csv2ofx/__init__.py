@@ -45,10 +45,11 @@ __version__ = '0.19.3'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2015 Reuben Cummings'
 
+# pylint: disable=invalid-name
 md5 = lambda content: hashlib.md5(content.encode('utf-8')).hexdigest()
 
 
-class Content(object):
+class Content(object):  # pylint: disable=too-many-instance-attributes
     """A transaction holding object
     """
     def __init__(self, mapping=None, **kwargs):
@@ -68,6 +69,13 @@ class Content(object):
             <csv2ofx.Content object at 0x...>
         """
         mapping = mapping or {}
+
+        # pylint doesn't like dynamically set attributes...
+        self.amount = None
+        self.account = lambda _: None
+        self.split_account = None
+        self.inv_split_account = None
+        self.id = None
         [self.__setattr__(k, v) for k, v in mapping.items()]
 
         if not hasattr(self, 'is_split'):
@@ -170,7 +178,7 @@ class Content(object):
         """
         return utils.convert_amount(self.get('amount', trxn))
 
-    def transaction_data(self, trxn):
+    def transaction_data(self, trxn):  # pylint: disable=too-many-locals
         """ gets transaction data
 
         Args:
@@ -297,6 +305,7 @@ class Content(object):
             else:
                 main_pos = 0
 
+            # pylint: disable=cell-var-from-loop
             keyfunc = lambda enum: enum[0] != main_pos
             sorted_trxns = sorted(enumerate(filtered_trxns), key=keyfunc)
             yield (grp, main_pos, sorted_trxns)
