@@ -40,7 +40,6 @@ class OFX(Content):
 
         Kwargs:
             def_type (str): Default account type.
-            split_header (str): Transaction field to use for the split account.
             start (date): Date from which to begin including transactions.
             end (date): Date from which to exclude transactions.
 
@@ -132,11 +131,12 @@ class OFX(Content):
             ...     'account': 'account', 'currency': 'USD',
             ...     'account_type': 'CHECKING', 'shares': Decimal('0'),
             ...     'is_investment': False, 'bank': 'account',
-            ...     'split_account_type': None, 'split_account_id': None,
+            ...     'split_account_type': 'CHECKING',
+            ...     'split_account_id': '195917574edc9b6bbeb5be9785b6a479',
             ...     'class': None, 'amount': Decimal('-1000.00'),
             ...     'memo': 'description notes',
             ...     'id': 'ee86450a47899254e2faa82dca3c2cf2',
-            ...     'split_account': None, 'action': '', 'payee': 'payee',
+            ...     'split_account': 'Checking', 'action': '', 'payee': 'payee',
             ...     'date': dt(2010, 6, 12, 0, 0), 'category': '',
             ...     'bank_id': 'e268443e43d93dab7ebef303bbe9642f',
             ...     'price': Decimal('0'), 'symbol': '', 'check_num': None,

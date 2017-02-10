@@ -59,7 +59,6 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             kwargs (dict): Keyword arguments
 
         Kwargs:
-            split_header (str): Transaction field to use for the split account.
             start (date): Date from which to begin including transactions.
             end (date): Date from which to exclude transactions.
 
@@ -81,12 +80,6 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
         if not hasattr(self, 'is_split'):
             self.is_split = False
 
-        if kwargs.get('split_header'):
-            split_account = itemgetter(kwargs['split_header'])
-        else:
-            split_account = None
-
-        self.split_account = self.inv_split_account = split_account
         self.start = kwargs.get('start') or dt(1970, 1, 1)
         self.end = kwargs.get('end') or dt.now()
 
@@ -199,15 +192,17 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             >>> Content(mapping).transaction_data(trxn) == {
             ...     'account_id': 'e268443e43d93dab7ebef303bbe9642f',
             ...     'bank_id': 'e268443e43d93dab7ebef303bbe9642f',
-            ...     'account': 'account', 'split_account_id': None,
+            ...     'account': 'account',
+            ...     'split_account_id': '195917574edc9b6bbeb5be9785b6a479',
             ...     'shares': Decimal('0'), 'payee': 'payee', 'currency': 'USD',
             ...     'bank': 'account', 'class': None, 'is_investment': False,
             ...     'date': datetime.datetime(2010, 6, 12, 0, 0),
             ...     'price': Decimal('0'), 'symbol': '', 'action': '',
             ...     'check_num': None, 'id': 'ee86450a47899254e2faa82dca3c2cf2',
-            ...     'split_account': None, 'type': 'DEBIT', 'category': '',
-            ...     'amount': Decimal('-1000.00'), 'memo': 'description notes',
-            ...     'inv_split_account': None, 'x_action': ''}
+            ...     'split_account': 'Checking', 'type': 'DEBIT',
+            ...     'category': '', 'amount': Decimal('-1000.00'),
+            ...     'memo': 'description notes', 'inv_split_account': None,
+            ...     'x_action': ''}
             True
         """
         account = self.get('account', trxn)

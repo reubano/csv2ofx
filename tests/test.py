@@ -111,18 +111,19 @@ if __name__ == '__main__':
             else:
                 yield (opts, _in, _out)
 
-    MINT_ALT_OPTS = ['-oqs20150613', '-e20150614', '-S Category', '-m mint']
+    MINT_ALT_OPTS = ['-oqs20150613', '-e20150614', '-m mint']
     SERVER_DATE = '-D 20161031112908'
+    SPLIT_OPTS = ['-o', '-m split_account', SERVER_DATE]
     PRE_TESTS = [
         (['--help'], [], True),
         (['-oq'], 'default.csv', 'default.qif'),
-        (['-oqS Category'], 'default.csv', 'default_w_splits.qif', ),
+        (['-oq', '-m split_account'], 'default.csv', 'default_w_splits.qif'),
         (['-oqc Description', '-m xero'], 'xero.csv', 'xero.qif'),
-        (['-oqS Category', '-m mint'], 'mint.csv', 'mint.qif'),
+        (['-oq', '-m mint'], 'mint.csv', 'mint.qif'),
         (MINT_ALT_OPTS, 'mint.csv', 'mint_alt.qif'),
         (['-oe 20150908', SERVER_DATE], 'default.csv', 'default.ofx'),
-        (['-oS Category', SERVER_DATE], 'default.csv', 'default_w_splits.ofx'),
-        (['-oS Category', '-m mint', SERVER_DATE], 'mint.csv', 'mint.ofx'),
+        (SPLIT_OPTS, 'default.csv', 'default_w_splits.ofx'),
+        (['-o', '-m mint', SERVER_DATE], 'mint.csv', 'mint.ofx'),
     ]
 
     main(csv2ofx, gen_test(PRE_TESTS))

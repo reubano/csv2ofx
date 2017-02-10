@@ -77,9 +77,6 @@ parser.add_argument(
         'field used to combine transactions within a split for double entry '
         'statements'))
 parser.add_argument(
-    '-S', '--split', metavar='FIELD_NAME', help=(
-        'field used for the split account for single entry statements'))
-parser.add_argument(
     '-C', '--chunksize', metavar='ROWS', type=int, default=2 ** 14,
     help="number of rows to process at a time")
 parser.add_argument(
@@ -135,7 +132,6 @@ def run():  # noqa: C901
 
     okwargs = {
         'def_type': args.account_type or 'Bank' if args.qif else 'CHECKING',
-        'split_header': args.split,
         'start': parse(args.start) if args.start else None,
         'end': parse(args.end) if args.end else None
     }

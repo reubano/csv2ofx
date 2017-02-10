@@ -38,7 +38,6 @@ class QIF(Content):
 
         Kwargs:
             def_type (str): Default account type.
-            split_header (str): Transaction field to use for the split account.
             start (date): Date from which to begin including transactions.
             end (date): Date from which to exclude transactions.
 
@@ -91,9 +90,10 @@ class QIF(Content):
             ...     'class': None, 'amount': Decimal('-1000.00'),
             ...     'memo': 'description notes',
             ...     'id': 'ee86450a47899254e2faa82dca3c2cf2',
-            ...     'split_account': None, 'action': '', 'payee': 'payee',
-            ...     'date': dt(2010, 6, 12, 0, 0),
-            ...     'category': '',
+            ...     'split_account': 'Checking',
+            ...     'split_account_id': '195917574edc9b6bbeb5be9785b6a479',
+            ...     'action': '', 'payee': 'payee',
+            ...     'date': dt(2010, 6, 12, 0, 0), 'category': '',
             ...     'bank_id': 'e268443e43d93dab7ebef303bbe9642f',
             ...     'price': Decimal('0'), 'symbol': '', 'check_num': None,
             ...     'inv_split_account': None, 'x_action': '', 'type': 'DEBIT'}
@@ -158,8 +158,9 @@ class QIF(Content):
 
         Examples:
             >>> from datetime import datetime as dt
-            >>> kwargs = {'payee': 'payee', 'amount': 100, 'check_num': 1, \
-'date': dt(2012, 1, 1), 'account_type': 'Bank'}
+            >>> kwargs = {
+            ...     'payee': 'payee', 'amount': 100, 'check_num': 1,
+            ...     'date': dt(2012, 1, 1), 'account_type': 'Bank'}
             >>> trxn = '!Type:BankN1D01/01/12PpayeeT100.00'
             >>> result = QIF().transaction(**kwargs)
             >>> trxn == result.replace('\\n', '').replace('\\t', '')
