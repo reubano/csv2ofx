@@ -22,8 +22,8 @@ TCash
 NINV-0198
 D01/25/15
 PBaisikeli
-MBicycle
 LJohn
+MBicycle
 T-113000.00
 SIncome
 $-113000.00
@@ -47,8 +47,8 @@ TCash
 NINV-0003
 D01/24/15
 PCharger-baisikeli (distributor price)
-MCharger
 LOffice
+MCharger
 T-30000.00
 SIncome
 $-30000.00
@@ -57,8 +57,8 @@ $-30000.00
 NINV-0006
 D01/25/15
 PCharger-baisikeli (distributor price)
-MCharger
 LJohn
+MCharger
 T-30000.00
 SIncome
 $-30000.00

@@ -44,7 +44,7 @@ from .ofx import OFX
 from .qif import QIF
 
 
-parser = ArgumentParser(  # pylint: disable=C0103
+parser = ArgumentParser(  # pylint: disable=invalid-name
     description="description: csv2ofx converts a csv file to ofx and qif",
     prog='csv2ofx', usage='%(prog)s [options] <source> <dest>',
     formatter_class=RawTextHelpFormatter)
@@ -76,9 +76,6 @@ parser.add_argument(
     '-c', '--collapse', metavar='FIELD_NAME', help=(
         'field used to combine transactions within a split for double entry '
         'statements'))
-parser.add_argument(
-    '-S', '--split', metavar='FIELD_NAME', help=(
-        'field used for the split account for single entry statements'))
 parser.add_argument(
     '-C', '--chunksize', metavar='ROWS', type=int, default=2 ** 14,
     help="number of rows to process at a time")
@@ -135,7 +132,6 @@ def run():  # noqa: C901
 
     okwargs = {
         'def_type': args.account_type or 'Bank' if args.qif else 'CHECKING',
-        'split_header': args.split,
         'start': parse(args.start) if args.start else None,
         'end': parse(args.end) if args.end else None
     }
@@ -156,7 +152,7 @@ def run():  # noqa: C901
         else:
             try:
                 mtime = p.getmtime(source.name)
-            except AttributeError:
+            except (AttributeError, FileNotFoundError):
                 mtime = time.time()
 
             server_date = dt.fromtimestamp(mtime)
@@ -169,9 +165,9 @@ def run():  # noqa: C901
             'overwrite': args.overwrite,
             'chunksize': args.chunksize,
             'encoding': args.encoding}
-    except:
+    except Exception as err:  # pylint: disable=broad-except
         source.close()
-        raise
+        exit(err)
 
     dest = open(args.dest, 'w', encoding=args.encoding) if args.dest else stdout
 
@@ -186,6 +182,10 @@ def run():  # noqa: C901
             msg += 'Check `start` and `end` options.'
         else:
             msg += 'Try again with `-c` option.'
+    except ValueError:
+        # csv2ofx called with no arguments
+        msg = 0
+        parser.print_help()
     except Exception as err:  # pylint: disable=broad-except
         msg = 1
         traceback.print_exc()
