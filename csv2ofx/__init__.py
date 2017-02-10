@@ -27,6 +27,7 @@ import itertools as it
 from functools import partial
 from datetime import datetime as dt
 from operator import itemgetter
+from decimal import Decimal
 
 from builtins import *
 from six.moves import filterfalse
@@ -73,10 +74,11 @@ class Content(object):
             self.is_split = False
 
         if kwargs.get('split_header'):
-            self.split_account = itemgetter(kwargs['split_header'])
+            split_account = itemgetter(kwargs['split_header'])
         else:
-            self.split_account = None
+            split_account = None
 
+        self.split_account = self.inv_split_account = split_account
         self.start = kwargs.get('start') or dt(1970, 1, 1)
         self.end = kwargs.get('end') or dt.now()
 
@@ -181,21 +183,23 @@ class Content(object):
             >>> import datetime
             >>> from decimal import Decimal
             >>> from csv2ofx.mappings.mint import mapping
-            >>> trxn = {'Transaction Type': 'DEBIT', 'Amount': 1000.00, \
-'Date': '06/12/10', 'Description': 'payee', 'Original Description': \
-'description', 'Notes': 'notes', 'Category': 'Checking', 'Account Name': \
-'account'}
+            >>> trxn = {
+            ...     'Transaction Type': 'DEBIT', 'Amount': 1000.00,
+            ...     'Date': '06/12/10', 'Description': 'payee',
+            ...     'Original Description': 'description', 'Notes': 'notes',
+            ...     'Category': 'Checking', 'Account Name': 'account'}
             >>> Content(mapping).transaction_data(trxn) == {
             ...     'account_id': 'e268443e43d93dab7ebef303bbe9642f',
-            ...     'memo': 'description notes', 'split_account_id':
-            ...     None, 'currency': 'USD',
-            ...     'date': datetime.datetime(2010, 6, 12, 0, 0),
-            ...     'class': None, 'bank': 'account', 'account': 'account',
-            ...     'split_account': None,
             ...     'bank_id': 'e268443e43d93dab7ebef303bbe9642f',
-            ...     'id': 'ee86450a47899254e2faa82dca3c2cf2', 'payee': 'payee',
-            ...     'amount': Decimal('-1000.00'), 'check_num': None,
-            ...     'type': 'DEBIT'}
+            ...     'account': 'account', 'split_account_id': None,
+            ...     'shares': Decimal('0'), 'payee': 'payee', 'currency': 'USD',
+            ...     'bank': 'account', 'class': None, 'is_investment': False,
+            ...     'date': datetime.datetime(2010, 6, 12, 0, 0),
+            ...     'price': Decimal('0'), 'symbol': '', 'action': '',
+            ...     'check_num': None, 'id': 'ee86450a47899254e2faa82dca3c2cf2',
+            ...     'split_account': None, 'type': 'DEBIT', 'category': '',
+            ...     'amount': Decimal('-1000.00'), 'memo': 'description notes',
+            ...     'inv_split_account': None, 'x_action': ''}
             True
         """
         account = self.get('account', trxn)
@@ -208,8 +212,6 @@ class Content(object):
         if _type not in {'DEBIT', 'CREDIT'}:
             _type = 'CREDIT' if amount > 0 else 'DEBIT'
 
-        amount = -1 * abs(amount) if _type == 'DEBIT' else abs(amount)
-
         date = self.get('date', trxn)
         payee = self.get('payee', trxn)
         desc = self.get('desc', trxn)
@@ -217,15 +219,40 @@ class Content(object):
         memo = '%s %s' % (desc, notes) if desc and notes else desc or notes
         check_num = self.get('check_num', trxn)
         details = ''.join(filter(None, [date, raw_amount, payee, memo]))
+        category = self.get('category', trxn, '')
+        shares = Decimal(self.get('shares', trxn, 0))
+        symbol = self.get('symbol', trxn, '')
+        price = Decimal(self.get('price', trxn, 0))
+        invest = shares or (symbol and symbol != 'N/A') or 'invest' in category
+
+        if invest:
+            amount = abs(amount)
+            shares = shares or (amount / price) if price else shares
+            amount = amount or shares * price
+            price = price or (amount / shares) if shares else price
+            action = utils.get_action(category)
+            x_action = utils.get_action(category, True)
+        else:
+            amount = -1 * abs(amount) if _type == 'DEBIT' else abs(amount)
+            action = ''
+            x_action = ''
 
         return {
             'date': parse(date),
             'currency': self.get('currency', trxn, 'USD'),
+            'shares': shares,
+            'symbol': symbol,
+            'price': price,
+            'action': action,
+            'x_action': x_action,
+            'category': category,
+            'is_investment': invest,
             'bank': bank,
             'bank_id': self.get('bank_id', trxn, md5(bank)),
             'account': account,
             'account_id': self.get('account_id', trxn, md5(account)),
             'split_account': split_account,
+            'inv_split_account': self.get('inv_split_account', trxn),
             'split_account_id': md5(split_account) if split_account else None,
             'amount': amount,
             'payee': payee,

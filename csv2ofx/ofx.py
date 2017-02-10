@@ -127,17 +127,19 @@ class OFX(Content):
             ...     'Original Description': 'description', 'Notes': 'notes',
             ...     'Category': 'Checking', 'Account Name': 'account'}
             >>> OFX(mapping, def_type='CHECKING').transaction_data(trxn) == {
-            ...     'account_type': 'CHECKING',
             ...     'account_id': 'e268443e43d93dab7ebef303bbe9642f',
-            ...     'memo': 'description notes', 'split_account_id': None,
-            ...     'currency': 'USD',
-            ...     'date': datetime.datetime(2010, 6, 12, 0, 0),
-            ...     'class': None, 'bank': 'account', 'account': 'account',
-            ...     'split_account': None,
+            ...     'account': 'account', 'currency': 'USD',
+            ...     'account_type': 'CHECKING', 'shares': Decimal('0'),
+            ...     'is_investment': False, 'bank': 'account',
+            ...     'split_account_type': None, 'split_account_id': None,
+            ...     'class': None, 'amount': Decimal('-1000.00'),
+            ...     'memo': 'description notes',
+            ...     'id': 'ee86450a47899254e2faa82dca3c2cf2',
+            ...     'split_account': None, 'action': '', 'payee': 'payee',
+            ...     'date': dt(2010, 6, 12, 0, 0), 'category': '',
             ...     'bank_id': 'e268443e43d93dab7ebef303bbe9642f',
-            ...     'id': 'ee86450a47899254e2faa82dca3c2cf2', 'payee': 'payee',
-            ...     'amount': Decimal('-1000.00'), 'split_account_type': None,
-            ...     'check_num': None, 'type': 'DEBIT'}
+            ...     'price': Decimal('0'), 'symbol': '', 'check_num': None,
+            ...     'inv_split_account': None, 'x_action': '', 'type': 'DEBIT'}
             True
         """
         data = super(OFX, self).transaction_data(trxn)
@@ -146,11 +148,7 @@ class OFX(Content):
         sa_type = utils.get_account_type(split, *args) if split else None
         memo = data.get('memo')
         _class = data.get('class')
-
-        if memo and _class:
-            memo = '%s %s' % (memo, _class)
-        else:
-            memo = memo or _class
+        memo = '%s %s' % (memo, _class) if memo and _class else memo or _class
 
         new_data = {
             'account_type': utils.get_account_type(data['account'], *args),

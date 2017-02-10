@@ -25,6 +25,18 @@ from builtins import *
 from meza.fntools import get_separators
 from meza.convert import to_decimal
 
+ACTION_TYPES = {
+    'ShrsIn': ('deposit',),
+    'ShrsOut': ('withdraw',),
+    'Buy': ('buy', 'invest'),
+    'Div': ('dividend',),
+    'Int': ('interest',),
+    'Sell': ('sell',),
+    'ReinvDiv': ('reinvest',),
+    'StkSplit': ('split',),
+}
+
+TRANSFERABLE = {'Buy', 'Div', 'Int', 'Sell'}
 
 def get_account_type(account, account_types, def_type='n/a'):
     """ Detect the account type of a given account
@@ -52,6 +64,36 @@ def get_account_type(account, account_types, def_type='n/a'):
 
     return _type
 
+
+def get_action(category, transfer=False, def_action='ShrsIn'):
+    """ Detect the investment action of a given category
+
+    Args:
+        category (str): The transaction category.
+        transfer (bool): Is the transaction an account transfer? (default:
+            False)
+        def_type (str): The default action.
+
+    Returns:
+        (str): The resulting action.
+
+    Examples:
+        >>> get_action('dividend & cap gains') == 'Div'
+        True
+        >>> get_action('buy', True) == 'BuyX'
+        True
+    """
+    _type = def_action
+
+    for key, values in ACTION_TYPES.items():
+        if any(v in category.lower() for v in values):
+            _type = key
+            break
+
+    if transfer and _type in TRANSFERABLE:
+        return '%sX' % _type
+    else:
+        return _type
 
 def convert_amount(content):
     """ Convert number to a decimal amount """
