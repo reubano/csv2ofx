@@ -35,6 +35,11 @@ from datetime import datetime as dt
 from argparse import RawTextHelpFormatter, ArgumentParser
 from pprint import pprint
 
+try:
+    FileNotFoundError
+except NameError:
+    FileNotFoundError = IOError
+
 from builtins import *
 from dateutil.parser import parse
 from meza.io import read_csv, IterStringIO, write
