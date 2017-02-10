@@ -169,9 +169,9 @@ def run():  # noqa: C901
             'overwrite': args.overwrite,
             'chunksize': args.chunksize,
             'encoding': args.encoding}
-    except:
+    except Exception as err:  # pylint: disable=broad-except
         source.close()
-        raise
+        exit(err)
 
     dest = open(args.dest, 'w', encoding=args.encoding) if args.dest else stdout
 
