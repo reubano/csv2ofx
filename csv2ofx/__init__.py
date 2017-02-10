@@ -41,7 +41,7 @@ __package_name__ = 'csv2ofx'
 __author__ = 'Reuben Cummings'
 __description__ = 'converts a csv file of transactions to an ofx or qif file'
 __email__ = 'reubano@gmail.com'
-__version__ = '0.20.0'
+__version__ = '0.20.1'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2015 Reuben Cummings'
 
