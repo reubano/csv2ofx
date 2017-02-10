@@ -124,6 +124,7 @@ if __name__ == '__main__':
         (['-oe 20150908', SERVER_DATE], 'default.csv', 'default.ofx'),
         (SPLIT_OPTS, 'default.csv', 'default_w_splits.ofx'),
         (['-o', '-m mint', SERVER_DATE], 'mint.csv', 'mint.ofx'),
+        (['-oq', '-m creditunion'], 'creditunion.csv', 'creditunion.qif'),
     ]
 
     main(csv2ofx, gen_test(PRE_TESTS))

@@ -71,7 +71,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
 
         # pylint doesn't like dynamically set attributes...
         self.amount = None
-        self.account = lambda _: None
+        self.account = None
         self.split_account = None
         self.inv_split_account = None
         self.id = None
@@ -79,6 +79,10 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
 
         if not hasattr(self, 'is_split'):
             self.is_split = False
+
+        if not callable(self.account):
+            account = self.account
+            self.account = lambda _: account
 
         self.start = kwargs.get('start') or dt(1970, 1, 1)
         self.end = kwargs.get('end') or dt.now()
