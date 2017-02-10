@@ -235,13 +235,13 @@ class QIF(Content):
         """ Gets QIF transaction footer.
 
         Returns:
-            (None): the QIF footer
+            (str): the QIF footer
 
         Examples:
             >>> QIF().footer()
+            ''
         """
-        if self.is_split:
-            return self.transaction_end()
+        return self.transaction_end() if self.is_split else ''
 
     def gen_body(self, data):
         """ Generate the QIF body """
