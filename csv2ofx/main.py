@@ -156,7 +156,7 @@ def run():  # noqa: C901
         else:
             try:
                 mtime = p.getmtime(source.name)
-            except AttributeError:
+            except (AttributeError, FileNotFoundError):
                 mtime = time.time()
 
             server_date = dt.fromtimestamp(mtime)
