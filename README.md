@@ -11,7 +11,7 @@
 
 csv2ofx requires the following programs in order to run properly:
 
-* [Python >= 2.7](http://www.python.org/download) (MacOS X comes with python preinstalled)
+* [Python >= 2.7, 3.5](http://www.python.org/download) (MacOS X comes with python preinstalled)
 
 ## INSTALLATION
 
