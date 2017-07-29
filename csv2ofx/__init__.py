@@ -45,6 +45,8 @@ __version__ = '0.20.1'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2015 Reuben Cummings'
 
+DEF_DATE_FMT = '%m/%d/%y'
+
 # pylint: disable=invalid-name
 md5 = lambda content: hashlib.md5(content.encode('utf-8')).hexdigest()
 
@@ -61,6 +63,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
         Kwargs:
             start (date): Date from which to begin including transactions.
             end (date): Date from which to exclude transactions.
+            date_fmt (str): Transaction date format (defaults to '%m/%d/%y').
 
         Examples:
             >>> from csv2ofx.mappings.mint import mapping
@@ -75,6 +78,8 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
         self.split_account = None
         self.inv_split_account = None
         self.id = None
+        self.date_fmt = kwargs.get('date_fmt', DEF_DATE_FMT)
+
         [self.__setattr__(k, v) for k, v in mapping.items()]
 
         if not hasattr(self, 'is_split'):

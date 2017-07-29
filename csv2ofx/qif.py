@@ -149,6 +149,7 @@ class QIF(Content):
             date (date): the transaction date (required)
             amount (number): the transaction amount (required)
             payee (number): the transaction amount (required)
+            date_fmt (str): the transaction date format (defaults to '%m/%d/%y')
             memo (str): the transaction memo
             class (str): the transaction classification
             check_num (str): a unique transaction identifier
@@ -166,7 +167,8 @@ class QIF(Content):
             >>> trxn == result.replace('\\n', '').replace('\\t', '')
             True
         """
-        kwargs.update({'time_stamp': kwargs['date'].strftime('%m/%d/%y')})
+        date_fmt = kwargs.get('date_fmt', self.date_fmt)
+        kwargs.update({'time_stamp': kwargs['date'].strftime(date_fmt)})
         is_investment = kwargs.get('is_investment')
         is_transaction = not is_investment
 
