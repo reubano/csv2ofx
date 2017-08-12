@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import (
-    absolute_import, division, print_function, with_statement)
+from __future__ import absolute_import, division, print_function
 
 import sys
-import csv2ofx as module
+
+from os import path as p
+
 import pkutils
 
 try:
@@ -13,11 +14,14 @@ try:
 except ImportError:
     from distutils.core import setup, find_packages
 
+PARENT_DIR = p.abspath(p.dirname(__file__))
+
 sys.dont_write_bytecode = True
 py2_requirements = sorted(pkutils.parse_requirements('py2-requirements.txt'))
 py3_requirements = sorted(pkutils.parse_requirements('requirements.txt'))
 dev_requirements = sorted(pkutils.parse_requirements('dev-requirements.txt'))
 readme = pkutils.read('README.md')
+module = pkutils.parse_module(p.join(PARENT_DIR, 'csv2ofx', '__init__.py'))
 license = module.__license__
 version = module.__version__
 project = module.__title__
@@ -78,4 +82,5 @@ setup(
         'Operating System :: Microsoft :: Windows',
     ],
     platforms=['MacOS X', 'Windows', 'Linux'],
+    scripts=[p.join('bin', 'csv2ofx')],
 )

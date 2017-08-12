@@ -110,12 +110,6 @@ def test(where=None, stop=None, **kwargs):
 
 
 @manager.command
-def register():
-    """Register package with PyPI"""
-    exit(call('python', p.join(BASEDIR, 'setup.py'), 'register'))
-
-
-@manager.command
 def release():
     """Package and upload a release"""
     try:
