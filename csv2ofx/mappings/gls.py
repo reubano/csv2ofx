@@ -6,8 +6,15 @@ mapping = {
     'delimiter': ';',
     'bank': 'GLS Bank',
     'account': itemgetter('Kontonummer'),
-    'date': lambda r: r['Buchungstag'][3:5] + '/' + r['Buchungstag'][:2] + '/' + r['Buchungstag'][-4:], # Chop up the dotted German date format and put it in ridiculous M/D/Y order
-    'amount': lambda r: r['Betrag'].replace('.', '').replace(',', '.'), # locale.atof does not actually know how to deal with German separators, so we do it this way
+    
+    # Chop up the dotted German date format and put it in ridiculous M/D/Y order
+    'date': lambda r: r['Buchungstag'][3:5] + '/'
+                    + r['Buchungstag'][:2] + '/'
+                    + r['Buchungstag'][-4:],
+
+    # locale.atof does not actually know how to deal with German separators.
+    # So we do it the crude way
+    'amount': lambda r: r['Betrag'].replace('.', '').replace(',', '.'), 
     'desc': itemgetter('Buchungstext'),
     'payee': itemgetter('Auftraggeber/Empfänger'),
 }
