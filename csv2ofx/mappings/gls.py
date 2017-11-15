@@ -8,7 +8,7 @@ mapping = {
     'account': itemgetter('Kontonummer'),
 
     # Chop up the dotted German date format and put it in ridiculous M/D/Y order
-    'date': lambda r: 
+    'date': lambda r:
         r['Buchungstag'][3:5] + '/' + r['Buchungstag'][:2] + '/' +
         r['Buchungstag'][-4:],
 
