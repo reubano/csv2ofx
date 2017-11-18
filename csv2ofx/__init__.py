@@ -90,7 +90,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             self.account = lambda _: account
 
         self.start = kwargs.get('start') or dt(1970, 1, 1)
-        self.end = kwargs.get('end') or dt(2100, 1, 1)
+        self.end = kwargs.get('end') or dt.now()
 
     def get(self, name, trxn=None, default=None):
         """ Gets an attribute which could be either a normal attribute,
