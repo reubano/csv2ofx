@@ -1,5 +1,7 @@
 # coding: utf-8
+
 from __future__ import absolute_import
+
 from operator import itemgetter
 
 mapping = {
@@ -18,5 +20,5 @@ mapping = {
     # So we do it the crude way
     'amount': lambda r: r['Betrag'].replace('.', '').replace(',', '.'),
     'desc': itemgetter('Buchungstext'),
-    'payee': itemgetter('Auftraggeber/Empfänger'),
+    'payee': itemgetter(u'Auftraggeber/Empfänger'),
 }
