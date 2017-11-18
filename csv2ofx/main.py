@@ -67,7 +67,7 @@ parser.add_argument(
     '-a', '--account', metavar='TYPE', dest='account_type', choices=TYPES,
     help="default account type 'CHECKING' for OFX and 'Bank' for QIF.")
 parser.add_argument(
-    '-e', '--end', metavar='DATE', help="end date")
+    '-e', '--end', metavar='DATE', help="end date", default=str(dt.now()))
 parser.add_argument(
     '-l', '--language', help="the language", default='ENG')
 parser.add_argument(
