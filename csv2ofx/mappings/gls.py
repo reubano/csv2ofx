@@ -20,5 +20,6 @@ mapping = {
     # So we do it the crude way
     'amount': lambda r: r['Betrag'].replace('.', '').replace(',', '.'),
     'desc': itemgetter('Buchungstext'),
+    # Unicode marker required for python2.7
     'payee': itemgetter(u'Auftraggeber/Empfänger'),
 }
