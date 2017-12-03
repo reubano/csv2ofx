@@ -144,8 +144,11 @@ def run():  # noqa: C901
     cont = QIF(mapping, **okwargs) if args.qif else OFX(mapping, **okwargs)
     source = open(args.source, encoding=args.encoding) if args.source else stdin
 
+    delimiter = mapping.get('delimiter', ',')
+
     try:
-        records = read_csv(source, has_header=cont.has_header)
+        records = read_csv(source, has_header=cont.has_header,
+            delimiter=delimiter)
         groups = cont.gen_groups(records, args.chunksize)
         trxns = cont.gen_trxns(groups, args.collapse)
         cleaned_trxns = cont.clean_trxns(trxns)
