@@ -248,4 +248,4 @@ git checkout -b name-of-your-bugfix-or-feature
 
 ## License
 
-csv2ofx is distributed under the [MIT License](http://opensource.org/licenses/MIT), the same as [tabutils](https://github.com/reubano/tabutils).
+csv2ofx is distributed under the [MIT License](http://opensource.org/licenses/MIT), the same as [meza](https://github.com/reubano/meza).
