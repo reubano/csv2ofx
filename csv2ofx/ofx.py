@@ -213,7 +213,7 @@ class OFX(Content):
             type (str): the transaction type (required)
             amount (number): the transaction amount (required)
             id (str): the transaction id (required)
-            check_num (str): the check num (required)
+            check_num (str): the check num
             payee (str): the payee (required)
             memo (str): the transaction memo
 
@@ -237,7 +237,8 @@ class OFX(Content):
         content += '\t\t\t\t\t\t<DTPOSTED>%s</DTPOSTED>\n' % time_stamp
         content += '\t\t\t\t\t\t<TRNAMT>%(amount)0.2f</TRNAMT>\n' % kwargs
         content += '\t\t\t\t\t\t<FITID>%(id)s</FITID>\n' % kwargs
-        content += '\t\t\t\t\t\t<CHECKNUM>%(check_num)s</CHECKNUM>\n' % kwargs
+        if kwargs['check_num'] is not None:
+            content += '\t\t\t\t\t\t<CHECKNUM>%(check_num)s</CHECKNUM>\n' % kwargs
         content += '\t\t\t\t\t\t<NAME>%(payee)s</NAME>\n' % kwargs
 
         if kwargs.get('memo'):
