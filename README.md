@@ -17,7 +17,7 @@ csv2ofx requires the following programs in order to run properly:
 
 (You are using a [virtualenv](http://www.virtualenv.org/en/latest/index.html), right?)
 
-    sudo pip install csv2ofx
+  sudo pip install csv2ofx
 
 ## Usage
 
@@ -77,7 +77,7 @@ for line in IterStringIO(content):
 
 *show help*
 
-    csv2ofx -h
+  csv2ofx -h
 
 ```bash
 usage: csv2ofx [options] <source> <dest>
@@ -205,7 +205,7 @@ csv2ofx comes with a built in task manager `manage.py`.
 
 ### Setup
 
-    pip install -r dev-requirements.txt
+  pip install -r dev-requirements.txt
 
 ### Examples
 
