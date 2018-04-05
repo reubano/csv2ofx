@@ -237,9 +237,11 @@ class OFX(Content):
         content += '\t\t\t\t\t\t<DTPOSTED>%s</DTPOSTED>\n' % time_stamp
         content += '\t\t\t\t\t\t<TRNAMT>%(amount)0.2f</TRNAMT>\n' % kwargs
         content += '\t\t\t\t\t\t<FITID>%(id)s</FITID>\n' % kwargs
+
         if kwargs.get('check_num') is not None:
             extra = '\t\t\t\t\t\t<CHECKNUM>%(check_num)s</CHECKNUM>\n'
             content += extra % kwargs
+
         content += '\t\t\t\t\t\t<NAME>%(payee)s</NAME>\n' % kwargs
 
         if kwargs.get('memo'):
