@@ -268,7 +268,7 @@ class OFX(Content):
         time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
         content = '\t\t\t\t</BANKTRANLIST>\n'
 
-        if balance in kwargs:
+        if kwargs.get('balance') is not None:
             content += '\t\t\t\t<LEDGERBAL>\n'
             content += '\t\t\t\t\t<BALAMT>%(balance)0.2f</BALAMT>\n' % kwargs
             content += '\t\t\t\t\t<DTASOF>%s</DTASOF>\n' % time_stamp
