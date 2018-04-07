@@ -17,7 +17,7 @@ except ImportError:
 PARENT_DIR = p.abspath(p.dirname(__file__))
 
 sys.dont_write_bytecode = True
-py2_requirements = sorted(pkutils.parse_requirements('py2-requirements.txt'))
+py2_requirements = set(pkutils.parse_requirements('py2-requirements.txt'))
 py3_requirements = sorted(pkutils.parse_requirements('requirements.txt'))
 dev_requirements = sorted(pkutils.parse_requirements('dev-requirements.txt'))
 readme = pkutils.read('README.md')
@@ -30,10 +30,10 @@ user = 'reubano'
 
 # Conditional sdist dependencies:
 py2 = sys.version_info.major == 2
-requirements = py2_requirements if py2 else py3_requirements
+requirements = sorted(py2_requirements) if py2 else py3_requirements
 
 # Conditional bdist_wheel dependencies:
-py2_require = set(py2_requirements).difference(py3_requirements)
+py2_require = sorted(py2_requirements.difference(py3_requirements))
 
 # Setup requirements
 setup_require = [r for r in dev_requirements if 'pkutils' in r]
