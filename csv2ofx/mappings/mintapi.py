@@ -27,6 +27,6 @@ mapping = {
     'bank': itemgetter('fi'),
     'currency': 'USD',
     'id': itemgetter('id'),
-    'shares': itemgetter('shares'),
+    'shares': lambda tr: tr['shares'] if tr['shares'] is not '' else 0.0,
     'symbol': itemgetter('symbol'),
 }
