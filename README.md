@@ -198,6 +198,7 @@ attribute | description | default field | default value | example
 `type`|transaction account type|n/a|checking|savings
 `balance`|account balance|n/a|n/a|$23.00
 `class`|transaction class|n/a|n/a|travel
+`date_fmt`|custom date format|n/a|%m/%d/%y|%m/%d/%Y
 
 ## Scripts
 
