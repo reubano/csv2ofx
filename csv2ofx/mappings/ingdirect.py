@@ -18,5 +18,5 @@ mapping = {
     'account': itemgetter('Account'),
     'date': itemgetter('Date'),
     'amount': lambda tr: tr['Credit'] + tr['Debit'],
-     'desc': itemgetter('Description'),
+    'desc': itemgetter('Description'),
 }
