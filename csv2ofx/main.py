@@ -190,11 +190,6 @@ def run():  # noqa: C901
             msg += 'Check `start` and `end` options.'
         else:
             msg += 'Try again with `-c` option.'
-    except ValueError:
-        # csv2ofx called with no arguments
-        # TODO I have a file that creates an error, which does not mean that it has been called with no arguments.
-        msg = 0
-        parser.print_help()
     except Exception as err:  # pylint: disable=broad-except
         msg = 1
         traceback.print_exc()

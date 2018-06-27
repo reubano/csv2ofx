@@ -4,8 +4,8 @@
 
 [csv2ofx](http://github.com/reubano/csv2ofx) is a [Python library](#library-examples) and [command line interface program](#cli-examples) that converts CSV files to OFX and QIF files for importing into GnuCash or similar financial accounting programs. csv2ofx has built in support for importing csv files from mint, yoodlee, and xero. csv2ofx has been tested on the following configuration:
 
-* MacOS X 10.9.5
-* Python 2.7.10
+* MacOS X 10.13.1
+* Python 3.6.4
 
 ## Requirements
 
@@ -17,7 +17,7 @@ csv2ofx requires the following programs in order to run properly:
 
 (You are using a [virtualenv](http://www.virtualenv.org/en/latest/index.html), right?)
 
-    sudo pip install csv2ofx
+  sudo pip install csv2ofx
 
 ## Usage
 
@@ -77,7 +77,7 @@ for line in IterStringIO(content):
 
 *show help*
 
-    csv2ofx -h
+  csv2ofx -h
 
 ```bash
 usage: csv2ofx [options] <source> <dest>
@@ -205,7 +205,7 @@ csv2ofx comes with a built in task manager `manage.py`.
 
 ### Setup
 
-    pip install -r dev-requirements.txt
+  pip install -r dev-requirements.txt
 
 ### Examples
 
@@ -248,4 +248,4 @@ git checkout -b name-of-your-bugfix-or-feature
 
 ## License
 
-csv2ofx is distributed under the [MIT License](http://opensource.org/licenses/MIT), the same as [tabutils](https://github.com/reubano/tabutils).
+csv2ofx is distributed under the [MIT License](http://opensource.org/licenses/MIT), the same as [meza](https://github.com/reubano/meza).

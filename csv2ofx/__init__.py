@@ -41,7 +41,7 @@ __package_name__ = 'csv2ofx'
 __author__ = 'Reuben Cummings'
 __description__ = 'converts a csv file of transactions to an ofx or qif file'
 __email__ = 'reubano@gmail.com'
-__version__ = '0.23.0'
+__version__ = '0.26.1'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2015 Reuben Cummings'
 
@@ -73,12 +73,12 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
         mapping = mapping or {}
 
         # pylint doesn't like dynamically set attributes...
-        self.amount = None
-        self.account = None
+        self.amount = 0
+        self.account = 'N/A'
+        self.date_fmt = kwargs.get('date_fmt', DEF_DATE_FMT)
         self.split_account = None
         self.inv_split_account = None
         self.id = None
-        self.date_fmt = kwargs.get('date_fmt', DEF_DATE_FMT)
 
         [self.__setattr__(k, v) for k, v in mapping.items()]
 

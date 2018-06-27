@@ -213,7 +213,7 @@ class OFX(Content):
             type (str): the transaction type (required)
             amount (number): the transaction amount (required)
             id (str): the transaction id (required)
-            check_num (str): the check num (required)
+            check_num (str): the check num
             payee (str): the payee (required)
             memo (str): the transaction memo
 
@@ -237,8 +237,13 @@ class OFX(Content):
         content += '\t\t\t\t\t\t<DTPOSTED>%s</DTPOSTED>\n' % time_stamp
         content += '\t\t\t\t\t\t<TRNAMT>%(amount)0.2f</TRNAMT>\n' % kwargs
         content += '\t\t\t\t\t\t<FITID>%(id)s</FITID>\n' % kwargs
-        content += '\t\t\t\t\t\t<CHECKNUM>%(check_num)s</CHECKNUM>\n' % kwargs
-        content += '\t\t\t\t\t\t<NAME>%(payee)s</NAME>\n' % kwargs
+
+        if kwargs.get('check_num') is not None:
+            extra = '\t\t\t\t\t\t<CHECKNUM>%(check_num)s</CHECKNUM>\n'
+            content += extra % kwargs
+
+        if kwargs.get('payee') is not None:
+            content += '\t\t\t\t\t\t<NAME>%(payee)s</NAME>\n' % kwargs
 
         if kwargs.get('memo'):
             content += '\t\t\t\t\t\t<MEMO>%(memo)s</MEMO>\n' % kwargs
@@ -267,7 +272,7 @@ class OFX(Content):
         time_stamp = kwargs['date'].strftime('%Y%m%d%H%M%S')  # yyyymmddhhmmss
         content = '\t\t\t\t</BANKTRANLIST>\n'
 
-        if kwargs.get('balance'):
+        if kwargs.get('balance') is not None:
             content += '\t\t\t\t<LEDGERBAL>\n'
             content += '\t\t\t\t\t<BALAMT>%(balance)0.2f</BALAMT>\n' % kwargs
             content += '\t\t\t\t\t<DTASOF>%s</DTASOF>\n' % time_stamp
