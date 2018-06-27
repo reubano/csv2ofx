@@ -1,8 +1,14 @@
 # coding: utf-8
 
-from __future__ import absolute_import
+from __future__ import (
+    absolute_import, division, print_function, unicode_literals)
 
 from operator import itemgetter
+
+
+def date_func(trxn):
+    tag = trxn['Buchungstag']
+    return '{}/{}/{}'.format(tag[3:5], tag[:2], tag[-4:])
 
 mapping = {
     'has_header': True,
@@ -12,14 +18,11 @@ mapping = {
     'account': itemgetter('Kontonummer'),
 
     # Chop up the dotted German date format and put it in ridiculous M/D/Y order
-    'date': lambda r:
-        r['Buchungstag'][3:5] + '/' + r['Buchungstag'][:2] + '/' +
-        r['Buchungstag'][-4:],
+    'date': date_func,
 
     # locale.atof does not actually know how to deal with German separators.
     # So we do it the crude way
     'amount': lambda r: r['Betrag'].replace('.', '').replace(',', '.'),
-    # Unicode marker required for python2.7
-    'payee': itemgetter(u'Auftraggeber/Empfänger'),
     'desc': itemgetter('Buchungstext'),
+    'payee': itemgetter('Auftraggeber/Empfänger'),
 }
