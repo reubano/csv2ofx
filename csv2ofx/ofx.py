@@ -242,7 +242,8 @@ class OFX(Content):
             extra = '\t\t\t\t\t\t<CHECKNUM>%(check_num)s</CHECKNUM>\n'
             content += extra % kwargs
 
-        content += '\t\t\t\t\t\t<NAME>%(payee)s</NAME>\n' % kwargs
+        if kwargs.get('payee') is not None:
+            content += '\t\t\t\t\t\t<NAME>%(payee)s</NAME>\n' % kwargs
 
         if kwargs.get('memo'):
             content += '\t\t\t\t\t\t<MEMO>%(memo)s</MEMO>\n' % kwargs
