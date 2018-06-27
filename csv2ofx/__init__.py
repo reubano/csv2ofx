@@ -73,8 +73,8 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
         mapping = mapping or {}
 
         # pylint doesn't like dynamically set attributes...
-        self.amount = None
-        self.account = None
+        self.amount = 0
+        self.account = 'N/A'
         self.split_account = None
         self.inv_split_account = None
         self.id = None
