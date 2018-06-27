@@ -75,10 +75,10 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
         # pylint doesn't like dynamically set attributes...
         self.amount = 0
         self.account = 'N/A'
+        self.date_fmt = kwargs.get('date_fmt', DEF_DATE_FMT)
         self.split_account = None
         self.inv_split_account = None
         self.id = None
-        self.date_fmt = kwargs.get('date_fmt', DEF_DATE_FMT)
 
         [self.__setattr__(k, v) for k, v in mapping.items()]
 
