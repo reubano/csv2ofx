@@ -24,7 +24,7 @@ import time
 import itertools as it
 import traceback
 
-from sys import stdin, stdout, exit
+from sys import stdin, stdout
 from importlib import import_module
 from imp import find_module, load_module
 from pkgutil import iter_modules
@@ -190,10 +190,6 @@ def run():  # noqa: C901
             msg += 'Check `start` and `end` options.'
         else:
             msg += 'Try again with `-c` option.'
-    except ValueError as err:
-        # csv2ofx called with no arguments or broken mapping
-        msg = 'Possible mapping problem: %s. ' % str(err)
-        parser.print_help()
     except Exception as err:  # pylint: disable=broad-except
         msg = 1
         traceback.print_exc()
