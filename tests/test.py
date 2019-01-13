@@ -130,6 +130,7 @@ if __name__ == '__main__':
             ['-E windows-1252', '-m gls', SERVER_DATE, '-e 20171111', '-o'],
             'gls.csv', 'gls.ofx'
         ),
+        (['-o', '-m pcmastercard'], 'pcmastercard.csv', 'pcmastercard.ofx'),
     ]
 
     main(csv2ofx, gen_test(PRE_TESTS))
