@@ -131,7 +131,7 @@ if __name__ == '__main__':
             'gls.csv', 'gls.ofx'
         ),
         (
-            ['-o', '-m pcmastercard', '-e 20190120', SERVER_DATE], 
+            ['-o', '-m pcmastercard', '-e 20190120', SERVER_DATE],
             'pcmastercard.csv', 'pcmastercard.ofx'
         ),
     ]
