@@ -245,7 +245,17 @@ pip install -r dev-requirements.txt
 git checkout -b name-of-your-bugfix-or-feature
 ```
 
-4. Make your changes, run linter and tests, and submit a pull request through the GitHub website.
+4. Make your changes, run linter and tests (see above), and submit a pull request through the GitHub website.
+
+### Adding Mappings
+
+How to contribute a mapping:
+
+1. Add the mapping in `csv2ofx/mappings/`
+2. Add a simple example CSV file in `data/test/`.
+3. Add the OFX or QIF file that results from the mapping and example CSV file in `data/converted/`.
+4. Add a `csv2ofx` call for your mapping to the tests in `tests/test.py`, in `PRE_TESTS`. If you added an OFX (not QIF) converted file, pay attention to the `-e` (end date) and `-D` (server date) arguments in the test- otherwise tests may pass on your workstation and fail on the build server.
+5. Ensure your test succeeds (see above).
 
 ## License
 
