@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+################################################################################
+# Remove useless trailing lines and trim columns in a CSV file to allow safe
+# processing by `csv2ofx`.  By default, it trims files exported from UBS CH
+# (FR): details in function `_trim()`
+#
+# TO-DO: integrate in csv2ofx?
+################################################################################
+[ "$DEBUG" ] && set -x
+set -o pipefail
+
+__author__='Marco "sphakka" Poleggi'
+
+myself=$(basename $0)
+dfields='4,6,9,12-16,19-21'
+dseparator=';'
+
+################################################################################
+
+usage() {
+    echo >&2 "
+Usage:
+
+  $myself CSV_FILE [FIELDS [SEPARATOR]]
+
+where
+
+  CSV_FILE:  path to an existing file or '-' for stdin
+  FIELDS:    cut-style list of fields to keep. Default to '$dfields'
+  SEPARATOR: a single (escaped) character. Default to '$dseparator'
+
+e.g.
+
+  $myself hairy_export.csv 1,3,5-8 \;
+  cat hairy_export.csv | $myself - 1,3,5-8 \;"
+
+  exit 1
+}
+
+trap '[ $? -ne 0 ] && usage' EXIT
+
+input_csv=${1:?'arg #1 missing: input CSV file'}
+fields=${2:-$dfields}
+separator=${3:-$dseparator}
+
+
+function _trim () {
+    local dlmtrc=${1:?'arg #1 missing: delimiter character'}
+    local fields=${2:?'arg #2 missing: cut-style fields to keep'}
+    local incsvf=${3:?'arg #3 missing: input CSV file'}
+    local trmtln=${4:-'3'} # number of trailing lines to trim
+
+    local head_opts=
+
+    if [ "$trmtln" ]; then
+        [[ "$trmtln" =~ ^[[:digit:]]+$ ]] || {
+            echo >&2 "[error] ${trmtln}: number of traling lines to trim is not an integer"
+            return  1
+        }
+        head_opts="-n-${trmtln}"
+    fi
+
+    # trnxs detailed as "Solde prix prestations" are split with a
+    # "Sous-montant" value, but empty "Débit; Crédit; Solde" columns (the
+    # trailing three). To avoid breaking csv2ofx, these must be filtered
+    # out... The kludge is to skip rows ending with 3 consecutive delimiter chars
+    head $head_opts $incsvf | cut -d$dlmtrc -f$fields | \
+        sed -nr "/${dlmtrc}${dlmtrc}${dlmtrc}\s*$/ !p" || {
+            echo >&2 "[error] ${incsvf}: can't filter input file"
+            return  1
+        }
+}
+
+_trim $separator $fields $input_csv || {
+    echo >&2 "[error] ${input_csv}: trimming failed..."
+    exit 1
+}
