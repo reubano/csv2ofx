@@ -2,6 +2,7 @@
 For PC Financial Mastercards
 https://www.pcfinancial.ca/en/credit-cards
 """
+from __future__ import absolute_import
 from operator import itemgetter
 
 mapping = {
