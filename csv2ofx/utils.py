@@ -28,11 +28,11 @@ from meza.convert import to_decimal
 ACTION_TYPES = {
     'ShrsIn': ('deposit',),
     'ShrsOut': ('withdraw',),
+    'ReinvDiv': ('reinvest',),
     'Buy': ('buy', 'invest'),
     'Div': ('dividend',),
     'Int': ('interest',),
     'Sell': ('sell',),
-    'ReinvDiv': ('reinvest',),
     'StkSplit': ('split',),
 }
 
@@ -82,6 +82,10 @@ def get_action(category, transfer=False, def_action='ShrsIn'):
         >>> get_action('dividend & cap gains') == 'Div'
         True
         >>> get_action('buy', True) == 'BuyX'
+        True
+        >>> get_action('invest') == 'Buy'
+        True
+        >>> get_action('reinvest') == 'ReinvDiv'
         True
     """
     _type = def_action
