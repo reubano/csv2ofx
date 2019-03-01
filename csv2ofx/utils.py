@@ -24,17 +24,21 @@ from __future__ import (
 from builtins import *
 from meza.fntools import get_separators
 from meza.convert import to_decimal
+from collections import OrderedDict
 
-ACTION_TYPES = {
-    'ShrsIn': ('deposit',),
-    'ShrsOut': ('withdraw',),
-    'Buy': ('buy', 'invest'),
-    'Div': ('dividend',),
-    'Int': ('interest',),
-    'Sell': ('sell',),
-    'ReinvDiv': ('reinvest',),
-    'StkSplit': ('split',),
-}
+# NOTE: Because we are testing for substrings, the order we iterate
+# over this dictionary matters (so place strings like "reinvest"
+# above substrings like "invest")
+ACTION_TYPES = OrderedDict([
+    ('ShrsIn', ('deposit',)),
+    ('ShrsOut', ('withdraw',)),
+    ('ReinvDiv', ('reinvest',)),
+    ('Buy', ('buy', 'invest',)),
+    ('Div', ('dividend',)),
+    ('Int', ('interest',)),
+    ('Sell', ('sell',)),
+    ('StkSplit', ('split',)),
+])
 
 TRANSFERABLE = {'Buy', 'Div', 'Int', 'Sell'}
 
@@ -82,6 +86,10 @@ def get_action(category, transfer=False, def_action='ShrsIn'):
         >>> get_action('dividend & cap gains') == 'Div'
         True
         >>> get_action('buy', True) == 'BuyX'
+        True
+        >>> get_action('invest') == 'Buy'
+        True
+        >>> get_action('reinvest') == 'ReinvDiv'
         True
     """
     _type = def_action
