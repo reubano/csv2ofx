@@ -24,17 +24,21 @@ from __future__ import (
 from builtins import *
 from meza.fntools import get_separators
 from meza.convert import to_decimal
+from collections import OrderedDict
 
-ACTION_TYPES = {
-    'ShrsIn': ('deposit',),
-    'ShrsOut': ('withdraw',),
-    'ReinvDiv': ('reinvest',),
-    'Buy': ('buy', 'invest'),
-    'Div': ('dividend',),
-    'Int': ('interest',),
-    'Sell': ('sell',),
-    'StkSplit': ('split',),
-}
+# NOTE: Because we are testing for substrings, the order we iterate
+# over this dictionary matters (so place strings like "reinvest"
+# above substrings like "invest")
+ACTION_TYPES = OrderedDict([
+    ('ShrsIn', ('deposit',)),
+    ('ShrsOut', ('withdraw',)),
+    ('ReinvDiv', ('reinvest',)),
+    ('Buy', ('buy', 'invest',)),
+    ('Div', ('dividend',)),
+    ('Int', ('interest',)),
+    ('Sell', ('sell',)),
+    ('StkSplit', ('split',)),
+])
 
 TRANSFERABLE = {'Buy', 'Div', 'Int', 'Sell'}
 
