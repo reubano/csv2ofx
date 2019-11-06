@@ -134,6 +134,11 @@ if __name__ == '__main__':
             ['-o', '-m pcmastercard', '-e 20190120', SERVER_DATE],
             'pcmastercard.csv', 'pcmastercard.ofx'
         ),
+        (
+            # N.B. input file obtained by pre-processing with
+            #    bin/csvtrim ubs-ch-fr.csv > ubs-ch-fr_trimmed.csv
+            ['-oq', '-m ubs-ch-fr'], 'ubs-ch-fr_trimmed.csv', 'ubs-ch-fr.qif'
+        ),
     ]
 
     main(csv2ofx, gen_test(PRE_TESTS))

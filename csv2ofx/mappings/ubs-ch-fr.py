@@ -27,9 +27,10 @@ from __future__ import (
 
 from operator import itemgetter
 
-# Financial numbers are expressed as "2'045.56" -- TO-DO switch to Babel?
+# Financial numbers are expressed as "2'045.56" in de/fr/it_CH (utf8 has some
+# glitches, so we go for the default one)
 import locale
-locale.setlocale(locale.LC_ALL, 'fr_CH.UTF-8')
+locale.setlocale(locale.LC_NUMERIC, 'fr_CH')
 
 __author__ = 'Marco "sphakka" Poleggi'
 
