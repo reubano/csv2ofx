@@ -29,6 +29,8 @@ where
   FIELDS:    cut-style list of fields to keep. Default: '$dfields'
   SEPARATOR: a single (escaped) character. Default: '$dseparator'
 
+(default values are for exports from UBS CH (DE/FR/IT))
+
 e.g.
 
   $myself hairy_export.csv 1,3,5-8 \;
