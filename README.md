@@ -136,6 +136,17 @@ optional arguments:
 
 	csv2ofx -m yoodlee file.csv
 
+
+#### Special cases
+
+Some banks, like *UBS Switzerland*, may provide CSV exports that are not
+readily tractable by csv2ofx because of extra header or trailing lines,
+redundant or unwanted columns. These input files can be preprocessed with the
+shipped `utilz/csvtrim` shell script. F.i., with mapping `ubs-ch-fr`:
+
+    csvtrim untrimmed.csv | csv2ofx -m ubs-ch-fr
+
+
 ## CUSTOMIZATION
 
 ### Code modification
@@ -233,7 +244,7 @@ cd csv2ofx
 2. Setup a new [virtualenv](http://www.virtualenv.org/en/latest/index.html)
 
 ```bash
-mkvirtualenv --no-site-packages csv2ofx
+mkvirtualenv --no-site-packages -i pkutils csv2ofx
 activate csv2ofx
 python setup.py develop
 pip install -r dev-requirements.txt
