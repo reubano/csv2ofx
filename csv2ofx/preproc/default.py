@@ -1,2 +1,2 @@
 def preprocess(folder, filename):
-    return f"{folder}/{filename}"
+    return folder + "/" + filename
