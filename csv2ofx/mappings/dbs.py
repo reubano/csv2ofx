@@ -11,7 +11,7 @@ mapping = {
     'delimiter': ',',
     'account': "DBS Checking",
     'date': itemgetter('Transaction Date'),
-    'amount': itemgetter('Amount'), #to create
-    'desc': itemgetter('Description'), #to create
-    'notes': itemgetter('Notes'), #to create
+    'amount': itemgetter('Amount'),
+    'desc': itemgetter('Description'),
+    'notes': itemgetter('Notes'),
 }
