@@ -4,8 +4,8 @@ import re
 
 
 def preprocess(folder, filename):
-    path = f"{folder}/{filename}"
-    new_path = f"{folder}/{filename.split('.')[0] + '_processed.csv'}"
+    path = folder + "/" + filename
+    new_path = folder + "/" + filename.split('.')[0] + "_processed.csv"
     with open(path, "r") as myfile:
         data = myfile.readlines()
     myfile.close()
