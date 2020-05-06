@@ -36,9 +36,10 @@ from meza.io import read_csv, IterStringIO
 from csv2ofx import utils
 from csv2ofx.ofx import OFX
 from csv2ofx.mappings.default import mapping
+from csv2ofx.preproc.default import preprocess
 
 ofx = OFX(mapping)
-records = read_csv('path/to/file.csv')
+records = read_csv(preprocess('path/to/','file.csv'))
 groups = ofx.gen_groups(records)
 trxns = ofx.gen_trxns(groups)
 cleaned_trxns = ofx.clean_trxns(trxns)
@@ -60,9 +61,10 @@ from tabutils.io import read_csv, IterStringIO
 from csv2ofx import utils
 from csv2ofx.qif import QIF
 from csv2ofx.mappings.default import mapping
+from csv2ofx.preproc.default import preprocess
 
 qif = QIF(mapping)
-records = read_csv('path/to/file.csv')
+records = read_csv(preprocess('path/to/','file.csv'))
 groups = qif.gen_groups(records)
 trxns = qif.gen_trxns(groups)
 cleaned_trxns = qif.clean_trxns(trxns)

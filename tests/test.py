@@ -134,6 +134,8 @@ if __name__ == '__main__':
             ['-o', '-m pcmastercard', '-e 20190120', SERVER_DATE],
             'pcmastercard.csv', 'pcmastercard.ofx'
         ),
+        (['-oq'], 'dbs.csv', 'dbs.ofx'),
+
     ]
 
     main(csv2ofx, gen_test(PRE_TESTS))
