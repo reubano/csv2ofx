@@ -138,6 +138,10 @@ if __name__ == '__main__':
             ['-o', '-m outbank', '-e 20190301', SERVER_DATE],
             'outbank.csv', 'outbank.ofx'
         ),
+        (
+            ['-o', '-m sparkasse', '-e 20201104', SERVER_DATE],
+            'sparkasse.csv', 'sparkasse.ofx'
+        ),
     ]
 
     main(csv2ofx, gen_test(PRE_TESTS))
