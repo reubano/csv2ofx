@@ -45,7 +45,7 @@ __version__ = '0.27.0'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2015 Reuben Cummings'
 
-DEF_DATE_FMT = '%m/%d/%y'
+DEF_DATE_FMT = '%m/%d/%Y'
 
 # pylint: disable=invalid-name
 md5 = lambda content: hashlib.md5(content.encode('utf-8')).hexdigest()
