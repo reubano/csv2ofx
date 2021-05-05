@@ -126,6 +126,10 @@ if __name__ == '__main__':
         (SPLIT_OPTS, 'default.csv', 'default_w_splits.ofx'),
         (['-o', '-m mint', SERVER_DATE], 'mint.csv', 'mint.ofx'),
         (['-oq', '-m creditunion'], 'creditunion.csv', 'creditunion.qif'),
+        (['-o', '-m stripe'], 'stripe-default.csv', 'stripe-default.ofx'),
+        (['-o', '-m stripe'], 'stripe-all.csv', 'stripe-all.ofx'),
+        (['-oq', '-m stripe'], 'stripe-default.csv', 'stripe-default.qif'),
+        (['-oq', '-m stripe'], 'stripe-all.csv', 'stripe-all.qif'),
         (
             ['-E windows-1252', '-m gls', SERVER_DATE, '-e 20171111', '-o'],
             'gls.csv', 'gls.ofx'
