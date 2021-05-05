@@ -21,9 +21,9 @@ mapping = {
     'has_header': True,
     'account': 'Stripe',
     'id': itemgetter('id'),
-    'date': itemgetter('Created (UTC)'),
-    'amount': itemgetter('Amount'),
-    'currency': itemgetter('Currency'),
-    'payee': lambda tr: tr.get('Customer Description') if len(tr.get('Customer Description')) > 0 else tr.get('Card Name', ""),
-    'desc': itemgetter("Description")
+    'date': itemgetter('created'),
+    'amount': itemgetter('amount'),
+    'currency': itemgetter('currency'),
+    'payee': lambda tr: tr.get('customer_description') if len(tr.get('customer_description')) > 0 else tr.get('card_name', ""),
+    'desc': itemgetter("description")
 }
