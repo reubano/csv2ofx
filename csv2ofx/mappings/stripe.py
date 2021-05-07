@@ -8,9 +8,10 @@ csv2ofx.mappings.stripe
 Provides a mapping for transactions obtained via Stripe card processing
 
 Note that Stripe provides a Default set of colums or you can download All columns. (as well as custom).
-The Default set does not include card information, so provides no appropriate value for the MEMO field for an anonymous transaction (missing a customer).
+The Default set does not include card information, so provides no appropriate value for the
+PAYEE field for an anonymous transaction (missing a customer).
 It's suggested the All Columns format be used if not all transactions identify a customer.
-This mapping sets MEMO to Customer Name if it exists, otherwise Card Name (if provided)
+This mapping sets PAYEE to Customer Name if it exists, otherwise Card Name (if provided)
 """
 from __future__ import (
     absolute_import, division, print_function, unicode_literals)
