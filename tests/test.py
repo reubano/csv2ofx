@@ -10,6 +10,7 @@ Provides scripttests to test csv2ofx CLI functionality.
 """
 
 import sys
+import os
 
 from difflib import unified_diff
 from os import path as p
@@ -157,6 +158,13 @@ if __name__ == "__main__":
             "ingesp.csv",
             "ingesp.ofx",
         ),
+        (["-o", "-m amazon", "-e 20230604", SERVER_DATE], "amazon.csv", "amazon.ofx",),
     ]
+
+    # for Amazon import; excludes transaction 3/3
+    os.environ['AMAZON_EXCLUDE_CARDS'] = '9876'
+    # clear the purchases account if set
+    os.environ.pop('AMAZON_PURCHASES_ACCOUNT', None)
+    assert 'AMAZON_PURCHASES_ACCOUNT' not in os.environ
 
     main(csv2ofx, gen_test(PRE_TESTS))
