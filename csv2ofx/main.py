@@ -147,8 +147,9 @@ def run():  # noqa: C901
     delimiter = mapping.get('delimiter', ',')
 
     try:
-        records = read_csv(source, has_header=cont.has_header,
+        raw = read_csv(source, has_header=cont.has_header,
             delimiter=delimiter)
+        records = getattr(cont, 'process_records', lambda x: x)(raw)
         groups = cont.gen_groups(records, args.chunksize)
         trxns = cont.gen_trxns(groups, args.collapse)
         cleaned_trxns = cont.clean_trxns(trxns)
