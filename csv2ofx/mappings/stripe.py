@@ -7,7 +7,7 @@ csv2ofx.mappings.stripe
 
 Provides a mapping for transactions obtained via Stripe card processing
 
-Note that Stripe provides a Default set of colums or you can download All columns. (as well as custom).
+Note that Stripe provides a Default set of columns or you can download All columns. (as well as custom).
 The Default set does not include card information, so provides no appropriate value for the
 PAYEE field for an anonymous transaction (missing a customer).
 It's suggested the All Columns format be used if not all transactions identify a customer.
