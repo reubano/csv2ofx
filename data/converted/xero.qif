@@ -4,7 +4,7 @@ TBank
 ^
 !Type:Bank
 NINV-0001
-D01/23/15
+D01/23/2015
 PSales
 T149000.00
 SCash
@@ -20,7 +20,7 @@ TCash
 ^
 !Type:Cash
 NINV-0198
-D01/25/15
+D01/25/2015
 PBaisikeli
 LJohn
 MBicycle
@@ -33,7 +33,7 @@ NChecking
 TBank
 ^
 !Type:Bank
-D02/14/15
+D02/14/2015
 PTransfer from Cash
 T-209000.00
 SCash
@@ -45,7 +45,7 @@ TCash
 ^
 !Type:Cash
 NINV-0003
-D01/24/15
+D01/24/2015
 PCharger-baisikeli (distributor price)
 LOffice
 MCharger
@@ -55,7 +55,7 @@ $-30000.00
 ^
 !Type:Cash
 NINV-0006
-D01/25/15
+D01/25/2015
 PCharger-baisikeli (distributor price)
 LJohn
 MCharger

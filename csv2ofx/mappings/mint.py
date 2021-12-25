@@ -7,20 +7,19 @@ csv2ofx.mappings.mintapi
 
 Provides a mapping for transactions obtained via mint.com
 """
-from __future__ import (
-    absolute_import, division, print_function, unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 from operator import itemgetter
 
 mapping = {
-    'is_split': False,
-    'has_header': True,
-    'split_account': itemgetter('Category'),
-    'account': itemgetter('Account Name'),
-    'date': itemgetter('Date'),
-    'type': itemgetter('Transaction Type'),
-    'amount': itemgetter('Amount'),
-    'desc': itemgetter('Original Description'),
-    'payee': itemgetter('Description'),
-    'notes': itemgetter('Notes'),
+    "is_split": False,
+    "has_header": True,
+    "split_account": itemgetter("Category"),
+    "account": itemgetter("Account Name"),
+    "date": itemgetter("Date"),
+    "type": itemgetter("Transaction Type"),
+    "amount": itemgetter("Amount"),
+    "desc": itemgetter("Original Description"),
+    "payee": itemgetter("Description"),
+    "notes": itemgetter("Notes"),
 }
