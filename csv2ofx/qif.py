@@ -155,7 +155,7 @@ class QIF(Content):
             date (date): the transaction date (required)
             amount (number): the transaction amount (required)
             payee (number): the transaction amount (required)
-            date_fmt (str): the transaction date format (defaults to '%m/%d/%y')
+            date_fmt (str): the transaction date format (defaults to '%m/%d/%Y')
             memo (str): the transaction memo
             class (str): the transaction classification
             check_num (str): a unique transaction identifier
@@ -168,7 +168,7 @@ class QIF(Content):
             >>> kwargs = {
             ...     'payee': 'payee', 'amount': 100, 'check_num': 1,
             ...     'date': dt(2012, 1, 1), 'account_type': 'Bank'}
-            >>> trxn = '!Type:BankN1D01/01/12PpayeeT100.00'
+            >>> trxn = '!Type:BankN1D01/01/2012PpayeeT100.00'
             >>> result = QIF().transaction(**kwargs)
             >>> trxn == result.replace('\\n', '').replace('\\t', '')
             True
