@@ -15,8 +15,8 @@ def date_func(trxn):
 
 
 def desc_func(trxn):
-    end = ' '.join(r['Omschrijving-{}'.format(n)] for n in range(1, 4))
-    return '{0} - {1}'.format(r['Naam tegenpartij'], end)
+    end = ' '.join(trxn['Omschrijving-{}'.format(n)] for n in range(1, 4))
+    return '{0} - {1}'.format(trxn['Naam tegenpartij'], end)
 
 
 mapping = {
