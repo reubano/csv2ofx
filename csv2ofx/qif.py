@@ -18,8 +18,12 @@ Attributes:
     ENCODING (str): Default file encoding.
 """
 from __future__ import (
-    absolute_import, division, print_function, with_statement,
-    unicode_literals)
+    absolute_import,
+    division,
+    print_function,
+    with_statement,
+    unicode_literals,
+)
 
 from builtins import *
 from meza.fntools import chunk
@@ -29,9 +33,10 @@ from . import Content, utils
 
 
 class QIF(Content):
-    """ A QIF object """
+    """A QIF object"""
+
     def __init__(self, mapping=None, **kwargs):
-        """ QIF constructor
+        """QIF constructor
         Args:
             mapping (dict): bank mapper (see csv2ofx.mappings)
             kwargs (dict): Keyword arguments
@@ -47,24 +52,24 @@ class QIF(Content):
             <csv2ofx.qif.QIF object at 0x...>
         """
         super(QIF, self).__init__(mapping, **kwargs)
-        self.def_type = kwargs.get('def_type')
+        self.def_type = kwargs.get("def_type")
         self.prev_account = None
         self.prev_group = None
         self.account_types = {
-            'Invst': ('roth', 'ira', '401k', 'vanguard'),
-            'Bank': ('checking', 'savings', 'market', 'income'),
-            'Oth A': ('receivable',),
-            'Oth L': ('payable',),
-            'CCard': ('visa', 'master', 'express', 'discover', 'platinum'),
-            'Cash': ('cash', 'expenses')
+            "Invst": ("roth", "ira", "401k", "vanguard"),
+            "Bank": ("checking", "savings", "market", "income"),
+            "Oth A": ("receivable",),
+            "Oth L": ("payable",),
+            "CCard": ("visa", "master", "express", "discover", "platinum"),
+            "Cash": ("cash", "expenses"),
         }
 
     def header(self, **kwargs):  # pylint: disable=unused-argument
-        """ Get the QIF header """
+        """Get the QIF header"""
         return None
 
     def transaction_data(self, tr):
-        """ gets QIF transaction data
+        """gets QIF transaction data
 
         Args:
             tr (dict): the transaction
@@ -101,23 +106,24 @@ class QIF(Content):
         """
         data = super(QIF, self).transaction_data(tr)
         args = [self.account_types, self.def_type]
-        memo = data.get('memo')
-        _class = data.get('class')
+        memo = data.get("memo")
+        _class = data.get("class")
 
         if memo and _class:
-            split_memo = '%s %s' % (memo, _class)
+            split_memo = "%s %s" % (memo, _class)
         else:
             split_memo = memo or _class
 
         new_data = {
-            'account_type': utils.get_account_type(data['account'], *args),
-            'split_memo': split_memo}
+            "account_type": utils.get_account_type(data["account"], *args),
+            "split_memo": split_memo,
+        }
 
         data.update(new_data)
         return data
 
     def account_start(self, **kwargs):
-        """ Gets QIF format account content
+        """Gets QIF format account content
 
         Args:
             kwargs (dict): Output from `transaction_data`.
@@ -140,7 +146,7 @@ class QIF(Content):
         return "!Account\nN%(account)s\nT%(account_type)s\n^\n" % kwargs
 
     def transaction(self, **kwargs):
-        """ Gets QIF format transaction content
+        """Gets QIF format transaction content
 
         Args:
             kwargs (dict): Output from `transaction_data`.
@@ -149,7 +155,7 @@ class QIF(Content):
             date (date): the transaction date (required)
             amount (number): the transaction amount (required)
             payee (number): the transaction amount (required)
-            date_fmt (str): the transaction date format (defaults to '%m/%d/%y')
+            date_fmt (str): the transaction date format (defaults to '%m/%d/%Y')
             memo (str): the transaction memo
             class (str): the transaction classification
             check_num (str): a unique transaction identifier
@@ -162,28 +168,28 @@ class QIF(Content):
             >>> kwargs = {
             ...     'payee': 'payee', 'amount': 100, 'check_num': 1,
             ...     'date': dt(2012, 1, 1), 'account_type': 'Bank'}
-            >>> trxn = '!Type:BankN1D01/01/12PpayeeT100.00'
+            >>> trxn = '!Type:BankN1D01/01/2012PpayeeT100.00'
             >>> result = QIF().transaction(**kwargs)
             >>> trxn == result.replace('\\n', '').replace('\\t', '')
             True
         """
-        date_fmt = kwargs.get('date_fmt', self.date_fmt)
-        kwargs.update({'time_stamp': kwargs['date'].strftime(date_fmt)})
-        is_investment = kwargs.get('is_investment')
+        date_fmt = kwargs.get("date_fmt", self.date_fmt)
+        kwargs.update({"time_stamp": kwargs["date"].strftime(date_fmt)})
+        is_investment = kwargs.get("is_investment")
         is_transaction = not is_investment
 
         if self.is_split:
-            kwargs.update({'amount': kwargs['amount'] * -1})
+            kwargs.update({"amount": kwargs["amount"] * -1})
 
         content = "!Type:%(account_type)s\n" % kwargs
 
-        if is_transaction and kwargs.get('check_num'):
+        if is_transaction and kwargs.get("check_num"):
             content += "N%(check_num)s\n" % kwargs
 
         content += "D%(time_stamp)s\n" % kwargs
 
         if is_investment:
-            if kwargs.get('inv_split_account'):
+            if kwargs.get("inv_split_account"):
                 content += "N%(x_action)s\n" % kwargs
             else:
                 content += "N%(action)s\n" % kwargs
@@ -193,19 +199,19 @@ class QIF(Content):
             content += "Q%(shares)s\n" % kwargs
             content += "Cc\n"
         else:
-            content += "P%(payee)s\n" % kwargs if kwargs.get('payee') else ''
-            content += "L%(class)s\n" % kwargs if kwargs.get('class') else ''
+            content += "P%(payee)s\n" % kwargs if kwargs.get("payee") else ""
+            content += "L%(class)s\n" % kwargs if kwargs.get("class") else ""
 
-        content += "M%(memo)s\n" % kwargs if kwargs.get('memo') else ''
+        content += "M%(memo)s\n" % kwargs if kwargs.get("memo") else ""
 
-        if is_investment and kwargs.get('commission'):
+        if is_investment and kwargs.get("commission"):
             content += "O%(commission)s\n" % kwargs
 
         content += "T%(amount)0.2f\n" % kwargs
         return content
 
     def split_content(self, **kwargs):
-        """ Gets QIF format split content
+        """Gets QIF format split content
 
         Args:
             kwargs (dict): Output from `transaction_data`.
@@ -234,28 +240,28 @@ class QIF(Content):
             >>> split == result.replace('\\n', '').replace('\\t', '')
             True
         """
-        is_investment = kwargs.get('is_investment')
+        is_investment = kwargs.get("is_investment")
         is_transaction = not is_investment
 
-        if is_investment and kwargs.get('inv_split_account'):
+        if is_investment and kwargs.get("inv_split_account"):
             content = "L%(inv_split_account)s\n" % kwargs
         elif is_investment and self.is_split:
             content = "L%(account)s\n" % kwargs
-        elif is_transaction and kwargs.get('split_account'):
+        elif is_transaction and kwargs.get("split_account"):
             content = "S%(split_account)s\n" % kwargs
         elif is_transaction:
             content = "S%(account)s\n" % kwargs
         else:
-            content = ''
+            content = ""
 
-        if content and kwargs.get('split_memo'):
+        if content and kwargs.get("split_memo"):
             content += "E%(split_memo)s\n" % kwargs
 
-        content += "$%(amount)0.2f\n" % kwargs if content else ''
+        content += "$%(amount)0.2f\n" % kwargs if content else ""
         return content
 
     def transaction_end(self):
-        """ Gets QIF transaction end
+        """Gets QIF transaction end
 
         Returns:
             (str): the QIF transaction end
@@ -268,7 +274,7 @@ class QIF(Content):
         return "^\n"
 
     def footer(self, **kwargs):  # pylint: disable=unused-argument
-        """ Gets QIF transaction footer.
+        """Gets QIF transaction footer.
 
         Returns:
             (str): the QIF footer
@@ -277,28 +283,28 @@ class QIF(Content):
             >>> QIF().footer() == ''
             True
         """
-        return self.transaction_end() if self.is_split else ''
+        return self.transaction_end() if self.is_split else ""
 
     def gen_body(self, data):
-        """ Generate the QIF body """
+        """Generate the QIF body"""
         split_account = self.split_account or self.inv_split_account
 
         for datum in data:
-            trxn_data = self.transaction_data(datum['trxn'])
-            account = self.account(datum['trxn'])
-            grp = datum['group']
+            trxn_data = self.transaction_data(datum["trxn"])
+            account = self.account(datum["trxn"])
+            grp = datum["group"]
 
             if self.prev_group and self.prev_group != grp and self.is_split:
                 yield self.transaction_end()
 
-            if datum['is_main'] and self.prev_account != account:
+            if datum["is_main"] and self.prev_account != account:
                 yield self.account_start(**trxn_data)
 
-            if (self.is_split and datum['is_main']) or not self.is_split:
+            if (self.is_split and datum["is_main"]) or not self.is_split:
                 yield self.transaction(**trxn_data)
                 self.prev_account = account
 
-            if (self.is_split and not datum['is_main']) or split_account:
+            if (self.is_split and not datum["is_main"]) or split_account:
                 yield self.split_content(**trxn_data)
 
             if not self.is_split:
@@ -307,7 +313,7 @@ class QIF(Content):
             self.prev_group = grp
 
     def gen_groups(self, records, chunksize=None):
-        """ Generate the QIF groups """
+        """Generate the QIF groups"""
         for chnk in chunk(records, chunksize):
             keyfunc = self.id if self.is_split else self.account
 
