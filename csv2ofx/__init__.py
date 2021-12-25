@@ -18,8 +18,12 @@ Attributes:
 """
 
 from __future__ import (
-    absolute_import, division, print_function, with_statement,
-    unicode_literals)
+    absolute_import,
+    division,
+    print_function,
+    with_statement,
+    unicode_literals,
+)
 
 import hashlib
 import itertools as it
@@ -36,26 +40,26 @@ from dateutil.parser import parse
 
 from . import utils
 
-__title__ = 'csv2ofx'
-__package_name__ = 'csv2ofx'
-__author__ = 'Reuben Cummings'
-__description__ = 'converts a csv file of transactions to an ofx or qif file'
-__email__ = 'reubano@gmail.com'
-__version__ = '0.27.0'
-__license__ = 'MIT'
-__copyright__ = 'Copyright 2015 Reuben Cummings'
+__title__ = "csv2ofx"
+__package_name__ = "csv2ofx"
+__author__ = "Reuben Cummings"
+__description__ = "converts a csv file of transactions to an ofx or qif file"
+__email__ = "reubano@gmail.com"
+__version__ = "0.28.0"
+__license__ = "MIT"
+__copyright__ = "Copyright 2015 Reuben Cummings"
 
-DEF_DATE_FMT = '%m/%d/%y'
+DEF_DATE_FMT = "%m/%d/%Y"
 
 # pylint: disable=invalid-name
-md5 = lambda content: hashlib.md5(content.encode('utf-8')).hexdigest()
+md5 = lambda content: hashlib.md5(content.encode("utf-8")).hexdigest()
 
 
 class Content(object):  # pylint: disable=too-many-instance-attributes
-    """A transaction holding object
-    """
+    """A transaction holding object"""
+
     def __init__(self, mapping=None, **kwargs):
-        """ Base content constructor
+        """Base content constructor
         Args:
             mapping (dict): bank mapper (see csv2ofx.mappings)
             kwargs (dict): Keyword arguments
@@ -74,26 +78,26 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
 
         # pylint doesn't like dynamically set attributes...
         self.amount = 0
-        self.account = 'N/A'
-        self.date_fmt = kwargs.get('date_fmt', DEF_DATE_FMT)
+        self.account = "N/A"
+        self.date_fmt = kwargs.get("date_fmt", DEF_DATE_FMT)
         self.split_account = None
         self.inv_split_account = None
         self.id = None
 
         [self.__setattr__(k, v) for k, v in mapping.items()]
 
-        if not hasattr(self, 'is_split'):
+        if not hasattr(self, "is_split"):
             self.is_split = False
 
         if not callable(self.account):
             account = self.account
             self.account = lambda _: account
 
-        self.start = kwargs.get('start') or dt(1970, 1, 1)
-        self.end = kwargs.get('end') or dt.now()
+        self.start = kwargs.get("start") or dt(1970, 1, 1)
+        self.end = kwargs.get("end") or dt.now()
 
     def get(self, name, trxn=None, default=None):
-        """ Gets an attribute which could be either a normal attribute,
+        """Gets an attribute which could be either a normal attribute,
         a mapping function, or a mapping attribute
 
         Args:
@@ -139,7 +143,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
         return value
 
     def skip_transaction(self, trxn):
-        """ Determines whether a transaction should be skipped (isn't in the
+        """Determines whether a transaction should be skipped (isn't in the
         specified date range)
 
         Args:
@@ -158,10 +162,10 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             >>> Content(mapping, start=dt(2013, 1, 1)).skip_transaction(trxn)
             True
         """
-        return not self.end >= parse(self.get('date', trxn)) >= self.start
+        return not self.end >= parse(self.get("date", trxn)) >= self.start
 
     def convert_amount(self, trxn):
-        """ Converts a string amount into a number
+        """Converts a string amount into a number
 
         Args:
             trxn (dict): The transaction.
@@ -178,10 +182,10 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             >>> Content(mapping, start=dt(2010, 1, 1)).convert_amount(trxn)
             Decimal('1000.00')
         """
-        return utils.convert_amount(self.get('amount', trxn))
+        return utils.convert_amount(self.get("amount", trxn))
 
     def transaction_data(self, trxn):  # pylint: disable=too-many-locals
-        """ gets transaction data
+        """gets transaction data
 
         Args:
             trxn (dict): the transaction
@@ -214,28 +218,28 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             ...     'x_action': ''}
             True
         """
-        account = self.get('account', trxn)
-        split_account = self.get('split_account', trxn)
-        bank = self.get('bank', trxn, account)
-        raw_amount = str(self.get('amount', trxn))
+        account = self.get("account", trxn)
+        split_account = self.get("split_account", trxn)
+        bank = self.get("bank", trxn, account)
+        raw_amount = str(self.get("amount", trxn))
         amount = self.convert_amount(trxn)
-        _type = self.get('type', trxn, '').upper()
+        _type = self.get("type", trxn, "").upper()
 
-        if _type not in {'DEBIT', 'CREDIT'}:
-            _type = 'CREDIT' if amount > 0 else 'DEBIT'
+        if _type not in {"DEBIT", "CREDIT"}:
+            _type = "CREDIT" if amount > 0 else "DEBIT"
 
-        date = self.get('date', trxn)
-        payee = self.get('payee', trxn)
-        desc = self.get('desc', trxn)
-        notes = self.get('notes', trxn)
-        memo = '%s %s' % (desc, notes) if desc and notes else desc or notes
-        check_num = self.get('check_num', trxn)
-        details = ''.join(filter(None, [date, raw_amount, payee, memo]))
-        category = self.get('category', trxn, '')
-        shares = Decimal(self.get('shares', trxn, 0))
-        symbol = self.get('symbol', trxn, '')
-        price = Decimal(self.get('price', trxn, 0))
-        invest = shares or (symbol and symbol != 'N/A') or 'invest' in category
+        date = self.get("date", trxn)
+        payee = self.get("payee", trxn)
+        desc = self.get("desc", trxn)
+        notes = self.get("notes", trxn)
+        memo = "%s %s" % (desc, notes) if desc and notes else desc or notes
+        check_num = self.get("check_num", trxn)
+        details = "".join(filter(None, [date, raw_amount, payee, memo]))
+        category = self.get("category", trxn, "")
+        shares = Decimal(self.get("shares", trxn, 0))
+        symbol = self.get("symbol", trxn, "")
+        price = Decimal(self.get("price", trxn, 0))
+        invest = shares or (symbol and symbol != "N/A") or "invest" in category
 
         if invest:
             amount = abs(amount)
@@ -245,38 +249,38 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             action = utils.get_action(category)
             x_action = utils.get_action(category, True)
         else:
-            amount = -1 * abs(amount) if _type == 'DEBIT' else abs(amount)
-            action = ''
-            x_action = ''
+            amount = -1 * abs(amount) if _type == "DEBIT" else abs(amount)
+            action = ""
+            x_action = ""
 
         return {
-            'date': parse(date),
-            'currency': self.get('currency', trxn, 'USD'),
-            'shares': shares,
-            'symbol': symbol,
-            'price': price,
-            'action': action,
-            'x_action': x_action,
-            'category': category,
-            'is_investment': invest,
-            'bank': bank,
-            'bank_id': self.get('bank_id', trxn, md5(bank)),
-            'account': account,
-            'account_id': self.get('account_id', trxn, md5(account)),
-            'split_account': split_account,
-            'inv_split_account': self.get('inv_split_account', trxn),
-            'split_account_id': md5(split_account) if split_account else None,
-            'amount': amount,
-            'payee': payee,
-            'memo': memo,
-            'class': self.get('class', trxn),
-            'id': self.get('id', trxn, check_num) or md5(details),
-            'check_num': check_num,
-            'type': _type,
+            "date": parse(date),
+            "currency": self.get("currency", trxn, "USD"),
+            "shares": shares,
+            "symbol": symbol,
+            "price": price,
+            "action": action,
+            "x_action": x_action,
+            "category": category,
+            "is_investment": invest,
+            "bank": bank,
+            "bank_id": self.get("bank_id", trxn, md5(bank)),
+            "account": account,
+            "account_id": self.get("account_id", trxn, md5(account)),
+            "split_account": split_account,
+            "inv_split_account": self.get("inv_split_account", trxn),
+            "split_account_id": md5(split_account) if split_account else None,
+            "amount": amount,
+            "payee": payee,
+            "memo": memo,
+            "class": self.get("class", trxn),
+            "id": self.get("id", trxn, check_num) or md5(details),
+            "check_num": check_num,
+            "type": _type,
         }
 
     def gen_trxns(self, groups, collapse=False):
-        """ Generate transactions """
+        """Generate transactions"""
         for grp, transactions in groups:
             if self.is_split and collapse:
                 # group transactions by `collapse` field and sum the amounts
@@ -290,7 +294,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             yield (grp, trxns)
 
     def clean_trxns(self, groups):
-        """ Clean transactions """
+        """Clean transactions"""
         for grp, trxns in groups:
             _args = [trxns, self.convert_amount]
 
@@ -298,7 +302,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             if self.is_split and self.skip_transaction(trxns[0]):
                 continue
             elif self.is_split and not utils.verify_splits(*_args):
-                raise Exception('Splits do not sum to zero.')
+                raise Exception("Splits do not sum to zero.")
             elif not self.is_split:
                 filtered_trxns = filterfalse(self.skip_transaction, trxns)
             else:

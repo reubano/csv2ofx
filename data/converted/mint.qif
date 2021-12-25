@@ -3,7 +3,7 @@ NChecking
 TBank
 ^
 !Type:Bank
-D06/12/15
+D06/12/2015
 PTransfer from Savings
 MAccount Transfer
 T-1500.00
@@ -12,7 +12,7 @@ EAccount Transfer
 $-1500.00
 ^
 !Type:Bank
-D06/13/15
+D06/13/2015
 PTransfer to Savings
 MAccount Transfer
 T2000.00
@@ -21,7 +21,7 @@ EAccount Transfer
 $2000.00
 ^
 !Type:Bank
-D06/14/15
+D06/14/2015
 PTransfer from Savings
 MAccount Transfer
 T-2500.00
@@ -34,7 +34,7 @@ NSavings
 TBank
 ^
 !Type:Bank
-D06/12/15
+D06/12/2015
 PTransfer from Checking
 MAccount Transfer
 T-1000.00
