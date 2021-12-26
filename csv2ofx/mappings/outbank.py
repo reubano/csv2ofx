@@ -13,13 +13,13 @@ from __future__ import absolute_import
 from operator import itemgetter
 
 mapping = {
-    'is_split': False,
-    'has_header': True,
-    'delimiter': ';',
-    'account': itemgetter('Account'),
-    'currency': itemgetter('Currency'),
-    'payee': itemgetter('Name'),
-    'date': itemgetter('Date'),
-    'amount': itemgetter('Amount'),
-    'desc': itemgetter('Reason'),
+    "is_split": False,
+    "has_header": True,
+    "delimiter": ";",
+    "account": itemgetter("Account"),
+    "currency": itemgetter("Currency"),
+    "payee": itemgetter("Name"),
+    "date": itemgetter("Date"),
+    "amount": itemgetter("Amount"),
+    "desc": itemgetter("Reason"),
 }

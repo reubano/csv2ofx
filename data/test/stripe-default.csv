@@ -1,0 +1,6 @@
+"id","description","seller_message","created","amount","amount_refunded","currency","converted_amount","converted_amount_refunded","fee","tax","converted_currency","status","statement_descriptor","customer_id","customer_description","customer_email","captured","card_id","invoice_id","transfer"
+ch_1IGl9SBI9JK85yVZtjcU9OLJ,"Entry ID: 316, Product: Big Event 2021",Payment complete.,2021-02-03 13:12,25.00,0.00,cad,25.00,0.00,1.03,0.00,cad,Paid,,,,,true,pm_1IGl9LBI9JK85yVZp5u0SDZa,,
+ch_1IGfFFBI9JK85yVZn6NXQs03,"Entry ID: 315, Product: Big Event 2021",Payment complete.,2021-02-03 06:53,27.50,0.00,cad,27.50,0.00,1.10,0.00,cad,Paid,,,,,true,pm_1IGfF8BI9JK85yVZl7mebDo0,,
+ch_1IGYhLBI9JK85yVZPHrxqN27,"Entry ID: 314, Product: Big Event 2021",Payment complete.,2021-02-02 23:54,25.00,0.00,cad,25.00,0.00,1.03,0.00,cad,Paid,,,,,true,pm_1IGYhFBI9JK85yVZ4JQYPp72,,
+ch_1IGYBPBI9JK85yVZ0OID8QTG,"Entry ID: 313, Product: Big Event 2021",Payment complete.,2021-02-02 23:21,25.00,0.00,cad,25.00,0.00,1.03,0.00,cad,Paid,,,,,true,pm_1IGYBJBI9JK85yVZC713zkPP,,
+ch_1IVbR2BI9JK85yVZUofVdX4R,Invoice 396BEA86-0001,Payment complete.,2021-03-16 11:51,10.00,0.00,cad,10.00,0.00,0.59,0.00,cad,Paid,,cus_J7gbFtFn5aCnnH,Big Customer,info@bigcustomer.example.com,true,src_1IVbR1BI9JK85yVZSaRjRQBW,in_1IVREgBI9JK85yVZlJIZTlnT,

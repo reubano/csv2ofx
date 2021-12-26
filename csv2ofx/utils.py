@@ -18,8 +18,12 @@ Attributes:
 """
 
 from __future__ import (
-    absolute_import, division, print_function, with_statement,
-    unicode_literals)
+    absolute_import,
+    division,
+    print_function,
+    with_statement,
+    unicode_literals,
+)
 
 from builtins import *
 from meza.fntools import get_separators
@@ -29,22 +33,30 @@ from collections import OrderedDict
 # NOTE: Because we are testing for substrings, the order we iterate
 # over this dictionary matters (so place strings like "reinvest"
 # above substrings like "invest")
-ACTION_TYPES = OrderedDict([
-    ('ShrsIn', ('deposit',)),
-    ('ShrsOut', ('withdraw',)),
-    ('ReinvDiv', ('reinvest',)),
-    ('Buy', ('buy', 'invest',)),
-    ('Div', ('dividend',)),
-    ('Int', ('interest',)),
-    ('Sell', ('sell',)),
-    ('StkSplit', ('split',)),
-])
+ACTION_TYPES = OrderedDict(
+    [
+        ("ShrsIn", ("deposit",)),
+        ("ShrsOut", ("withdraw",)),
+        ("ReinvDiv", ("reinvest",)),
+        (
+            "Buy",
+            (
+                "buy",
+                "invest",
+            ),
+        ),
+        ("Div", ("dividend",)),
+        ("Int", ("interest",)),
+        ("Sell", ("sell",)),
+        ("StkSplit", ("split",)),
+    ]
+)
 
-TRANSFERABLE = {'Buy', 'Div', 'Int', 'Sell'}
+TRANSFERABLE = {"Buy", "Div", "Int", "Sell"}
 
 
-def get_account_type(account, account_types, def_type='n/a'):
-    """ Detect the account type of a given account
+def get_account_type(account, account_types, def_type="n/a"):
+    """Detect the account type of a given account
 
     Args:
         account (str): The account name
@@ -70,8 +82,8 @@ def get_account_type(account, account_types, def_type='n/a'):
     return _type
 
 
-def get_action(category, transfer=False, def_action='ShrsIn'):
-    """ Detect the investment action of a given category
+def get_action(category, transfer=False, def_action="ShrsIn"):
+    """Detect the investment action of a given category
 
     Args:
         category (str): The transaction category.
@@ -100,18 +112,18 @@ def get_action(category, transfer=False, def_action='ShrsIn'):
             break
 
     if transfer and _type in TRANSFERABLE:
-        return '%sX' % _type
+        return "%sX" % _type
     else:
         return _type
 
 
 def convert_amount(content):
-    """ Convert number to a decimal amount """
+    """Convert number to a decimal amount"""
     return to_decimal(content, **get_separators(content))
 
 
 def get_max_split(splits, keyfunc):
-    """ Returns the split in a transaction with the largest absolute value
+    """Returns the split in a transaction with the largest absolute value
 
     Args:
         splits (List[dict]): return value of group_transactions()
@@ -134,7 +146,7 @@ def get_max_split(splits, keyfunc):
 
 
 def verify_splits(splits, keyfunc):
-    """ Verifies that the splits of each transaction sum to 0
+    """Verifies that the splits of each transaction sum to 0
 
     Args:
        splits (dict): return value of group_transactions()
@@ -156,14 +168,14 @@ def verify_splits(splits, keyfunc):
 
 
 def gen_data(groups):
-    """ Generate the transaction data """
+    """Generate the transaction data"""
     for group, main_pos, sorted_trxns in groups:
         for pos, trxn in sorted_trxns:
             base_data = {
-                'trxn': trxn,
-                'is_main': pos == main_pos,
-                'len': len(sorted_trxns),
-                'group': group
+                "trxn": trxn,
+                "is_main": pos == main_pos,
+                "len": len(sorted_trxns),
+                "group": group,
             }
 
             yield base_data

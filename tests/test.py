@@ -9,8 +9,7 @@ tests.test
 Provides scripttests to test csv2ofx CLI functionality.
 """
 
-from __future__ import (
-    absolute_import, division, print_function, unicode_literals)
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 import sys
 
@@ -24,16 +23,16 @@ import pygogo as gogo
 
 from scripttest import TestFileEnvironment
 
-sys.path.append('../csv2ofx')
+sys.path.append("../csv2ofx")
 
 PARENT_DIR = p.abspath(p.dirname(p.dirname(__file__)))
-EXAMPLE_DIR = p.join(PARENT_DIR, 'data', 'test')
-CHECK_DIR = p.join(PARENT_DIR, 'data', 'converted')
+EXAMPLE_DIR = p.join(PARENT_DIR, "data", "test")
+CHECK_DIR = p.join(PARENT_DIR, "data", "converted")
 
 
 def filter_output(outlines, debug_stmts=None):
     """Remove meza debugging statements"""
-    def_stmts = ['File was opened in', 'Decoding file with encoding']
+    def_stmts = ["File was opened in", "Decoding file with encoding"]
     debug_stmts = debug_stmts or def_stmts
 
     for line in outlines:
@@ -48,14 +47,14 @@ def main(script, tests, verbose=False, stop=True):
     failures = 0
     logger = gogo.Gogo(__name__, verbose=verbose).logger
     short_script = p.basename(script)
-    env = TestFileEnvironment('.scripttest')
+    env = TestFileEnvironment(".scripttest")
 
     start = timer()
     for pos, test in enumerate(tests):
         num = pos + 1
         opts, arguments, expected = test
-        joined_opts = ' '.join(opts) if opts else ''
-        joined_args = '"%s"' % '" "'.join(arguments) if arguments else ''
+        joined_opts = " ".join(opts) if opts else ""
+        joined_args = '"%s"' % '" "'.join(arguments) if arguments else ""
         command = "%s %s %s" % (script, joined_opts, joined_args)
         short_command = "%s %s %s" % (short_script, joined_opts, joined_args)
         result = env.run(command, cwd=PARENT_DIR, expect_stderr=True)
@@ -68,24 +67,24 @@ def main(script, tests, verbose=False, stop=True):
         elif p.isfile(expected):
             outlines = StringIO(output).readlines()
 
-            with open(expected, encoding='utf-8') as f:
+            with open(expected, encoding="utf-8") as f:
                 checklines = f.readlines()
         else:
             outlines = StringIO(output).readlines()
             checklines = StringIO(expected).readlines()
 
         args = [checklines, list(filter_output(outlines))]
-        kwargs = {'fromfile': 'expected', 'tofile': 'got'}
-        diffs = ''.join(unified_diff(*args, **kwargs))
+        kwargs = {"fromfile": "expected", "tofile": "got"}
+        diffs = "".join(unified_diff(*args, **kwargs))
 
         if diffs:
             failures += 1
             msg = "ERROR! Output from test #%i:\n  %s\n" % (num, short_command)
             msg += "doesn't match:\n  %s\n" % expected
-            msg += diffs if diffs else ''
+            msg += diffs if diffs else ""
         else:
             logger.debug(output)
-            msg = 'Scripttest #%i: %s ... ok' % (num, short_command)
+            msg = "Scripttest #%i: %s ... ok" % (num, short_command)
 
         logger.info(msg)
 
@@ -93,14 +92,15 @@ def main(script, tests, verbose=False, stop=True):
             break
 
     time = timer() - start
-    logger.info('%s' % '-' * 70)
-    end = 'FAILED (failures=%i)' % failures if failures else 'OK'
-    logger.info('Ran %i scripttests in %0.3fs\n\n%s', num, time, end)
+    logger.info("%s" % "-" * 70)
+    end = "FAILED (failures=%i)" % failures if failures else "OK"
+    logger.info("Ran %i scripttests in %0.3fs\n\n%s", num, time, end)
     sys.exit(failures)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     # pylint: disable=invalid-name
-    csv2ofx = p.join(PARENT_DIR, 'bin', 'csv2ofx')
+    csv2ofx = p.join(PARENT_DIR, "bin", "csv2ofx")
 
     def gen_test(raw):
         """Generate test arguments"""
@@ -111,32 +111,47 @@ if __name__ == '__main__':
             else:
                 yield (opts, _in, _out)
 
-    MINT_ALT_OPTS = ['-oqs20150613', '-e20150614', '-m mint']
-    SERVER_DATE = '-D 20161031112908'
-    SPLIT_OPTS = ['-o', '-m split_account', SERVER_DATE]
+    MINT_ALT_OPTS = ["-oqs20150613", "-e20150614", "-m mint"]
+    SERVER_DATE = "-D 20161031112908"
+    SPLIT_OPTS = ["-o", "-m split_account", SERVER_DATE]
     PRE_TESTS = [
-        (['--help'], [], True),
-        (['-oq'], 'default.csv', 'default.qif'),
-        (['-oq', '-m split_account'], 'default.csv', 'default_w_splits.qif'),
-        (['-oqc Description', '-m xero'], 'xero.csv', 'xero.qif'),
-        (['-oq', '-m mint'], 'mint.csv', 'mint.qif'),
-        (['-oq', '-m mint_headerless'], 'mint_headerless.csv', 'mint.qif'),
-        (MINT_ALT_OPTS, 'mint.csv', 'mint_alt.qif'),
-        (['-oe 20150908', SERVER_DATE], 'default.csv', 'default.ofx'),
-        (SPLIT_OPTS, 'default.csv', 'default_w_splits.ofx'),
-        (['-o', '-m mint', SERVER_DATE], 'mint.csv', 'mint.ofx'),
-        (['-oq', '-m creditunion'], 'creditunion.csv', 'creditunion.qif'),
+        (["--help"], [], True),
+        (["-oq"], "default.csv", "default.qif"),
+        (["-oq", "-m split_account"], "default.csv", "default_w_splits.qif"),
+        (["-oqc Description", "-m xero"], "xero.csv", "xero.qif"),
+        (["-oq", "-m mint"], "mint.csv", "mint.qif"),
+        (["-oq", "-m mint_headerless"], "mint_headerless.csv", "mint.qif"),
+        (MINT_ALT_OPTS, "mint.csv", "mint_alt.qif"),
+        (["-oe 20150908", SERVER_DATE], "default.csv", "default.ofx"),
+        (SPLIT_OPTS, "default.csv", "default_w_splits.ofx"),
+        (["-o", "-m mint", SERVER_DATE], "mint.csv", "mint.ofx"),
+        (["-oq", "-m creditunion"], "creditunion.csv", "creditunion.qif"),
         (
-            ['-E windows-1252', '-m gls', SERVER_DATE, '-e 20171111', '-o'],
-            'gls.csv', 'gls.ofx'
+            ["-o", "-m stripe", "-e", "20210505", SERVER_DATE],
+            "stripe-default.csv",
+            "stripe-default.ofx",
         ),
         (
-            ['-o', '-m pcmastercard', '-e 20190120', SERVER_DATE],
-            'pcmastercard.csv', 'pcmastercard.ofx'
+            ["-o", "-m stripe", "-e", "20210505", SERVER_DATE],
+            "stripe-all.csv",
+            "stripe-all.ofx",
+        ),
+        (["-oq", "-m stripe"], "stripe-default.csv", "stripe-default.qif"),
+        (["-oq", "-m stripe"], "stripe-all.csv", "stripe-all.qif"),
+        (
+            ["-E windows-1252", "-m gls", SERVER_DATE, "-e 20171111", "-o"],
+            "gls.csv",
+            "gls.ofx",
         ),
         (
-            ['-o', '-m outbank', '-e 20190301', SERVER_DATE],
-            'outbank.csv', 'outbank.ofx'
+            ["-o", "-m pcmastercard", "-e 20190120", SERVER_DATE],
+            "pcmastercard.csv",
+            "pcmastercard.ofx",
+        ),
+        (
+            ["-o", "-m outbank", "-e 20190301", SERVER_DATE],
+            "outbank.csv",
+            "outbank.ofx",
         ),
     ]
 
