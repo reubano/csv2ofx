@@ -58,9 +58,9 @@ MODULES = tuple(itemgetter(1)(m) for m in iter_modules(MAPPINGS.__path__))
 
 
 parser.add_argument(
-    dest="source", nargs="?", help="the source csv file (defaults to stdin)"
+    dest="source", nargs="?", help="the source csv file (default: stdin)"
 )
-parser.add_argument(dest="dest", nargs="?", help="the output file (defaults to stdout)")
+parser.add_argument(dest="dest", nargs="?", help="the output file (default: stdout)")
 parser.add_argument(
     "-a",
     "--account",
@@ -70,15 +70,21 @@ parser.add_argument(
     help="default account type 'CHECKING' for OFX and 'Bank' for QIF.",
 )
 parser.add_argument(
-    "-e", "--end", metavar="DATE", help="end date", default=str(dt.now())
+    "-e",
+    "--end",
+    metavar="DATE",
+    help="end date (default: today)",
+    default=str(dt.now()),
 )
-parser.add_argument("-l", "--language", help="the language", default="ENG")
+parser.add_argument(
+    "-l", "--language", help="the language (default: ENG)", default="ENG"
+)
 parser.add_argument("-s", "--start", metavar="DATE", help="the start date")
 parser.add_argument(
     "-m",
     "--mapping",
     metavar="MAPPING_NAME",
-    help="the account mapping",
+    help="the account mapping (default: default)",
     default="default",
     choices=MODULES,
 )
@@ -100,7 +106,7 @@ parser.add_argument(
     metavar="ROWS",
     type=int,
     default=2 ** 14,
-    help="number of rows to process at a time",
+    help="number of rows to process at a time (default: 2 ** 14)",
 )
 parser.add_argument(
     "-L",
