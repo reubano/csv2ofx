@@ -10,7 +10,6 @@ T45000.00
 SExpenses
 $45000.00
 ^
-!Type:Cash
 NINV-8
 D03/25/2015
 PƢunȡuƙi Chairman
@@ -30,7 +29,6 @@ T50000.00
 SExpenses
 $50000.00
 ^
-!Type:Bank
 NINV-2
 D02/08/2015
 PÓmary Akida
@@ -38,7 +36,6 @@ T50000.00
 SExpenses
 $50000.00
 ^
-!Type:Bank
 NINV-3
 D02/24/2015
 PSadrick Mtel
@@ -46,7 +43,6 @@ T70000.00
 SExpenses
 $70000.00
 ^
-!Type:Bank
 NINV-4
 D02/28/2015
 PHabibœ Said
@@ -54,7 +50,6 @@ T65000.00
 SExpenses
 $65000.00
 ^
-!Type:Bank
 NINV-5
 D03/04/2015
 PNguluko Ómary Yahya
@@ -62,7 +57,6 @@ T60000.00
 SExpenses
 $60000.00
 ^
-!Type:Bank
 NINV-6
 D03/09/2015
 PȢasha Ramadhani

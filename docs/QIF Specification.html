@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en"><head id="Head1">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><title>
+	QIF Specification
+</title><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><meta id="mdesc" name="Description" content="Microsoft (MS) Money FAQ, Help and Information Pages"><meta id="mkey" name="Keywords" content="microsoft, ms money, msmoney, faq"><meta id="mrobots" name="robots" content="index,follow"><meta name="author" content="Glyn Simpson"><meta name="copyright" content="Glyn Simpson 2002–2016">
+    <link href="QIF%20Specification_files/sitecss.css" rel="stylesheet">
+
+
+<style></style></head>
+<body data-new-gr-c-s-check-loaded="8.892.0" data-gr-ext-installed="">
+    <form method="post" action="./qifspecification.aspx" id="form1">
+<div class="aspNetHidden">
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUKMTY1NDU2MTA1Mg9kFgJmD2QWAgIDD2QWBAIED2QWAmYPFgIeB1Zpc2libGVnZAIIDxYCHgRUZXh0BTY8YnIgLz5QYWdlIExhc3QgVXBkYXRlZDogU3VuLCAyMyBKdW4gMjAxOSAxNToxNzoyNiBHTVRkZCSEsSGzYMMylHkWWnOJpMJb87X3CpHH06WbHC1Zc44x">
+</div>
+
+<div class="aspNetHidden">
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="8E769597">
+</div>
+        <div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a href="http://moneymvps.org/" class="navbar-brand">MS Money Help &amp; Info Pages</a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a href="http://moneymvps.org/">Home</a></li>
+                        <li><a href="http://moneymvps.org/#" data-toggle="dropdown" title="Microsoft Money Articles">Articles
+                                <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="http://moneymvps.org/faq/article/654.aspx" title="Windows 10">Windows 10</a></li>
+                                <li><a href="http://moneymvps.org/faq/article/42.aspx" title="Money 2005 Reinstallation">Money 2005 Reinstallation</a></li>
+                                <li><a href="http://moneymvps.org/articles/default.aspx" title="Windows 10">Miscellaneous Articles</a></li>
+                                <li><a href="http://moneymvps.org/faq/default.aspx" title="Microsoft Money FAQ">All FAQs</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">FAQ
+                                 <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="http://moneymvps.org/faq/default.aspx" title="Microsoft Money FAQ">All FAQs</a></li>
+                                <li><a href="http://moneymvps.org/faq/AtoZ.aspx" title="Money FAQ - A to Z">A to Z</a></li>
+                                <li><a href="http://moneymvps.org/faq/keyword/default.aspx" title="Money Keywords">Keywords</a></li>
+                                <li><a href="http://moneymvps.org/faq/categorylist.aspx" title="Money FAQ - Categories">Categories</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#" title="Microsoft Money Products">Products
+                                 <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="http://moneymvps.org/faq/article/642.aspx" title="Microsoft Money Products">Product Browser</a></li>
+                                <li><a href="http://moneymvps.org/faq/article/602.aspx" title="Microsoft Money US">US</a></li>
+                                <li><a href="http://moneymvps.org/faq/article/586.aspx" title="Microsoft Money UK">UK</a></li>
+                                <li><a href="http://moneymvps.org/faq/article/597.aspx" title="Microsoft Money Canada">Canada</a></li>
+                            </ul>
+                        </li>
+                        <li><a class="dropdown-toggle" data-toggle="dropdown" href="#" title="Microsoft (MS) Money Downloads and Patches">Downloads  
+                                        <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="http://moneymvps.org/downloads/Default.aspx" title="All Downloads">All Downloads</a></li>
+                                <li><a href="http://moneymvps.org/downloads/Trials.aspx" title="Trials">Trial Versions</a></li>
+                                <li><a href="http://moneymvps.org/downloads/Patches.aspx" title="Patches">Patches &amp; Updates</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" title="Support for Microsoft Money" href="#">Support
+                                        <span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                                <li><a href="http://moneymvps.org/faq/article/9.aspx" title="Support for Microsoft Money">Support</a></li>
+                                <li><a href="http://moneymvps.org/books_US.aspx" title="US Microsoft (MS) Money Books">US Money Books</a></li>
+                                <li><a href="http://moneymvps.org/books_UK.aspx" title="UK Microsoft (MS) Money Books">UK Money Books</a></li>
+                                <li><a href="http://moneymvps.org/books_Canada.aspx" title="Canadian Microsoft (MS) Money Books">Canadian Money Books</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="http://microsoftmoney.blogspot.com/" title="Microsoft (MS) Money FAQ Blog">Blog</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Content Page Section -->
+        <div class="container body-content">
+            <div id="leaderboard">
+                
+    <br>
+<br><br>
+
+
+
+
+
+            </div>
+
+            
+
+            <div class="row">
+                <div class="col-md-10 col-sm-8">
+                    <div class="row">
+                        
+   <h1>QIF Specification</h1>
+    The Quicken interchange format (<b>QIF</b>) is a specially formatted text (ASCII) 
+file that lets you to move Quicken transactions:
+    <br>
+    <p></p>
+    <ul>
+        <li>From one Quicken account register into another Quicken account register, or </li>
+        <li>To/From another application that supports the <b>QIF</b> format.</li>
+    </ul>
+    <p>
+        <b><u>Note:</u></b> For Quicken to translate data from a text file into the Quicken 
+register as transactions, the text file <u>must</u><b> </b>be in the <b>QIF</b>
+        format.
+        <br>
+    </p>
+    <h2>Required File Formatting</h2>
+
+    <ul>
+        <li>Each transaction must end with a symbol, indicating the end of entry.</li>
+        <li>Each item in the transaction must display on a separate line.</li>
+        <li>When Quicken exports an account register or list, it adds a 
+line to the top of the file that identifies the type of account or list.
+ Listed below are the header lines Quicken adds to the exported files:</li>
+    </ul>
+    <div class="table-responsive">
+        <table class="table table-bordered table-condensed">
+            <tbody><tr>
+                <th><b>Header</b></th>
+                <th><b>Type of data</b></th>
+            </tr>
+            <tr>
+                <td>!Type:Bank</td>
+                <td>Bank account transactions</td>
+            </tr>
+            <tr>
+                <td>!Type:Cash</td>
+                <td>Cash account transactions</td>
+            </tr>
+            <tr>
+                <td>!Type:CCard</td>
+                <td>Credit card account transactions</td>
+            </tr>
+            <tr>
+                <td>!Type:Invst</td>
+                <td>Investment account transactions</td>
+            </tr>
+            <tr>
+                <td>!Type:Oth A</td>
+                <td>Asset account transactions</td>
+            </tr>
+            <tr>
+                <td>!Type:Oth L</td>
+                <td>Liability account transactions</td>
+            </tr>
+            <tr>
+                <td>!Account</td>
+                <td>Account list or which account follows</td>
+            </tr>
+            <tr>
+                <td>!Type:Cat</td>
+                <td>Category list</td>
+            </tr>
+            <tr>
+                <td>!Type:Class</td>
+                <td>Class list</td>
+            </tr>
+            <tr>
+                <td>!Type:Memorized</td>
+                <td>Memorized transaction list</td>
+            </tr>
+        </tbody></table>
+    </div>
+    <p>
+        You can force Quicken to import all transfers, regardless of whether Ignore Transfers 
+is selected when the file is imported. You must add a line to the file being imported 
+into a Quicken account. Use a text editor or word processor to put the following 
+line right after the header line at the top of the file:<br>
+    </p>
+    <p>
+        !Option:AllXfr<br>
+    </p>
+    <h3>Items for Non-Investment Accounts</h3>
+    <p>
+        Each item in a bank, cash, credit card, other liability, or other asset account 
+must begin with a letter that indicates the field in the Quicken register. The non-split 
+items can be in any sequence:
+        <br>
+    </p>
+    <div class="table-responsive">
+        <table class="table table-bordered table-condensed">
+            <tbody><tr>
+                <th><b>Field</b></th>
+                <th><b>Indicator</b> <b>Explanation</b></th>
+            </tr>
+            <tr>
+                <td>D</td>
+                <td>Date</td>
+            </tr>
+            <tr>
+                <td>T</td>
+                <td>Amount</td>
+            </tr>
+            <tr>
+                <td>C</td>
+                <td>Cleared status</td>
+            </tr>
+            <tr>
+                <td>N</td>
+                <td>Num (check or reference number)</td>
+            </tr>
+            <tr>
+                <td>P</td>
+                <td>Payee</td>
+            </tr>
+            <tr>
+                <td>M</td>
+                <td>Memo</td>
+            </tr>
+            <tr>
+                <td>A</td>
+                <td>Address (up to five lines; the sixth line is an optional message)
+                </td>
+            </tr>
+            <tr>
+                <td>L</td>
+                <td>Category (Category/Subcategory/Transfer/Class)</td>
+            </tr>
+            <tr>
+                <td>S</td>
+                <td>Category in split (Category/Transfer/Class)</td>
+            </tr>
+            <tr>
+                <td>E</td>
+                <td>Memo in split</td>
+            </tr>
+            <tr>
+                <td>$</td>
+                <td>Dollar amount of split</td>
+            </tr>
+            <tr>
+                <td>^</td>
+                <td>End of the entry</td>
+            </tr>
+        </tbody></table>
+    </div>
+    <p>
+        <b><u>Note:</u></b> Repeat the S, E, and $ lines as many times as needed for 
+additional items in a split. If an item is omitted from the transaction in the
+QIF file, Quicken treats it 
+as a blank item.<br>
+    </p>
+    <h3>Items for Investment Accounts</h3>
+    <div class="table-responsive">
+        <table class="table table-bordered table-condensed">
+            <tbody><tr>
+                <th><b>Field</b></th>
+                <th><b>Indicator</b> <b>Explanation</b></th>
+            </tr>
+            <tr>
+                <td>D</td>
+                <td>Date</td>
+            </tr>
+            <tr>
+                <td>N</td>
+                <td>Action</td>
+            </tr>
+            <tr>
+                <td>Y</td>
+                <td>Security</td>
+            </tr>
+            <tr>
+                <td>I</td>
+                <td>Price</td>
+            </tr>
+            <tr>
+                <td>Q</td>
+                <td>Quantity (number of shares or split ratio)</td>
+            </tr>
+            <tr>
+                <td>T</td>
+                <td>Transaction amount</td>
+            </tr>
+            <tr>
+                <td>C</td>
+                <td>Cleared status</td>
+            </tr>
+            <tr>
+                <td>P</td>
+                <td>Text in the first line for transfers and reminders</td>
+            </tr>
+            <tr>
+                <td>M</td>
+                <td>Memo</td>
+            </tr>
+            <tr>
+                <td>O</td>
+                <td>Commission</td>
+            </tr>
+            <tr>
+                <td>L</td>
+                <td>Account for the transfer</td>
+            </tr>
+            <tr>
+                <td>$</td>
+                <td>Amount transferred</td>
+            </tr>
+            <tr>
+                <td>^</td>
+                <td>End of the entry</td>
+            </tr>
+        </tbody></table>
+    </div>
+    <h3>Items for Account Information</h3>
+    <p>
+        The account header !Account is used in two places-at the start of an account 
+list and the start of a list of transactions to specify to which account they belong.
+        <br>
+    </p>
+    <div class="table-responsive">
+        <table class="table table-bordered table-condensed">
+            <tbody><tr>
+                <th><b>Field</b></th>
+                <th><b>Indicator</b> <b>Explanation</b></th>
+            </tr>
+            <tr>
+                <td>N</td>
+                <td>Name</td>
+            </tr>
+            <tr>
+                <td>T</td>
+                <td>Type of account</td>
+            </tr>
+            <tr>
+                <td>D</td>
+                <td>Description</td>
+            </tr>
+            <tr>
+                <td>L</td>
+                <td>Credit limit (only for credit card accounts)</td>
+            </tr>
+            <tr>
+                <td>/</td>
+                <td>Statement balance date</td>
+            </tr>
+            <tr>
+                <td>$</td>
+                <td>Statement balance amount</td>
+            </tr>
+            <tr>
+                <td>^</td>
+                <td>End of entry</td>
+            </tr>
+        </tbody></table>
+    </div>
+    <h3>Items for a Category List</h3>
+    <div class="table-responsive">
+        <table class="table table-bordered table-condensed">
+            <tbody><tr>
+                <th><b>Field</b></th>
+                <th><b>Indicator</b> <b>Explanation</b></th>
+            </tr>
+            <tr>
+                <td>N</td>
+                <td>Category name:subcategory name</td>
+            </tr>
+            <tr>
+                <td>D</td>
+                <td>Description</td>
+            </tr>
+            <tr>
+                <td>T</td>
+                <td>Tax related if included, not tax related if omitted</td>
+            </tr>
+            <tr>
+                <td>I</td>
+                <td>Income category</td>
+            </tr>
+            <tr>
+                <td>E</td>
+                <td>Expense category (if category type is unspecified, quicken assumes expense 
+		type)</td>
+            </tr>
+            <tr>
+                <td>B</td>
+                <td>Budget amount (only in a Budget Amounts QIF file)</td>
+            </tr>
+            <tr>
+                <td>R</td>
+                <td>Tax schedule information</td>
+            </tr>
+            <tr>
+                <td>^</td>
+                <td>End of entry</td>
+            </tr>
+        </tbody></table>
+    </div>
+    <h3>Items for a Class List</h3>
+    <div class="table-responsive">
+        <table class="table table-bordered table-condensed">
+            <tbody><tr>
+                <th><b>Field</b></th>
+                <th><b>Indicator</b> <b>Explanation</b></th>
+            </tr>
+            <tr>
+                <td>N</td>
+                <td>Class name</td>
+            </tr>
+            <tr>
+                <td>D</td>
+                <td>Description</td>
+            </tr>
+            <tr>
+                <td>^</td>
+                <td>End of entry</td>
+            </tr>
+        </tbody></table>
+    </div>
+    <h3>Items for a Memorized Transaction List</h3>
+    <p>
+        Immediately preceding the ^ character, each entry must end with one of the following 
+file indicators to specify the transaction type.
+        <br>
+    </p>
+    <ul>
+        <li>KC </li>
+        <li>KD </li>
+        <li>KP </li>
+        <li>KI </li>
+        <li>KE </li>
+    </ul>
+    <p>
+        With that exception, memorized transaction entries have the same format as regular 
+transaction entries (non-investment accounts). However, the Date or Num field is 
+included. All items are optional, but if an amortization record is included, all 
+seven amortization lines must also be included.<br>
+    </p>
+    <div class="table-responsive">
+        <table class="table table-bordered table-condensed">
+            <tbody><tr>
+                <th><b>Field</b></th>
+                <th><b>Indicator</b> <b>Explanation</b></th>
+            </tr>
+            <tr>
+                <td>KC</td>
+                <td>Check transaction</td>
+            </tr>
+            <tr>
+                <td>KD</td>
+                <td>Deposit transaction</td>
+            </tr>
+            <tr>
+                <td>KP</td>
+                <td>Payment transaction</td>
+            </tr>
+            <tr>
+                <td>KI</td>
+                <td>Investment transaction</td>
+            </tr>
+            <tr>
+                <td>KE</td>
+                <td>Electronic payee transaction</td>
+            </tr>
+            <tr>
+                <td>T</td>
+                <td>Amount</td>
+            </tr>
+            <tr>
+                <td>C</td>
+                <td>Cleared status</td>
+            </tr>
+            <tr>
+                <td>P</td>
+                <td>Payee</td>
+            </tr>
+            <tr>
+                <td>M</td>
+                <td>Memo</td>
+            </tr>
+            <tr>
+                <td>A</td>
+                <td>Address</td>
+            </tr>
+            <tr>
+                <td>L</td>
+                <td>Category or Transfer/Class</td>
+            </tr>
+            <tr>
+                <td>S</td>
+                <td>Category/class in split</td>
+            </tr>
+            <tr>
+                <td>E</td>
+                <td>Memo in split</td>
+            </tr>
+            <tr>
+                <td>$</td>
+                <td>Dollar amount of split</td>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>Amortization: First payment date</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Amortization: Total years for loan</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Amortization: Number of payments already made</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Amortization: Number of periods per year</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>Amortization: Interest rate</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>Amortization: Current loan balance</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td>Amortization: Original loan amount</td>
+            </tr>
+            <tr>
+                <td>^</td>
+                <td>End of entry</td>
+            </tr>
+        </tbody></table>
+    </div>
+    <h2>Examples of QIF files</h2>
+    <h3>Normal Transactions Example</h3>
+    <div class="table-responsive">
+        <table class="table table-bordered table-condensed">
+            <tbody><tr>
+                <th><b>Transaction Item</b></th>
+                <th><b>Comment (not in file)</b></th>
+            </tr>
+            <tr>
+                <td>!Type:Bank</td>
+                <td>Header</td>
+            </tr>
+            <tr>
+                <td>D6/ 1/94</td>
+                <td>Date</td>
+            </tr>
+            <tr>
+                <td>T-1,000.00</td>
+                <td>Amount</td>
+            </tr>
+            <tr>
+                <td>N1005</td>
+                <td>Check number</td>
+            </tr>
+            <tr>
+                <td>PBank Of Mortgage</td>
+                <td>Payee</td>
+            </tr>
+            <tr>
+                <td>L[linda]</td>
+                <td>Category</td>
+            </tr>
+            <tr>
+                <td>S[linda]</td>
+                <td>First category in split</td>
+            </tr>
+            <tr>
+                <td>$-253.64</td>
+                <td>First amount in split</td>
+            </tr>
+            <tr>
+                <td>SMort Int</td>
+                <td>Second category in split</td>
+            </tr>
+            <tr>
+                <td>$-746.36</td>
+                <td>Second amount in split</td>
+            </tr>
+            <tr>
+                <td>^</td>
+                <td>End of the transaction</td>
+            </tr>
+            <tr>
+                <td>D6/ 2/94</td>
+                <td>Date</td>
+            </tr>
+            <tr>
+                <td>T75.00</td>
+                <td>Amount</td>
+            </tr>
+            <tr>
+                <td>PDeposit</td>
+                <td>Payee</td>
+            </tr>
+            <tr>
+                <td>^</td>
+                <td>End of the transaction</td>
+            </tr>
+            <tr>
+                <td>D6/ 3/94</td>
+                <td>Date</td>
+            </tr>
+            <tr>
+                <td>T-10.00</td>
+                <td>Amount</td>
+            </tr>
+            <tr>
+                <td>PJoBob Biggs</td>
+                <td>Payee</td>
+            </tr>
+            <tr>
+                <td>MJ.B. gets bucks</td>
+                <td>Memo</td>
+            </tr>
+            <tr>
+                <td>LEntertain</td>
+                <td>Category</td>
+            </tr>
+            <tr>
+                <td>A1010 Rodeo Dr.</td>
+                <td>Address (line 1)</td>
+            </tr>
+            <tr>
+                <td>AWaco, Tx</td>
+                <td>Address (line 2)</td>
+            </tr>
+            <tr>
+                <td>A80505</td>
+                <td>Address (line 3)</td>
+            </tr>
+            <tr>
+                <td>A</td>
+                <td>Address (line 4)</td>
+            </tr>
+            <tr>
+                <td>A</td>
+                <td>Address (line 5)</td>
+            </tr>
+            <tr>
+                <td>A</td>
+                <td>Address (line 6)</td>
+            </tr>
+            <tr>
+                <td>^</td>
+                <td>End of the transaction</td>
+            </tr>
+        </tbody></table>
+    </div>
+    <h3>Investment Example</h3>
+    <div class="table-responsive">
+        <table class="table table-bordered table-condensed">
+            <tbody><tr>
+                <th><b>Transaction Item</b></th>
+                <th><b>Comment (not in file)</b></th>
+            </tr>
+            <tr>
+                <td>!Type:Invst</td>
+                <td>Header line</td>
+            </tr>
+            <tr>
+                <td>D8/25/93</td>
+                <td>Date</td>
+            </tr>
+            <tr>
+                <td>NShrsIn</td>
+                <td>Action (optional)</td>
+            </tr>
+            <tr>
+                <td>Yibm4</td>
+                <td>Security</td>
+            </tr>
+            <tr>
+                <td>I11.260</td>
+                <td>Price</td>
+            </tr>
+            <tr>
+                <td>Q88.81</td>
+                <td>Quantity</td>
+            </tr>
+            <tr>
+                <td>CX</td>
+                <td>Cleared Status</td>
+            </tr>
+            <tr>
+                <td>T1,000.00</td>
+                <td>Amount</td>
+            </tr>
+            <tr>
+                <td>MOpening</td>
+                <td>Balance Memo</td>
+            </tr>
+            <tr>
+                <td>^</td>
+                <td>End of the transaction</td>
+            </tr>
+            <tr>
+                <td>D8/25/93</td>
+                <td>Date</td>
+            </tr>
+            <tr>
+                <td>NBuyX</td>
+                <td>Action</td>
+            </tr>
+            <tr>
+                <td>Yibm4</td>
+                <td>Security</td>
+            </tr>
+            <tr>
+                <td>I11.030</td>
+                <td>Price</td>
+            </tr>
+            <tr>
+                <td>Q9.066</td>
+                <td>Quantity</td>
+            </tr>
+            <tr>
+                <td>T100.00</td>
+                <td>Amount</td>
+            </tr>
+            <tr>
+                <td>MEst. price as of 8/25/93</td>
+                <td>Memo</td>
+            </tr>
+            <tr>
+                <td>L[CHECKING]</td>
+                <td>Account for transfer</td>
+            </tr>
+            <tr>
+                <td>$100.00</td>
+                <td>Amount transferred</td>
+            </tr>
+            <tr>
+                <td>^</td>
+                <td>End of the transaction</td>
+            </tr>
+        </tbody></table>
+    </div>
+    <h3>Memorized List Example</h3>
+    <div class="table-responsive">
+        <table class="table table-bordered table-condensed">
+            <tbody><tr>
+                <th><b>Transaction Item</b></th>
+                <th><b>Comment (not in file)</b></th>
+            </tr>
+            <tr>
+                <td>!Type:Memorized</td>
+                <td>Header line</td>
+            </tr>
+            <tr>
+                <td>T-50.00</td>
+                <td>Amount</td>
+            </tr>
+            <tr>
+                <td>PJoe Hayes</td>
+                <td>Payee</td>
+            </tr>
+            <tr>
+                <td>MRent</td>
+                <td>Memo</td>
+            </tr>
+            <tr>
+                <td>KC</td>
+                <td>Check transaction</td>
+            </tr>
+            <tr>
+                <td>^</td>
+                <td>End of the transaction</td>
+            </tr>
+            <tr>
+                <td>T-25.00</td>
+                <td>Amount</td>
+            </tr>
+            <tr>
+                <td>T-25.00</td>
+                <td>Company Payee</td>
+            </tr>
+            <tr>
+                <td>LTelephone</td>
+                <td>Category</td>
+            </tr>
+            <tr>
+                <td>KP</td>
+                <td>Payment transaction</td>
+            </tr>
+            <tr>
+                <td>^</td>
+                <td>End of the transaction</td>
+            </tr>
+        </tbody></table>
+    </div>
+
+                    </div>
+                    <div class="row">
+                        <div id="contentfoot">
+                            
+<div class="ac">
+    
+
+    
+</div>
+
+                            <!-- Article Footer Start -->
+                            <br>Page Last Updated: Sun, 23 Jun 2019 15:17:26 GMT
+                            <!-- Article Footer End -->
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-4">
+                    
+<div id="right">
+<iframe src="http://rcm-uk.amazon.co.uk/e/cm?t=microsoftmone-21&amp;o=2&amp;p=8&amp;l=as1&amp;asins=B0002WV7TO&amp;fc1=000000&amp;=1&amp;lc1=0000ff&amp;bc1=ffffff&amp;lt1=_blank&amp;IS2=1&amp;f=ifr&amp;bg1=ffffff&amp;f=ifr" style="width: 120px; height: 240px" scrolling="no" marginwidth="0" marginheight="0" sroa5kst3="" frameborder="0"></iframe>
+</div>
+
+                </div>
+            </div>
+            <hr>
+            <footer>
+                
+<a href="http://moneymvps.org/faq/article/9.aspx">Support</a> | <a href="http://moneymvps.org/faq/article/4.aspx" title="About the author">About the author</a> | <a href="http://moneymvps.org/sitemap.aspx" title="Microsoft Money Help and FAQ Sitemap">Sitemap</a> | <a href="http://microsoftmoney.blogspot.com/" title="Microsoft (MS) Money Blog">Blog</a> | <a href="javascript:SendMail('glyn.simpson', 'gmail.com', 'moneymvps.org site feedback');void(0)" title="Contact Me">Contact Me</a>
+<br>
+This site is provided without any employment or contractual obligation with Microsoft
+    Corporation.<br>
+Copyright © Glyn Simpson 1998-2021. All rights reserved.
+            </footer>
+        </div>
+
+        <!-- /container -->
+        
+        <script src="QIF%20Specification_files/jquery.js"></script>
+
+        <script src="QIF%20Specification_files/bootstrap.js"></script>
+
+    </form>
+
+
+</body></html>
