@@ -1,7 +1,10 @@
 *.py[cod]
-.cookiecutter
+*.DS_Store
 *.ipynb
+.cookiecutter
 .ipynb_checkpoints/*
+.idea/
+example*.log
 examples/.ipynb_checkpoints/*
 
 # C extensions
@@ -29,8 +32,9 @@ pip-log.txt
 .coverage
 .tox
 .noseids
-nosetests.xml
 .scripttest
+htmlcov/*
+nosetests.xml
 
 # Translations
 *.mo
@@ -46,5 +50,3 @@ output/*/index.html
 
 # Sphinx
 docs/_build
-
-.idea/
