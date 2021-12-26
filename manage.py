@@ -26,7 +26,7 @@ def upload_():
     # check_call(['twine', 'upload', p.join(BASEDIR, 'dist', '*')])
     _uploaddir = p.join(BASEDIR, "dist", "*")
     url = "https://upload.pypi.org/legacy/"
-    check_call(["twine upload", "--repository-url", url, _uploaddir])
+    check_call(["twine", "upload", "--repository-url", url, _uploaddir])
 
 
 def sdist_():
