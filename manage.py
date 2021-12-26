@@ -12,24 +12,24 @@ BASEDIR = p.dirname(__file__)
 DEF_WHERE = ["csv2ofx", "tests", "setup.py", "manage.py"]
 
 
-def upload_():
+def _upload():
     """Upload distribution files"""
     _uploaddir = p.join(BASEDIR, "dist", "*")
     url = "https://upload.pypi.org/legacy/"
     check_call(["twine", "upload", "--repository-url", url, _uploaddir])
 
 
-def sdist_():
+def _sdist():
     """Create a source distribution package"""
     check_call(p.join(BASEDIR, "helpers", "srcdist"))
 
 
-def wheel_():
+def _wheel():
     """Create a wheel package"""
     check_call(p.join(BASEDIR, "helpers", "wheel"))
 
 
-def clean_():
+def _clean():
     """Remove Python file and build artifacts"""
     check_call(p.join(BASEDIR, "helpers", "clean"))
 
@@ -124,10 +124,10 @@ def register():
 def release():
     """Package and upload a release"""
     try:
-        clean_()
-        sdist_()
-        wheel_()
-        upload_()
+        _clean()
+        _sdist()
+        _wheel()
+        _upload()
     except CalledProcessError as e:
         exit(e.returncode)
 
@@ -136,9 +136,9 @@ def release():
 def build():
     """Create a source distribution and wheel package"""
     try:
-        clean_()
-        sdist_()
-        wheel_()
+        _clean()
+        _sdist()
+        _wheel()
     except CalledProcessError as e:
         exit(e.returncode)
 
@@ -147,7 +147,7 @@ def build():
 def upload():
     """Upload distribution files"""
     try:
-        upload_()
+        _upload()
     except CalledProcessError as e:
         exit(e.returncode)
 
@@ -156,7 +156,7 @@ def upload():
 def sdist():
     """Create a source distribution package"""
     try:
-        sdist_()
+        _sdist()
     except CalledProcessError as e:
         exit(e.returncode)
 
@@ -165,7 +165,7 @@ def sdist():
 def wheel():
     """Create a wheel package"""
     try:
-        wheel_()
+        _wheel()
     except CalledProcessError as e:
         exit(e.returncode)
 
@@ -174,7 +174,7 @@ def wheel():
 def clean():
     """Remove Python file and build artifacts"""
     try:
-        clean_()
+        _clean()
     except CalledProcessError as e:
         exit(e.returncode)
 
