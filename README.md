@@ -42,7 +42,7 @@ from csv2ofx.ofx import OFX
 from csv2ofx.mappings.default import mapping
 
 ofx = OFX(mapping)
-records = read_csv('path/to/file.csv')
+records = read_csv('path/to/file.csv', has_header=True)
 groups = ofx.gen_groups(records)
 trxns = ofx.gen_trxns(groups)
 cleaned_trxns = ofx.clean_trxns(trxns)
@@ -66,7 +66,7 @@ from csv2ofx.qif import QIF
 from csv2ofx.mappings.default import mapping
 
 qif = QIF(mapping)
-records = read_csv('path/to/file.csv')
+records = read_csv('path/to/file.csv', has_header=True)
 groups = qif.gen_groups(records)
 trxns = qif.gen_trxns(groups)
 cleaned_trxns = qif.clean_trxns(trxns)
