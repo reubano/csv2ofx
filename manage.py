@@ -23,7 +23,10 @@ DEF_WHERE = ["csv2ofx", "tests", "setup.py", "manage.py"]
 
 def upload_():
     """Upload distribution files"""
-    check_call(["twine", "upload", p.join(BASEDIR, "dist", "*")])
+    # check_call(['twine', 'upload', p.join(BASEDIR, 'dist', '*')])
+    _uploaddir = p.join(BASEDIR, "dist", "*")
+    url = "https://upload.pypi.org/legacy/"
+    check_call(f"twine upload --repository-url {url} {_uploaddir}", shell=True)
 
 
 def sdist_():
