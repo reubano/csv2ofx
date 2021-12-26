@@ -17,14 +17,6 @@ Examples:
 Attributes:
     ENCODING (str): Default file encoding.
 """
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    with_statement,
-    unicode_literals,
-)
-
 from builtins import *
 from meza.fntools import chunk
 from meza.process import group

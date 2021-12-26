@@ -8,8 +8,6 @@ Provides a mapping for transactions obtained from Outbank, a
 banking application that is able to export to CSV.
 Mapping build for version 2.19.
 """
-from __future__ import absolute_import
-
 from operator import itemgetter
 
 mapping = {

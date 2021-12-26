@@ -21,8 +21,6 @@ tricky:
 * The payee is not explicitly provided: it can be in columns "Description 2/3"
 
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from operator import itemgetter
 
 # Financial numbers are expressed as "2'045.56" -- TO-DO switch to Babel?
