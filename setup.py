@@ -43,6 +43,7 @@ setup(
     version=version,
     description=description,
     long_description=readme,
+    long_description_content_type='text/markdown',
     author=module.__author__,
     author_email=module.__email__,
     url=pkutils.get_url(project, user),
