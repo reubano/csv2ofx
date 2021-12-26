@@ -1,5 +1,9 @@
 # csv2ofx
 
+[![travis](https://img.shields.io/travis/reubano/csv2ofx/master.svg)](https://app.travis-ci.com/github/reubano/csv2ofx)
+[![versions](https://img.shields.io/pypi/pyversions/csv2ofx.svg)](https://pypi.python.org/pypi/csv2ofx)
+[![pypi](https://img.shields.io/pypi/v/csv2ofx.svg)](https://pypi.python.org/pypi/csv2ofx)
+
 ## INTRODUCTION
 
 [csv2ofx](http://github.com/reubano/csv2ofx) is a [Python library](#library-examples) and [command line interface program](#cli-examples) that converts CSV files to OFX and QIF files for importing into GnuCash or similar financial accounting programs. csv2ofx has built in support for importing csv files from mint, yoodlee, and xero. csv2ofx has been tested on the following configuration:
@@ -38,7 +42,7 @@ from csv2ofx.ofx import OFX
 from csv2ofx.mappings.default import mapping
 
 ofx = OFX(mapping)
-records = read_csv('path/to/file.csv')
+records = read_csv('path/to/file.csv', has_header=True)
 groups = ofx.gen_groups(records)
 trxns = ofx.gen_trxns(groups)
 cleaned_trxns = ofx.clean_trxns(trxns)
@@ -62,7 +66,7 @@ from csv2ofx.qif import QIF
 from csv2ofx.mappings.default import mapping
 
 qif = QIF(mapping)
-records = read_csv('path/to/file.csv')
+records = read_csv('path/to/file.csv', has_header=True)
 groups = qif.gen_groups(records)
 trxns = qif.gen_trxns(groups)
 cleaned_trxns = qif.clean_trxns(trxns)
