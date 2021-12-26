@@ -1,7 +1,5 @@
 # coding: utf-8
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from operator import itemgetter
 
 # example to convert:
@@ -10,13 +8,13 @@ from operator import itemgetter
 
 def date_func(trxn):
     # Chop up the ISO date and put it in ridiculous M/D/Y order
-    tag = trxn["Datum"].split('-')
+    tag = trxn["Datum"].split("-")
     return "{}/{}/{}".format(tag[1], tag[2], tag[0])
 
 
 def desc_func(trxn):
-    end = ' '.join(trxn['Omschrijving-{}'.format(n)] for n in range(1, 4))
-    return '{0} - {1}'.format(trxn['Naam tegenpartij'], end)
+    end = " ".join(trxn["Omschrijving-{}".format(n)] for n in range(1, 4))
+    return "{0} - {1}".format(trxn["Naam tegenpartij"], end)
 
 
 mapping = {

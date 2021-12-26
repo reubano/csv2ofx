@@ -9,8 +9,6 @@ tests.test
 Provides scripttests to test csv2ofx CLI functionality.
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import sys
 
 from difflib import unified_diff

@@ -3,15 +3,6 @@
 # vim: sw=4:ts=4:expandtab
 
 """ A script to manage development tasks """
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    with_statement,
-    unicode_literals,
-)
-
-from sys import version_info
 from os import path as p
 from subprocess import call, check_call, CalledProcessError
 from manager import Manager
@@ -21,25 +12,24 @@ BASEDIR = p.dirname(__file__)
 DEF_WHERE = ["csv2ofx", "tests", "setup.py", "manage.py"]
 
 
-def upload_():
+def _upload():
     """Upload distribution files"""
-    # check_call(['twine', 'upload', p.join(BASEDIR, 'dist', '*')])
     _uploaddir = p.join(BASEDIR, "dist", "*")
     url = "https://upload.pypi.org/legacy/"
     check_call(["twine", "upload", "--repository-url", url, _uploaddir])
 
 
-def sdist_():
+def _sdist():
     """Create a source distribution package"""
     check_call(p.join(BASEDIR, "helpers", "srcdist"))
 
 
-def wheel_():
+def _wheel():
     """Create a wheel package"""
     check_call(p.join(BASEDIR, "helpers", "wheel"))
 
 
-def clean_():
+def _clean():
     """Remove Python file and build artifacts"""
     check_call(p.join(BASEDIR, "helpers", "clean"))
 
@@ -59,17 +49,24 @@ def lint(where=None, strict=False):
     args = ["pylint", "--rcfile=tests/pylintrc", "-rn", "-fparseable"]
 
     try:
-        check_call(["flake8"] + extra)
-        check_call(args + extra + ["--py3k"]) if version_info.major == 2 else None
-        check_call(args + extra) if strict else None
+        if strict:
+            check_call(args + extra)
+        else:
+            check_call(["flake8"] + extra)
     except CalledProcessError as e:
         exit(e.returncode)
 
 
+@manager.arg("where", "w", help="Modules to check")
 @manager.command
-def pipme():
-    """Install requirements.txt"""
-    exit(call("pip", "install", "-r", "requirements.txt"))
+def prettify(where=None):
+    """Prettify code with black"""
+    extra = where.split(" ") if where else DEF_WHERE
+
+    try:
+        check_call(["black"] + extra)
+    except CalledProcessError as e:
+        exit(e.returncode)
 
 
 @manager.command
@@ -118,13 +115,19 @@ def test(where=None, stop=None, **kwargs):
 
 
 @manager.command
+def register():
+    """Register package with PyPI"""
+    exit(call("python", p.join(BASEDIR, "setup.py"), "register"))
+
+
+@manager.command
 def release():
     """Package and upload a release"""
     try:
-        clean_()
-        sdist_()
-        wheel_()
-        upload_()
+        _clean()
+        _sdist()
+        _wheel()
+        _upload()
     except CalledProcessError as e:
         exit(e.returncode)
 
@@ -133,9 +136,9 @@ def release():
 def build():
     """Create a source distribution and wheel package"""
     try:
-        clean_()
-        sdist_()
-        wheel_()
+        _clean()
+        _sdist()
+        _wheel()
     except CalledProcessError as e:
         exit(e.returncode)
 
@@ -144,7 +147,7 @@ def build():
 def upload():
     """Upload distribution files"""
     try:
-        upload_()
+        _upload()
     except CalledProcessError as e:
         exit(e.returncode)
 
@@ -153,7 +156,7 @@ def upload():
 def sdist():
     """Create a source distribution package"""
     try:
-        sdist_()
+        _sdist()
     except CalledProcessError as e:
         exit(e.returncode)
 
@@ -162,7 +165,7 @@ def sdist():
 def wheel():
     """Create a wheel package"""
     try:
-        wheel_()
+        _wheel()
     except CalledProcessError as e:
         exit(e.returncode)
 
@@ -171,7 +174,7 @@ def wheel():
 def clean():
     """Remove Python file and build artifacts"""
     try:
-        clean_()
+        _clean()
     except CalledProcessError as e:
         exit(e.returncode)
 

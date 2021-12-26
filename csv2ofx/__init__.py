@@ -17,14 +17,6 @@ Attributes:
     ENCODING (str): Default file encoding.
 """
 
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    with_statement,
-    unicode_literals,
-)
-
 import hashlib
 import itertools as it
 
@@ -45,7 +37,7 @@ __package_name__ = "csv2ofx"
 __author__ = "Reuben Cummings"
 __description__ = "converts a csv file of transactions to an ofx or qif file"
 __email__ = "reubano@gmail.com"
-__version__ = "0.28.4"
+__version__ = "0.29.0"
 __license__ = "MIT"
 __copyright__ = "Copyright 2015 Reuben Cummings"
 
