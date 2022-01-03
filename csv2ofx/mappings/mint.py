@@ -12,7 +12,7 @@ from operator import itemgetter
 mapping = {
     "is_split": False,
     "has_header": True,
-    "split_account": itemgetter("Category"),
+    "class": itemgetter("Category"),
     "account": itemgetter("Account Name"),
     "date": itemgetter("Date"),
     "type": itemgetter("Transaction Type"),
