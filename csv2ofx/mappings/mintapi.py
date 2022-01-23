@@ -7,8 +7,6 @@ csv2ofx.mappings.mintapi
 
 Provides a mapping for transactions obtained via the mintapi python script
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from operator import itemgetter
 
 mapping = {

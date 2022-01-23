@@ -1,11 +1,10 @@
 sudo: false
 language: python
 python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
-  - "pypy"
-  - "pypy3.5"
+  - "3.7"
+  - "3.8"
+  - "3.9"
+  - pypy3.7-7.3.2
 
 cache:
   directories:
@@ -16,6 +15,11 @@ env:
     - PIP_WHEEL_DIR=$HOME/.cache/pip/wheels
     - PIP_FIND_LINKS=file://$HOME/.cache/pip/wheels
     - PYTHONHASHSEED=94967295
+
+matrix:
+  fast_finish: true
+  allow_failures:
+  - python: pypy3.7-7.3.2
 
 notifications:
   email:
@@ -37,16 +41,10 @@ before_install:
 
 install:
   - pip install -r dev-requirements.txt
-  - |
-      if [[ $TRAVIS_PYTHON_VERSION == *"3"* ]]; then
-        pip install -r requirements.txt
-      else
-        pip install -r py2-requirements.txt
-      fi
+  - pip install -r requirements.txt
 
 script:
-  - manage lint
-  - manage test
+  - manage lint && manage test
 
 after_success:
   - if [[ "$TRAVIS_PULL_REQUEST" == "true" ]]; then exit 0; fi

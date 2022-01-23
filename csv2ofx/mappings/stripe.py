@@ -15,8 +15,6 @@ It's suggested the All Columns format be used if not all transactions
 identify a customer. This mapping sets PAYEE to Customer Name if it
 exists, otherwise Card Name (if provided)
 """
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 from operator import itemgetter
 
 mapping = {

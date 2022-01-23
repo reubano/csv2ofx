@@ -17,14 +17,6 @@ Examples:
 Attributes:
     ENCODING (str): Default file encoding.
 """
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    with_statement,
-    unicode_literals,
-)
-
 from builtins import *
 from meza.fntools import chunk
 from meza.process import group
@@ -145,6 +137,23 @@ class QIF(Content):
         """
         return "!Account\nN%(account)s\nT%(account_type)s\n^\n" % kwargs
 
+    def transaction_start(self, account_type=None, **kwargs):
+        """Gets QIF format transaction start content
+
+        Args:
+            account_type (str): the transaction account type
+            kwargs (dict): Output from `transaction_data`.
+
+        Returns:
+            (str): content the QIF content
+
+        Examples:
+            >>> result = QIF().transaction_start(account_type='Bank')
+            >>> '!Type:Bank' == result.replace('\\n', '').replace('\\t', '')
+            True
+        """
+        return "!Type:%s\n" % account_type
+
     def transaction(self, **kwargs):
         """Gets QIF format transaction content
 
@@ -167,8 +176,8 @@ class QIF(Content):
             >>> from datetime import datetime as dt
             >>> kwargs = {
             ...     'payee': 'payee', 'amount': 100, 'check_num': 1,
-            ...     'date': dt(2012, 1, 1), 'account_type': 'Bank'}
-            >>> trxn = '!Type:BankN1D01/01/2012PpayeeT100.00'
+            ...     'date': dt(2012, 1, 1)}
+            >>> trxn = 'N1D01/01/2012PpayeeT100.00'
             >>> result = QIF().transaction(**kwargs)
             >>> trxn == result.replace('\\n', '').replace('\\t', '')
             True
@@ -181,10 +190,10 @@ class QIF(Content):
         if self.is_split:
             kwargs.update({"amount": kwargs["amount"] * -1})
 
-        content = "!Type:%(account_type)s\n" % kwargs
-
         if is_transaction and kwargs.get("check_num"):
-            content += "N%(check_num)s\n" % kwargs
+            content = "N%(check_num)s\n" % kwargs
+        else:
+            content = ""
 
         content += "D%(time_stamp)s\n" % kwargs
 
@@ -299,6 +308,7 @@ class QIF(Content):
 
             if datum["is_main"] and self.prev_account != account:
                 yield self.account_start(**trxn_data)
+                yield self.transaction_start(**trxn_data)
 
             if (self.is_split and datum["is_main"]) or not self.is_split:
                 yield self.transaction(**trxn_data)

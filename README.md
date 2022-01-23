@@ -6,16 +6,11 @@
 
 ## INTRODUCTION
 
-[csv2ofx](http://github.com/reubano/csv2ofx) is a [Python library](#library-examples) and [command line interface program](#cli-examples) that converts CSV files to OFX and QIF files for importing into GnuCash or similar financial accounting programs. csv2ofx has built in support for importing csv files from mint, yoodlee, and xero. csv2ofx has been tested on the following configuration:
-
-* MacOS X 10.13.1
-* Python 3.6.4
+[csv2ofx](http://github.com/reubano/csv2ofx) is a [Python library](#library-examples) and [command line interface program](#cli-examples) that converts CSV files to OFX and QIF files for importing into GnuCash or similar financial accounting programs. csv2ofx has built in support for importing csv files from mint, yoodlee, and xero.
 
 ## Requirements
 
-csv2ofx requires the following programs in order to run properly:
-
-* [Python >= 2.7, 3.5](http://www.python.org/download) (MacOS X comes with python preinstalled)
+csv2ofx has been tested and is known to work on Python 3.7, 3.8, and 3.9; and PyPy3.7.
 
 ## INSTALLATION
 
@@ -32,8 +27,6 @@ csv2ofx is intended to be used either directly from Python or from the command l
 *normal OFX usage*
 
 ```python
-from __future__ import absolute_import, print_function
-
 import itertools as it
 
 from meza.io import read_csv, IterStringIO
@@ -42,7 +35,7 @@ from csv2ofx.ofx import OFX
 from csv2ofx.mappings.default import mapping
 
 ofx = OFX(mapping)
-records = read_csv('path/to/file.csv')
+records = read_csv('path/to/file.csv', has_header=True)
 groups = ofx.gen_groups(records)
 trxns = ofx.gen_trxns(groups)
 cleaned_trxns = ofx.clean_trxns(trxns)
@@ -56,8 +49,6 @@ for line in IterStringIO(content):
 *normal QIF usage*
 
 ```python
-from __future__ import absolute_import, print_function
-
 import itertools as it
 
 from tabutils.io import read_csv, IterStringIO
@@ -66,7 +57,7 @@ from csv2ofx.qif import QIF
 from csv2ofx.mappings.default import mapping
 
 qif = QIF(mapping)
-records = read_csv('path/to/file.csv')
+records = read_csv('path/to/file.csv', has_header=True)
 groups = qif.gen_groups(records)
 trxns = qif.gen_trxns(groups)
 cleaned_trxns = qif.clean_trxns(trxns)
