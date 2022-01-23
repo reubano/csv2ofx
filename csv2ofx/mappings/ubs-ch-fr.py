@@ -42,8 +42,7 @@ def fixdate(ds):
 
 def map_desc(tr):
     description = tr["Description 2"] or tr["Description 1"]
-    return description + (": " + tr["Description 3"] if tr["Description 3"] else "")
-
+    return description + (": " + tr["Description 3"] if tr["Description 3"]  else "")
 
 def map_payee(tr):
     return tr["Description 3"] if tr.get("Débit") != "" else tr["Description 2"]
@@ -62,7 +61,7 @@ mapping = {
     "amount": lambda tr: locale.atof(tr["Débit"] or tr["Crédit"]),
     # debits show _your_ notes in "Desc 2", whereas credits report the
     # _payee_. Thus a better "class" value comes from "Desc 1" + "Desc 2"
-    "class": lambda tr: tr["Description 1"] + (": " + tr["Description 2"] or ""),
+    "class": lambda tr: tr["Description 1"] + (": " + tr["Description 2"] if tr["Description 2"] else ""),
     "notes": itemgetter("Description 2"),
     # switch day/month (maybe file a bug: always inverted when ambiguous like
     # '01.02.2018')
