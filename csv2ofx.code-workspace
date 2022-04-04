@@ -4,5 +4,19 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "csv2ofx launch",
+				"type": "python",
+				"request": "launch",
+				"program": "${workspaceFolder}/csv2ofx/csv2ofx",
+				"args": ["-m santander ~/OneDrive/Controle_Financeiro/csv2ofx/csvInput/sample.csv ~/OneDrive/Controle_Financeiro/csv2ofx/csvInput/sample.ofx"],
+				"console": "integratedTerminal",
+				"justMyCode": true
+			}
+		]
+	}
 }
