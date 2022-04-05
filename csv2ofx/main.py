@@ -58,9 +58,9 @@ MODULES = tuple(itemgetter(1)(m) for m in iter_modules(MAPPINGS.__path__))
 
 
 parser.add_argument(
-    dest="source", nargs="?", help="the source csv file (default: stdin)"
+    dest="source", nargs="?", help="the source csv file (mandatory)"
 )
-parser.add_argument(dest="dest", nargs="?", help="the output file (default: stdout)")
+parser.add_argument(dest="dest", nargs="?", help="the output file (mandatory)")
 parser.add_argument(
     "-a",
     "--account",
@@ -154,6 +154,7 @@ args = parser.parse_args()  # pylint: disable=C0103
 
 def run():  # noqa: C901
     """Parses the CLI options and runs the main program"""
+
     if args.debug:
         pprint(dict(args._get_kwargs()))  # pylint: disable=W0212
         exit(0)
@@ -184,7 +185,12 @@ def run():  # noqa: C901
     }
 
     cont = QIF(mapping, **okwargs) if args.qif else OFX(mapping, **okwargs)
-    source = open(args.source, encoding=args.encoding) if args.source else stdin
+
+    if not args.source or not args.dest:
+        parser.print_help()
+        exit(1)
+    
+    source = open(args.source, encoding=args.encoding)
 
     delimiter = mapping.get("delimiter", ",")
 
@@ -219,7 +225,7 @@ def run():  # noqa: C901
         source.close()
         exit(err)
 
-    dest = open(args.dest, "w", encoding=args.encoding) if args.dest else stdout
+    dest = open(args.dest, "w", encoding=args.encoding)
 
     try:
         res = write(dest, IterStringIO(content), **kwargs)
