@@ -189,7 +189,7 @@ def run():  # noqa: C901
     if not args.source or not args.dest:
         parser.print_help()
         exit(1)
-    
+
     source = open(args.source, encoding=args.encoding)
 
     delimiter = mapping.get("delimiter", ",")

@@ -154,7 +154,8 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             >>> Content(mapping, start=dt(2013, 1, 1)).skip_transaction(trxn)
             True
         """
-        return not self.end >= dt.strptime(self.get("date", trxn),self.date_fmt) >= self.start
+        trxnDate = dt.strptime(self.get("date", trxn), self.date_fmt)
+        return not self.end >= trxnDate >= self.start
 
     def convert_amount(self, trxn):
         """Converts a string amount into a number
@@ -246,7 +247,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             x_action = ""
 
         return {
-            "date": dt.strptime(date,self.date_fmt),
+            "date": dt.strptime(date, self.date_fmt),
             "currency": self.get("currency", trxn, "USD"),
             "shares": shares,
             "symbol": symbol,
