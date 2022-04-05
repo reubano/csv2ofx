@@ -5,7 +5,7 @@ mapping = {
     "is_split": False,
     "bank": "Santander",
     "currency": "BRL",
-    "delimiter": ";",
+    "delimiter": ",",
     "account": "Santander Bank",
     "date": itemgetter("Date"),
     "date_fmt": "%d/%m/%y",

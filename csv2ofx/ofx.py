@@ -83,7 +83,10 @@ class OFX(Content):
         # yyyymmddhhmmss
         time_stamp = kwargs.get("date", dt.now()).strftime("%Y%m%d%H%M%S")
 
-        content = "DATA:OFXSGML\n"
+        content = "OFXHEADER:100"
+        content += "DATA:OFXSGML\n"
+        content += "VERSION:102\n"
+        content += "SECURITY:NONE\n"
         content += "ENCODING:UTF-8\n"
         content += "<OFX>\n"
         content += "\t<SIGNONMSGSRSV1>\n"
