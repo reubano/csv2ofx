@@ -72,6 +72,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
         # pylint doesn't like dynamically set attributes...
         self.amount = 0
         self.account = "N/A"
+        self.parse_fmt = kwargs.get("parse_fmt")
         self.dayfirst = kwargs.get("dayfirst")
         self.split_account = None
         self.inv_split_account = None
@@ -88,6 +89,14 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
 
         self.start = kwargs.get("start") or dt(1970, 1, 1)
         self.end = kwargs.get("end") or dt.now()
+
+    def parse_date(self, trxn):
+        if self.parse_fmt:
+            parsed = dt.strptime(self.get("date", trxn), self.parse_fmt)
+        else:
+            parsed = parse(self.get("date", trxn), dayfirst=self.dayfirst)
+
+        return parsed
 
     def get(self, name, trxn=None, default=None):
         """Gets an attribute which could be either a normal attribute,
@@ -155,11 +164,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             >>> Content(mapping, start=dt(2013, 1, 1)).skip_transaction(trxn)
             True
         """
-        return (
-            not self.end
-            >= parse(self.get("date", trxn), dayfirst=self.dayfirst)
-            >= self.start
-        )
+        return not self.end >= self.parse_date(trxn) >= self.start
 
     def convert_amount(self, trxn):
         """Converts a string amount into a number
@@ -251,7 +256,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             x_action = ""
 
         return {
-            "date": parse(date, dayfirst=self.dayfirst),
+            "date": self.parse_date(trxn),
             "currency": self.get("currency", trxn, "USD"),
             "shares": shares,
             "symbol": symbol,
