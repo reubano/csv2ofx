@@ -183,6 +183,9 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             >>> trxn = {'Date': '06/12/10', 'Amount': '$1,000'}
             >>> Content(mapping, start=dt(2010, 1, 1)).convert_amount(trxn)
             Decimal('1000.00')
+            >>> trxn = {'Date': '06/12/10', 'Amount': '1.000,00€'}
+            >>> Content(mapping, start=dt(2010, 1, 1)).convert_amount(trxn)
+            Decimal('1000.00')
         """
         return utils.convert_amount(self.get("amount", trxn))
 
