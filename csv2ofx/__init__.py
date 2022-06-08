@@ -61,6 +61,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             date_fmt (str): Transaction date format (defaults to '%m/%d/%y').
             dayfirst (bool): Interpret the first value in ambiguous dates (e.g. 01/05/09)
                 as the day (ignored if `parse_fmt` is present).
+            filter (func): Keep transactions for which function returns true
 
         Examples:
             >>> from csv2ofx.mappings.mint import mapping
@@ -74,6 +75,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
         self.account = "N/A"
         self.parse_fmt = kwargs.get("parse_fmt")
         self.dayfirst = kwargs.get("dayfirst")
+        self.filter = kwargs.get("filter")
         self.split_account = None
         self.inv_split_account = None
         self.id = None
@@ -149,7 +151,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
 
     def skip_transaction(self, trxn):
         """Determines whether a transaction should be skipped (isn't in the
-        specified date range)
+        specified date range, etc.)
 
         Args:
             trxn (dict): The transaction.
@@ -167,7 +169,8 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             >>> Content(mapping, start=dt(2013, 1, 1)).skip_transaction(trxn)
             True
         """
-        return not self.end >= self.parse_date(trxn) >= self.start
+        keep = self.end >= self.parse_date(trxn) >= self.start
+        return not (self.filter(trxn) if keep and self.filter else keep)
 
     def convert_amount(self, trxn):
         """Converts a string amount into a number

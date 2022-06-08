@@ -8,6 +8,7 @@ csv2ofx.mappings.mintapi
 Provides a mapping for transactions obtained via mint.com
 """
 from operator import itemgetter
+from csv2ofx.utils import convert_amount
 
 
 mapping = {
@@ -22,4 +23,5 @@ mapping = {
     "payee": itemgetter("Description"),
     "notes": itemgetter("Notes"),
     "first_row": 3,
+    "filter": lambda trxn: convert_amount(trxn["Amount"]) < 2500,
 }
