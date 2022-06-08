@@ -141,10 +141,10 @@ optional arguments:
 
 ### Code modification
 
-If you would like to import csv files with field names different from the default, you can modify the mapping file or create your own. New mappings must be placed in the `csv2ofx/mappings` folder. The mapping object consists of a dictionary whose keys are OFX/QIF attributes and whose values are functions which should return the corresponding value from a record (csv row). The mapping function will take in a record, e.g.,
+If you would like to import csv files with field names different from the default, you can modify the mapping file or create your own. New mappings must be placed in the `csv2ofx/mappings` folder (otherwise you must use the ). The mapping object consists of a dictionary whose keys are OFX/QIF attributes and whose values are functions which should return the corresponding value from a record (csv row). The mapping function will take in a record, e.g.,
 
 ```python
-{'Account': 'savings 2', 'Date': '1/3/15', 'Amount': '5,000'}
+{'Account': 'savings 2', 'Date': '1/3/15', 'Amount': 5000}
 ```
 
 The most basic mapping function just returns a specific field or value, e.g.,
@@ -154,18 +154,19 @@ from operator import itemgetter
 
 mapping = {
     'bank': 'BetterBank',
-    'account': itemgetter('account_num'),
-    'date': itemgetter('trx_date'),
-    'amount': itemgetter('trx_amount')}
+    'account': itemgetter('Account'),
+    'date': itemgetter('Date'),
+    'amount': itemgetter('Amount')}
 ```
 
 But more complex parsing is also possible, e.g.,
 
 ```python
 mapping = {
-    'account': lambda r: r['details'].split(':')[0],
-    'date': lambda r: '%s/%s/%s' % (r['month'], r['day'], r['year']),
-    'amount': lambda r: r['amount'] * 2}
+    'account': lambda r: r['Details'].split(':')[0],
+    'date': lambda r: '%s/%s/%s' % (r['Month'], r['Day'], r['Year']),
+    'amount': lambda r: r['Amount'] * 2,
+}
 ```
 
 ### Required field attributes
@@ -173,8 +174,8 @@ mapping = {
 attribute | description | default field | example
 ----------|-------------|---------------------|--------
 `account`|transaction account|Account|BetterBank Checking
-`date`|transaction date|Date|5/4/10
-`amount`|transaction amount|Amount|$30.52
+`date`|transaction date|Date|itemgetter('Transaction Date')
+`amount`|transaction amount|Amount|itemgetter('Transaction Amount')
 
 ### Optional field attributes
 
@@ -186,8 +187,9 @@ attribute | description | default field | default value | example
 `check_num`|the check or transaction number|Row|n/a|2
 `id`|transaction id|`check_num`|Num|n/a|531
 `bank`|the bank name|n/a|`account`|Bank
+`account`|transaction account type|n/a|checking|savings
 `account_id`|transaction account id|n/a|hash of `account`|bb_checking
-`type`|transaction account type|n/a|checking|savings
+`type`|transaction type (either debit or credit)|n/a|CREDIT if amount > 0 else DEBIT|debit
 `balance`|account balance|n/a|n/a|$23.00
 `class`|transaction class|n/a|n/a|travel
 
