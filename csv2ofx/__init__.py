@@ -41,7 +41,6 @@ __version__ = "0.29.0"
 __license__ = "MIT"
 __copyright__ = "Copyright 2015 Reuben Cummings"
 
-DEF_DATE_FMT = "%m/%d/%Y"
 
 # pylint: disable=invalid-name
 md5 = lambda content: hashlib.md5(content.encode("utf-8")).hexdigest()
@@ -73,7 +72,6 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
         # pylint doesn't like dynamically set attributes...
         self.amount = 0
         self.account = "N/A"
-        self.date_fmt = kwargs.get("date_fmt", DEF_DATE_FMT)
         self.dayfirst = kwargs.get("dayfirst")
         self.split_account = None
         self.inv_split_account = None

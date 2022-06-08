@@ -194,7 +194,7 @@ attribute | description | default field | default value | example
 `type`|transaction account type|n/a|checking|savings
 `balance`|account balance|n/a|n/a|$23.00
 `class`|transaction class|n/a|n/a|travel
-`date_fmt`|custom date format|n/a|%m/%d/%y|%m/%d/%Y
+`date_fmt`|custom QIF date output format|n/a|%m/%d/%y|%m/%d/%Y
 `dayfirst`|interpret the first value in ambiguous dates (e.g. 01/05/09) as the day (ignored if `parse_fmt` is present)|n/a|False|True
 
 ## Scripts

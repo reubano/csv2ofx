@@ -23,11 +23,13 @@ from meza.process import group
 
 from . import Content, utils
 
+DEF_DATE_FMT = "%m/%d/%Y"
+
 
 class QIF(Content):
     """A QIF object"""
 
-    def __init__(self, mapping=None, **kwargs):
+    def __init__(self, mapping=None, date_fmt=DEF_DATE_FMT, **kwargs):
         """QIF constructor
         Args:
             mapping (dict): bank mapper (see csv2ofx.mappings)
@@ -37,13 +39,16 @@ class QIF(Content):
             def_type (str): Default account type.
             start (date): Date from which to begin including transactions.
             end (date): Date from which to exclude transactions.
+            date_fmt (str): Transaction date output format (defaults to '%m/%d/%y').
 
         Examples:
             >>> from csv2ofx.mappings.mint import mapping
             >>> QIF(mapping)  #doctest: +ELLIPSIS
             <csv2ofx.qif.QIF object at 0x...>
         """
-        super(QIF, self).__init__(mapping, **kwargs)
+        self.date_fmt = date_fmt
+
+        super(QIF, self).__init__(mapping, date_fmt=date_fmt, **kwargs)
         self.def_type = kwargs.get("def_type")
         self.prev_account = None
         self.prev_group = None
@@ -183,7 +188,7 @@ class QIF(Content):
             True
         """
         date_fmt = kwargs.get("date_fmt", self.date_fmt)
-        kwargs.update({"time_stamp": kwargs["date"].strftime(date_fmt)})
+        kwargs.update({"time_stamp": kwargs["date"].strftime("%m/%d/%Y")})
         is_investment = kwargs.get("is_investment")
         is_transaction = not is_investment
 
