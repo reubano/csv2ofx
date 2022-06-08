@@ -83,6 +83,9 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
         if not hasattr(self, "is_split"):
             self.is_split = False
 
+        if not hasattr(self, "has_header"):
+            self.has_header = True
+
         if not callable(self.account):
             account = self.account
             self.account = lambda _: account
