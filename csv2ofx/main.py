@@ -116,6 +116,22 @@ parser.add_argument(
     help="number of rows to process at a time (default: 2 ** 14)",
 )
 parser.add_argument(
+    "-r",
+    "--first-row",
+    metavar="ROWS",
+    type=int,
+    default=0,
+    help="the first row to process (zero based)",
+)
+parser.add_argument(
+    "-O",
+    "--first-col",
+    metavar="COLS",
+    type=int,
+    default=0,
+    help="the first column to process (zero based)",
+)
+parser.add_argument(
     "-L",
     "--list-mappings",
     help="list the available mappings",
@@ -196,10 +212,15 @@ def run():  # noqa: C901
     cont = QIF(mapping, **okwargs) if args.qif else OFX(mapping, **okwargs)
     source = open(args.source, encoding=args.encoding) if args.source else stdin
 
-    delimiter = mapping.get("delimiter", ",")
+    ckwargs = {
+        "has_header": cont.has_header,
+        "delimiter": mapping.get("delimiter", ","),
+        "first_row": mapping.get("first_row", args.first_row),
+        "first_col": mapping.get("first_col", args.first_col),
+    }
 
     try:
-        records = read_csv(source, has_header=cont.has_header, delimiter=delimiter)
+        records = read_csv(source, **ckwargs)
         groups = cont.gen_groups(records, args.chunksize)
         trxns = cont.gen_trxns(groups, args.collapse)
         cleaned_trxns = cont.clean_trxns(trxns)

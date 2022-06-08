@@ -101,6 +101,10 @@ optional arguments:
                         field used to combine transactions within a split for double entry statements
   -C ROWS, --chunksize ROWS
                         number of rows to process at a time (default: 2 ** 14)
+  -r ROWS, --first-row ROWS
+                        number of initial rows to skip (default: 0)
+  -O COLS, --first-col COLS
+                        number of initial cols to skip (default: 0)
   -L, --list-mappings   list the available mappings
   -V, --version         show version and exit
   -q, --qif             enables 'QIF' output instead of 'OFX'
@@ -166,6 +170,7 @@ mapping = {
     'account': lambda r: r['Details'].split(':')[0],
     'date': lambda r: '%s/%s/%s' % (r['Month'], r['Day'], r['Year']),
     'amount': lambda r: r['Amount'] * 2,
+    'first_row': 1,
 }
 ```
 
@@ -204,6 +209,8 @@ attribute | description | default value | example
 `date_fmt`|custom QIF date output format|%m/%d/%y|%m/%d/%Y
 `dayfirst`|interpret the first value in ambiguous dates (e.g. 01/05/09) as the day (ignored if `parse_fmt` is present)|False|True
 `parse_fmt`|transaction date parsing format||%m/%d/%Y
+`first_row`|the first row to process (zero based)|0|2
+`first_col`|the first column to process (zero based)|0|2
 
 ## Scripts
 
