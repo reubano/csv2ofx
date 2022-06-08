@@ -81,6 +81,13 @@ parser.add_argument(
 )
 parser.add_argument("-s", "--start", metavar="DATE", help="the start date")
 parser.add_argument(
+    "-y",
+    "--dayfirst",
+    help="interpret the first value in ambiguous dates (e.g. 01/05/09) as the day",
+    action="store_true",
+    default=False,
+)
+parser.add_argument(
     "-m",
     "--mapping",
     metavar="MAPPING_NAME",
@@ -133,7 +140,10 @@ parser.add_argument(
     help="overwrite destination file if it exists",
 )
 parser.add_argument(
-    "-D", "--server-date", help="OFX server date (default: source file mtime)"
+    "-D",
+    "--server-date",
+    metavar="DATE",
+    help="OFX server date (default: source file mtime)",
 )
 parser.add_argument(
     "-E", "--encoding", default="utf-8", help="File encoding (default: utf-8)"
@@ -179,8 +189,8 @@ def run():  # noqa: C901
 
     okwargs = {
         "def_type": args.account_type or "Bank" if args.qif else "CHECKING",
-        "start": parse(args.start) if args.start else None,
-        "end": parse(args.end) if args.end else None,
+        "start": parse(args.start, dayfirst=args.dayfirst) if args.start else None,
+        "end": parse(args.end, dayfirst=args.dayfirst) if args.end else None,
     }
 
     cont = QIF(mapping, **okwargs) if args.qif else OFX(mapping, **okwargs)
@@ -197,7 +207,7 @@ def run():  # noqa: C901
         body = cont.gen_body(data)
 
         if args.server_date:
-            server_date = parse(args.server_date)
+            server_date = parse(args.server_date, dayfirst=args.dayfirst)
         else:
             try:
                 mtime = p.getmtime(source.name)

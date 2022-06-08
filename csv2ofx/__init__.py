@@ -60,6 +60,8 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             start (date): Date from which to begin including transactions.
             end (date): Date from which to exclude transactions.
             date_fmt (str): Transaction date format (defaults to '%m/%d/%y').
+            dayfirst (bool): Interpret the first value in ambiguous dates (e.g. 01/05/09)
+                as the day (ignored if `parse_fmt` is present).
 
         Examples:
             >>> from csv2ofx.mappings.mint import mapping
@@ -72,6 +74,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
         self.amount = 0
         self.account = "N/A"
         self.date_fmt = kwargs.get("date_fmt", DEF_DATE_FMT)
+        self.dayfirst = kwargs.get("dayfirst")
         self.split_account = None
         self.inv_split_account = None
         self.id = None
@@ -154,7 +157,11 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             >>> Content(mapping, start=dt(2013, 1, 1)).skip_transaction(trxn)
             True
         """
-        return not self.end >= parse(self.get("date", trxn)) >= self.start
+        return (
+            not self.end
+            >= parse(self.get("date", trxn), dayfirst=self.dayfirst)
+            >= self.start
+        )
 
     def convert_amount(self, trxn):
         """Converts a string amount into a number
@@ -246,7 +253,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             x_action = ""
 
         return {
-            "date": parse(date),
+            "date": parse(date, dayfirst=self.dayfirst),
             "currency": self.get("currency", trxn, "USD"),
             "shares": shares,
             "symbol": symbol,
