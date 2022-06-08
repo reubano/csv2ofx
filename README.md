@@ -95,15 +95,20 @@ optional arguments:
   -y, --dayfirst        interpret the first value in ambiguous dates (e.g. 01/05/09) as the day
   -m MAPPING, --mapping MAPPING
                         the account mapping
+  -x FILE_PATH, --custom FILE_PATH
+                        path to a custom mapping file
   -c FIELD_NAME, --collapse FIELD_NAME
                         field used to combine transactions within a split for double entry statements
-  -S FIELD_NAME, --split FIELD_NAME
-                        field used for the split account for single entry statements
   -C ROWS, --chunksize ROWS
                         number of rows to process at a time (default: 2 ** 14)
+  -L, --list-mappings   list the available mappings
   -V, --version         show version and exit
   -q, --qif             enables 'QIF' output instead of 'OFX'
   -o, --overwrite       overwrite destination file if it exists
+  -D SERVER_DATE, --server-date SERVER_DATE
+                        OFX server date (default: source file mtime)
+  -E ENCODING, --encoding ENCODING
+                        File encoding (default: utf-8)
   -d, --debug           display the options and arguments passed to the parser
   -v, --verbose         verbose output
 ```
@@ -171,15 +176,6 @@ attribute | description | default field | example
 `date`|transaction date|Date|5/4/10
 `amount`|transaction amount|Amount|$30.52
 
-### Optional value attributes
-
-attribute | description | default value
-----------|-------------|---------------
-`has_header`|does the csv file have a header row|True
-`is_split`|does the csv file contain split (double entry) transactions|False
-`currency`|the currency ISO code|USD
-`delimiter`|the csv field delimiter|,
-
 ### Optional field attributes
 
 attribute | description | default field | default value | example
@@ -194,9 +190,18 @@ attribute | description | default field | default value | example
 `type`|transaction account type|n/a|checking|savings
 `balance`|account balance|n/a|n/a|$23.00
 `class`|transaction class|n/a|n/a|travel
-`date_fmt`|custom QIF date output format|n/a|%m/%d/%y|%m/%d/%Y
-`dayfirst`|interpret the first value in ambiguous dates (e.g. 01/05/09) as the day (ignored if `parse_fmt` is present)|n/a|False|True
-`parse_fmt`|transaction date parsing format|n/a||%m/%d/%Y
+
+### Optional value attributes
+
+attribute | description | default value | example
+----------|-------------|---------------|--------
+`has_header`|does the csv file have a header row|True
+`is_split`|does the csv file contain split (double entry) transactions|False
+`currency`|the currency ISO code|USD|GBP
+`delimiter`|the csv field delimiter|,|;
+`date_fmt`|custom QIF date output format|%m/%d/%y|%m/%d/%Y
+`dayfirst`|interpret the first value in ambiguous dates (e.g. 01/05/09) as the day (ignored if `parse_fmt` is present)|False|True
+`parse_fmt`|transaction date parsing format||%m/%d/%Y
 
 ## Scripts
 
