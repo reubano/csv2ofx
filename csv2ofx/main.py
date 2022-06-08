@@ -112,7 +112,7 @@ parser.add_argument(
     "--chunksize",
     metavar="ROWS",
     type=int,
-    default=2 ** 14,
+    default=2**14,
     help="number of rows to process at a time (default: 2 ** 14)",
 )
 parser.add_argument(

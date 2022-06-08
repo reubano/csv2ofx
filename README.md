@@ -100,7 +100,7 @@ optional arguments:
   -S FIELD_NAME, --split FIELD_NAME
                         field used for the split account for single entry statements
   -C ROWS, --chunksize ROWS
-                        number of rows to process at a time
+                        number of rows to process at a time (default: 2 ** 14)
   -V, --version         show version and exit
   -q, --qif             enables 'QIF' output instead of 'OFX'
   -o, --overwrite       overwrite destination file if it exists
