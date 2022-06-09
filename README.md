@@ -103,6 +103,8 @@ optional arguments:
                         number of rows to process at a time (default: 2 ** 14)
   -r ROWS, --first-row ROWS
                         number of initial rows to skip (default: 0)
+  -r ROWS, --last-row ROWS
+                        the final rows to process, negative values count from the end (default: inf)
   -O COLS, --first-col COLS
                         number of initial cols to skip (default: 0)
   -L, --list-mappings   list the available mappings
@@ -171,6 +173,7 @@ mapping = {
     'date': lambda r: '%s/%s/%s' % (r['Month'], r['Day'], r['Year']),
     'amount': lambda r: r['Amount'] * 2,
     'first_row': 1,
+    'last_row': 10,
     'filter': lambda r: r['Amount'] > 10,
 }
 ```
@@ -211,6 +214,7 @@ attribute | description | default value | example
 `dayfirst`|interpret the first value in ambiguous dates (e.g. 01/05/09) as the day (ignored if `parse_fmt` is present)|False|True
 `parse_fmt`|transaction date parsing format||%m/%d/%Y
 `first_row`|the first row to process (zero based)|0|2
+`last_row`|the last row to process (zero based, negative values count from the end)|inf|-2
 `first_col`|the first column to process (zero based)|0|2
 `filter`|keep transactions for which function returns true||lambda tr: tr['amount'] > 10
 

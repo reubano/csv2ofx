@@ -23,5 +23,6 @@ mapping = {
     "payee": itemgetter("Description"),
     "notes": itemgetter("Notes"),
     "first_row": 3,
+    "last_row": -1,
     "filter": lambda trxn: convert_amount(trxn["Amount"]) < 2500,
 }

@@ -30,6 +30,7 @@ from io import open
 from datetime import datetime as dt
 from argparse import RawTextHelpFormatter, ArgumentParser
 from pprint import pprint
+from math import inf
 
 try:
     FileNotFoundError
@@ -124,6 +125,14 @@ parser.add_argument(
     help="the first row to process (zero based)",
 )
 parser.add_argument(
+    "-R",
+    "--last-row",
+    metavar="ROWS",
+    type=int,
+    default=inf,
+    help="the last row to process (zero based, negative values count from the end)",
+)
+parser.add_argument(
     "-O",
     "--first-col",
     metavar="COLS",
@@ -216,6 +225,7 @@ def run():  # noqa: C901
         "has_header": cont.has_header,
         "delimiter": mapping.get("delimiter", ","),
         "first_row": mapping.get("first_row", args.first_row),
+        "last_row": mapping.get("last_row", args.last_row),
         "first_col": mapping.get("first_col", args.first_col),
     }
 
