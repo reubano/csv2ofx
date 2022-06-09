@@ -92,17 +92,29 @@ optional arguments:
                         the language
   -s DATE, --start DATE
                         the start date
+  -y, --dayfirst        interpret the first value in ambiguous dates (e.g. 01/05/09) as the day
   -m MAPPING, --mapping MAPPING
                         the account mapping
+  -x FILE_PATH, --custom FILE_PATH
+                        path to a custom mapping file
   -c FIELD_NAME, --collapse FIELD_NAME
                         field used to combine transactions within a split for double entry statements
-  -S FIELD_NAME, --split FIELD_NAME
-                        field used for the split account for single entry statements
   -C ROWS, --chunksize ROWS
-                        number of rows to process at a time
+                        number of rows to process at a time (default: 2 ** 14)
+  -r ROWS, --first-row ROWS
+                        number of initial rows to skip (default: 0)
+  -r ROWS, --last-row ROWS
+                        the final rows to process, negative values count from the end (default: inf)
+  -O COLS, --first-col COLS
+                        number of initial cols to skip (default: 0)
+  -L, --list-mappings   list the available mappings
   -V, --version         show version and exit
   -q, --qif             enables 'QIF' output instead of 'OFX'
   -o, --overwrite       overwrite destination file if it exists
+  -D SERVER_DATE, --server-date SERVER_DATE
+                        OFX server date (default: source file mtime)
+  -E ENCODING, --encoding ENCODING
+                        File encoding (default: utf-8)
   -d, --debug           display the options and arguments passed to the parser
   -v, --verbose         verbose output
 ```
@@ -135,10 +147,10 @@ optional arguments:
 
 ### Code modification
 
-If you would like to import csv files with field names different from the default, you can modify the mapping file or create your own. New mappings must be placed in the `csv2ofx/mappings` folder. The mapping object consists of a dictionary whose keys are OFX/QIF attributes and whose values are functions which should return the corresponding value from a record (csv row). The mapping function will take in a record, e.g.,
+If you would like to import csv files with field names different from the default, you can modify the mapping file or create your own. New mappings must be placed in the `csv2ofx/mappings` folder (otherwise you must use the ). The mapping object consists of a dictionary whose keys are OFX/QIF attributes and whose values are functions which should return the corresponding value from a record (csv row). The mapping function will take in a record, e.g.,
 
 ```python
-{'Account': 'savings 2', 'Date': '1/3/15', 'Amount': '5,000'}
+{'Account': 'savings 2', 'Date': '1/3/15', 'Amount': 5000}
 ```
 
 The most basic mapping function just returns a specific field or value, e.g.,
@@ -148,18 +160,22 @@ from operator import itemgetter
 
 mapping = {
     'bank': 'BetterBank',
-    'account': itemgetter('account_num'),
-    'date': itemgetter('trx_date'),
-    'amount': itemgetter('trx_amount')}
+    'account': itemgetter('Account'),
+    'date': itemgetter('Date'),
+    'amount': itemgetter('Amount')}
 ```
 
 But more complex parsing is also possible, e.g.,
 
 ```python
 mapping = {
-    'account': lambda r: r['details'].split(':')[0],
-    'date': lambda r: '%s/%s/%s' % (r['month'], r['day'], r['year']),
-    'amount': lambda r: r['amount'] * 2}
+    'account': lambda r: r['Details'].split(':')[0],
+    'date': lambda r: '%s/%s/%s' % (r['Month'], r['Day'], r['Year']),
+    'amount': lambda r: r['Amount'] * 2,
+    'first_row': 1,
+    'last_row': 10,
+    'filter': lambda r: r['Amount'] > 10,
+}
 ```
 
 ### Required field attributes
@@ -167,17 +183,8 @@ mapping = {
 attribute | description | default field | example
 ----------|-------------|---------------------|--------
 `account`|transaction account|Account|BetterBank Checking
-`date`|transaction date|Date|5/4/10
-`amount`|transaction amount|Amount|$30.52
-
-### Optional value attributes
-
-attribute | description | default value
-----------|-------------|---------------
-`has_header`|does the csv file have a header row|True
-`is_split`|does the csv file contain split (double entry) transactions|False
-`currency`|the currency ISO code|USD
-`delimiter`|the csv field delimiter|,
+`date`|transaction date|Date|itemgetter('Transaction Date')
+`amount`|transaction amount|Amount|itemgetter('Transaction Amount')
 
 ### Optional field attributes
 
@@ -189,11 +196,27 @@ attribute | description | default field | default value | example
 `check_num`|the check or transaction number|Row|n/a|2
 `id`|transaction id|`check_num`|Num|n/a|531
 `bank`|the bank name|n/a|`account`|Bank
+`account`|transaction account type|n/a|checking|savings
 `account_id`|transaction account id|n/a|hash of `account`|bb_checking
-`type`|transaction account type|n/a|checking|savings
+`type`|transaction type (either debit or credit)|n/a|CREDIT if amount > 0 else DEBIT|debit
 `balance`|account balance|n/a|n/a|$23.00
 `class`|transaction class|n/a|n/a|travel
-`date_fmt`|custom date format|n/a|%m/%d/%y|%m/%d/%Y
+
+### Optional value attributes
+
+attribute | description | default value | example
+----------|-------------|---------------|--------
+`has_header`|does the csv file have a header row|True
+`is_split`|does the csv file contain split (double entry) transactions|False
+`currency`|the currency ISO code|USD|GBP
+`delimiter`|the csv field delimiter|,|;
+`date_fmt`|custom QIF date output format|%m/%d/%y|%m/%d/%Y
+`dayfirst`|interpret the first value in ambiguous dates (e.g. 01/05/09) as the day (ignored if `parse_fmt` is present)|False|True
+`parse_fmt`|transaction date parsing format||%m/%d/%Y
+`first_row`|the first row to process (zero based)|0|2
+`last_row`|the last row to process (zero based, negative values count from the end)|inf|-2
+`first_col`|the first column to process (zero based)|0|2
+`filter`|keep transactions for which function returns true||lambda tr: tr['amount'] > 10
 
 ## Scripts
 

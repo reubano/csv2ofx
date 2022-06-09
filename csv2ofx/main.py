@@ -30,6 +30,7 @@ from io import open
 from datetime import datetime as dt
 from argparse import RawTextHelpFormatter, ArgumentParser
 from pprint import pprint
+from math import inf
 
 try:
     FileNotFoundError
@@ -81,6 +82,13 @@ parser.add_argument(
 )
 parser.add_argument("-s", "--start", metavar="DATE", help="the start date")
 parser.add_argument(
+    "-y",
+    "--dayfirst",
+    help="interpret the first value in ambiguous dates (e.g. 01/05/09) as the day",
+    action="store_true",
+    default=False,
+)
+parser.add_argument(
     "-m",
     "--mapping",
     metavar="MAPPING_NAME",
@@ -105,8 +113,32 @@ parser.add_argument(
     "--chunksize",
     metavar="ROWS",
     type=int,
-    default=2 ** 14,
+    default=2**14,
     help="number of rows to process at a time (default: 2 ** 14)",
+)
+parser.add_argument(
+    "-r",
+    "--first-row",
+    metavar="ROWS",
+    type=int,
+    default=0,
+    help="the first row to process (zero based)",
+)
+parser.add_argument(
+    "-R",
+    "--last-row",
+    metavar="ROWS",
+    type=int,
+    default=inf,
+    help="the last row to process (zero based, negative values count from the end)",
+)
+parser.add_argument(
+    "-O",
+    "--first-col",
+    metavar="COLS",
+    type=int,
+    default=0,
+    help="the first column to process (zero based)",
 )
 parser.add_argument(
     "-L",
@@ -133,7 +165,10 @@ parser.add_argument(
     help="overwrite destination file if it exists",
 )
 parser.add_argument(
-    "-D", "--server-date", help="OFX server date (default: source file mtime)"
+    "-D",
+    "--server-date",
+    metavar="DATE",
+    help="OFX server date (default: source file mtime)",
 )
 parser.add_argument(
     "-E", "--encoding", default="utf-8", help="File encoding (default: utf-8)"
@@ -179,17 +214,23 @@ def run():  # noqa: C901
 
     okwargs = {
         "def_type": args.account_type or "Bank" if args.qif else "CHECKING",
-        "start": parse(args.start) if args.start else None,
-        "end": parse(args.end) if args.end else None,
+        "start": parse(args.start, dayfirst=args.dayfirst) if args.start else None,
+        "end": parse(args.end, dayfirst=args.dayfirst) if args.end else None,
     }
 
     cont = QIF(mapping, **okwargs) if args.qif else OFX(mapping, **okwargs)
     source = open(args.source, encoding=args.encoding) if args.source else stdin
 
-    delimiter = mapping.get("delimiter", ",")
+    ckwargs = {
+        "has_header": cont.has_header,
+        "delimiter": mapping.get("delimiter", ","),
+        "first_row": mapping.get("first_row", args.first_row),
+        "last_row": mapping.get("last_row", args.last_row),
+        "first_col": mapping.get("first_col", args.first_col),
+    }
 
     try:
-        records = read_csv(source, has_header=cont.has_header, delimiter=delimiter)
+        records = read_csv(source, **ckwargs)
         groups = cont.gen_groups(records, args.chunksize)
         trxns = cont.gen_trxns(groups, args.collapse)
         cleaned_trxns = cont.clean_trxns(trxns)
@@ -197,7 +238,7 @@ def run():  # noqa: C901
         body = cont.gen_body(data)
 
         if args.server_date:
-            server_date = parse(args.server_date)
+            server_date = parse(args.server_date, dayfirst=args.dayfirst)
         else:
             try:
                 mtime = p.getmtime(source.name)
