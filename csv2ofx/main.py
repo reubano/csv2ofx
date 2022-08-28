@@ -158,6 +158,13 @@ parser.add_argument(
     default=False,
 )
 parser.add_argument(
+    "-M",
+    "--ms-money",
+    help="enables MS Money compatible 'OFX' output",
+    action="store_true",
+    default=False,
+)
+parser.add_argument(
     "-o",
     "--overwrite",
     action="store_true",
@@ -216,6 +223,7 @@ def run():  # noqa: C901
         "def_type": args.account_type or "Bank" if args.qif else "CHECKING",
         "start": parse(args.start, dayfirst=args.dayfirst) if args.start else None,
         "end": parse(args.end, dayfirst=args.dayfirst) if args.end else None,
+        "ms_money": args.ms_money,
     }
 
     cont = QIF(mapping, **okwargs) if args.qif else OFX(mapping, **okwargs)

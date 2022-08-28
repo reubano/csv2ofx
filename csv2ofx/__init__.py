@@ -76,6 +76,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
         self.parse_fmt = kwargs.get("parse_fmt")
         self.dayfirst = kwargs.get("dayfirst")
         self.filter = kwargs.get("filter")
+        self.ms_money = kwargs.get("ms_money")
         self.split_account = None
         self.inv_split_account = None
         self.id = None
