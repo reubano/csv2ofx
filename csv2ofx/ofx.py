@@ -77,14 +77,38 @@ class OFX(Content):
             >>> result = OFX().header(**kwargs)
             >>> header == result.replace('\\n', '').replace('\\t', '')
             True
+            >>> msmoneyargs = { 'ms_money': True }
+            >>> header = 'OFXHEADER:100DATA:OFXSGMLVERSION:102SECURITY:NONE\
+ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
+<OFX><SIGNONMSGSRSV1>\
+<SONRS><STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS><DTSERVER>\
+20120115000000</DTSERVER><LANGUAGE>ENG</LANGUAGE></SONRS></SIGNONMSGSRSV1>\
+<BANKMSGSRSV1><STMTTRNRS><TRNUID>1</TRNUID><STATUS><CODE>0</CODE><SEVERITY>INFO\
+</SEVERITY></STATUS>'
+            >>> result = OFX(msmoneyargs).header(**kwargs)
+            >>> result = list(result)[0]
+            >>> header == result.replace('\\n', '').replace('\\t', '')
+            True
         """
         kwargs.setdefault("language", "ENG")
 
         # yyyymmddhhmmss
         time_stamp = kwargs.get("date", dt.now()).strftime("%Y%m%d%H%M%S")
 
-        content = "DATA:OFXSGML\n"
-        content += "ENCODING:UTF-8\n"
+        content = ""
+        if self.ms_money:
+            content += "OFXHEADER:100\n"
+        content += "DATA:OFXSGML\n"
+        if self.ms_money:
+            content += "VERSION:102\n"
+            content += "SECURITY:NONE\n"
+            content += "ENCODING:USASCII\n"
+            content += "CHARSET:1252\n"
+            content += "COMPRESSION:NONE\n"
+            content += "OLDFILEUID:NONE\n"
+            content += "NEWFILEUID:NONE\n"
+        else:
+            content += "ENCODING:UTF-8\n"
         content += "<OFX>\n"
         content += "\t<SIGNONMSGSRSV1>\n"
         content += "\t\t<SONRS>\n"
@@ -98,7 +122,10 @@ class OFX(Content):
         content += "\t</SIGNONMSGSRSV1>\n"
         content += "\t<BANKMSGSRSV1>\n"
         content += "\t\t<%s>\n" % self.resp_type
-        content += "\t\t\t<TRNUID></TRNUID>\n"
+        if self.ms_money:
+            content += "\t\t\t<TRNUID>1</TRNUID>\n"
+        else:
+            content += "\t\t\t<TRNUID></TRNUID>\n"
         content += "\t\t\t<STATUS>\n"
         content += "\t\t\t\t<CODE>0</CODE>\n"
         content += "\t\t\t\t<SEVERITY>INFO</SEVERITY>\n"
@@ -147,11 +174,27 @@ class OFX(Content):
         memo = data.get("memo")
         _class = data.get("class")
         memo = "%s %s" % (memo, _class) if memo and _class else memo or _class
+        payee = data.get("payee")
+        date = data.get("date")
+        if self.ms_money:
+            payee = payee[:32] if len(payee) > 32 else payee
+            if date.strftime("%H%M%S") == "000000":
+                # Per MS Money OFX Troubleshooting guide:
+                # "Microsoft recommends that servers either send server time in
+                # full datetime format or send dates with a datetime format that
+                # equates to Noon GMT, such as CCYYMMDD120000. With this format,
+                # Money displays the expected date for almost any time in the
+                # world. In the example above, a <DTPOSTED>20000505120000 would
+                # always display as 5/5/00 anywhere the world except for the
+                # center of the Pacific Ocean."
+                date = date.replace(hour=12)
 
         new_data = {
             "account_type": utils.get_account_type(data["account"], *args),
             "split_account_type": sa_type,
             "memo": memo,
+            "payee": payee,
+            "date": date,
         }
 
         data.update(new_data)
@@ -184,12 +227,28 @@ class OFX(Content):
             >>> start == result.replace('\\n', '').replace('\\t', '')
             True
         """
-        kwargs.update(
-            {
-                "start_date": self.start.strftime("%Y%m%d"),
-                "end_date": self.end.strftime("%Y%m%d"),
-            }
-        )
+        if self.ms_money:
+            # Per MS Money OFX Troubleshooting guide:
+            # "Microsoft recommends that servers either send server time in
+            # full datetime format or send dates with a datetime format that
+            # equates to Noon GMT, such as CCYYMMDD120000. With this format,
+            # Money displays the expected date for almost any time in the
+            # world. In the example above, a <DTPOSTED>20000505120000 would
+            # always display as 5/5/00 anywhere the world except for the
+            # center of the Pacific Ocean."
+            kwargs.update(
+                {
+                    "start_date": self.start.strftime("%Y%m%d120000"),
+                    "end_date": self.end.strftime("%Y%m%d120000"),
+                }
+            )
+        else:
+            kwargs.update(
+                {
+                    "start_date": self.start.strftime("%Y%m%d"),
+                    "end_date": self.end.strftime("%Y%m%d"),
+                }
+            )
 
         content = "\t\t\t<STMTRS>\n"
         content += "\t\t\t\t<CURDEF>%(currency)s</CURDEF>\n" % kwargs
@@ -239,7 +298,8 @@ class OFX(Content):
         content += "\t\t\t\t\t\t<TRNAMT>%(amount)0.2f</TRNAMT>\n" % kwargs
         content += "\t\t\t\t\t\t<FITID>%(id)s</FITID>\n" % kwargs
 
-        if kwargs.get("check_num") is not None:
+        if (self.ms_money and kwargs.get("check_num")) or \
+           (not self.ms_money and kwargs.get("check_num") is not None):
             extra = "\t\t\t\t\t\t<CHECKNUM>%(check_num)s</CHECKNUM>\n"
             content += extra % kwargs
 
