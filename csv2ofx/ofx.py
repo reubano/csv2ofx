@@ -23,7 +23,7 @@ from builtins import *
 from meza.fntools import chunk, xmlize
 from meza.process import group
 
-from . import Content, utils
+from . import BalanceError, Content, utils
 
 
 class OFX(Content):
@@ -50,6 +50,14 @@ class OFX(Content):
         self.resp_type = "INTRATRNRS" if self.split_account else "STMTTRNRS"
         self.def_type = kwargs.get("def_type")
         self.prev_group = None
+        self.first_trxn = None
+        self.last_trxn = None
+        self.latest_trxn = None
+        self.latest_date_count = 0
+        self.dates_ascending = 0
+        self.dates_descending = 0
+        self.balances_ascending = 0
+        self.balances_descending = 0
         self.account_types = {
             "CHECKING": ("checking", "income", "receivable", "payable"),
             "SAVINGS": ("savings",),
@@ -75,6 +83,7 @@ class OFX(Content):
 <BANKMSGSRSV1><STMTTRNRS><TRNUID></TRNUID><STATUS><CODE>0</CODE><SEVERITY>INFO\
 </SEVERITY></STATUS>'
             >>> result = OFX().header(**kwargs)
+            >>> result = list(result)[0]
             >>> header == result.replace('\\n', '').replace('\\t', '')
             True
             >>> msmoneyargs = { 'ms_money': True }
@@ -130,7 +139,7 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
         content += "\t\t\t\t<CODE>0</CODE>\n"
         content += "\t\t\t\t<SEVERITY>INFO</SEVERITY>\n"
         content += "\t\t\t</STATUS>\n"
-        return content
+        yield content
 
     def transaction_data(self, trxn):
         """gets OFX transaction data
@@ -164,7 +173,8 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
             ...     'date': dt(2010, 6, 12, 0, 0), 'category': '',
             ...     'bank_id': 'e268443e43d93dab7ebef303bbe9642f',
             ...     'price': Decimal('0'), 'symbol': '', 'check_num': None,
-            ...     'inv_split_account': None, 'x_action': '', 'type': 'DEBIT'}
+            ...     'inv_split_account': None, 'x_action': '', 'type': 'DEBIT',
+            ...     'balance': None}
             True
         """
         data = super(OFX, self).transaction_data(trxn)
@@ -333,11 +343,50 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
         time_stamp = kwargs["date"].strftime("%Y%m%d%H%M%S")  # yyyymmddhhmmss
         content = "\t\t\t\t</BANKTRANLIST>\n"
 
-        if kwargs.get("balance") is not None:
+        # Use the following ranked rules to guess at transaction order:
+        # 1. If the transaction with the latest date is the only transcation
+        #    with that date, use the balance on that transaction and don't
+        #    worry about transaction order.
+        # 2. If dates are both ascending and descending, don't get ending
+        #    balance from transactions.
+        # 3. If dates are ascending, use the last transaction.
+        # 4. If dates are descending, use the first transaction.
+        # 5. If more balances are consistent with ascending order, use the
+        #    last transaction.
+        # 6. If more balances are consistent with descending order, use the
+        #    first transaction.
+        # 7. Don't get ending balance from transactions.
+        if self.latest_date_count == 1:                                 # (1)
+            endbaltrxn = self.latest_trxn
+        elif self.dates_ascending and self.dates_descending:            # (2)
+            reason = "transactions have both ascending and descending dates"
+            endbaltrxn = None
+        elif self.dates_ascending:                                      # (3)
+            endbaltrxn = self.last_trxn
+        elif self.dates_descending:                                     # (4)
+            endbaltrxn = self.first_trxn
+        elif self.balances_ascending > self.balances_descending:        # (5)
+            endbaltrxn = self.last_trxn
+        elif self.balances_descending > self.balances_ascending:        # (6)
+            endbaltrxn = self.first_trxn
+        else:                                                           # (7)
+            reason = "not enough information to determine ending balance"
+            endbaltrxn = None
+
+        balamt = kwargs.get("balance")
+        if balamt is None and endbaltrxn is not None:
+            # No balance specified in kwargs.  Get from transaction instead.
+            balamt = endbaltrxn.get('balance')
+            time_stamp = endbaltrxn['date'].strftime("%Y%m%d%H%M%S")
+
+        if balamt is not None:
             content += "\t\t\t\t<LEDGERBAL>\n"
-            content += "\t\t\t\t\t<BALAMT>%(balance)0.2f</BALAMT>\n" % kwargs
+            content += "\t\t\t\t\t<BALAMT>%0.2f</BALAMT>\n" % balamt
             content += "\t\t\t\t\t<DTASOF>%s</DTASOF>\n" % time_stamp
             content += "\t\t\t\t</LEDGERBAL>\n"
+        elif self.ms_money:
+            # MS Money import fails if <LEDGERBAL> is missing
+            raise BalanceError("Ending balance not specified and %s" % reason)
 
         content += "\t\t\t</STMTRS>\n"
         return content
@@ -485,6 +534,7 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
         Examples:
             >>> ft = '</BANKTRANLIST></STMTRS></STMTTRNRS></BANKMSGSRSV1></OFX>'
             >>> result = OFX().footer(date=dt(2012, 1, 15))
+            >>> result = list(result)[0]
             >>> ft == result.replace('\\n', '').replace('\\t', '')
             True
         """
@@ -498,7 +548,7 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
             content = ""
 
         content += "\t\t</%s>\n\t</BANKMSGSRSV1>\n</OFX>\n" % self.resp_type
-        return content
+        yield content
 
     def gen_body(self, data):  # noqa: C901
         """Generate the OFX body"""
@@ -528,12 +578,166 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
             elif self.is_split:
                 yield self.split_content(**trxn_data)
             elif datum["is_main"]:
+                self.calc_balances(trxn_data)
                 yield self.account_start(**trxn_data)
                 yield self.transaction(**trxn_data)
             else:
+                self.calc_balances(trxn_data)
                 yield self.transaction(**trxn_data)
 
             self.prev_group = grp
+
+    def calc_balances(self, trxn):
+        """Analyzes pairs of transactions to help determine the correct ending
+        balance to use in <LEDGERBAL> block.
+
+        Args:
+            trxn (dict): the transaction
+        """
+        if trxn.get("balance") is None:
+            return
+
+        self.update_first_trxn(trxn)
+        self.update_latest_trxn(trxn)
+
+        # See if transactions have a consistent ascending/descending order
+        if self.last_trxn is not None:
+            self.check_date_order(trxn)
+            self.check_balance_order(trxn)
+
+        # Now we have a new last transaction (this one)
+        self.update_last_trxn(trxn)
+
+    def update_first_trxn(self, trxn):
+        """Ending balance will be here if transactions in descending order"""
+        if self.first_trxn is None:
+            self.first_trxn = trxn
+
+    def update_latest_trxn(self, trxn):
+        """See if we can find one transaction with the latest date
+
+        Args:
+            trxn (dict): the transaction
+
+        Examples:
+            >>> ofx = OFX()
+            >>> trxn1 = { 'date': dt(2010, 6, 12, 0, 0) }
+            >>> trxn2 = { 'date': dt(2010, 6, 12, 0, 0) }
+            >>> trxn3 = { 'date': dt(2010, 6, 13, 0, 0) }
+            >>> ofx.update_latest_trxn(trxn1)
+            >>> ofx.latest_trxn['date'] == dt(2010, 6, 12, 0, 0)
+            True
+            >>> ofx.latest_date_count
+            1
+            >>> ofx.update_latest_trxn(trxn2)
+            >>> ofx.latest_trxn['date'] == dt(2010, 6, 12, 0, 0)
+            True
+            >>> ofx.latest_date_count
+            2
+            >>> ofx.update_latest_trxn(trxn3)
+            >>> ofx.latest_trxn['date'] == dt(2010, 6, 13, 0, 0)
+            True
+            >>> ofx.latest_date_count
+            1
+        """
+        if self.latest_trxn is None:
+            self.latest_trxn = trxn
+            self.latest_date_count = 1
+        elif trxn['date'] > self.latest_trxn['date']:
+            self.latest_trxn = trxn
+            self.latest_date_count = 1
+        elif trxn['date'] == self.latest_trxn['date']:
+            self.latest_date_count += 1
+
+    def check_date_order(self, trxn):
+        """See if dates have a consistent ascending/descending order
+
+        Args:
+            trxn (dict): the transaction
+
+        Examples:
+            >>> ofx = OFX()
+            >>> trxn1 = { 'date': dt(2010, 6, 12, 0, 0) }
+            >>> trxn2 = { 'date': dt(2010, 6, 12, 0, 0) }
+            >>> trxn3 = { 'date': dt(2010, 6, 13, 0, 0) }
+            >>> trxn4 = { 'date': dt(2010, 6, 11, 0, 0) }
+            >>> ofx.update_last_trxn(trxn1)
+            >>> ofx.check_date_order(trxn2)
+            >>> ofx.dates_ascending
+            0
+            >>> ofx.dates_descending
+            0
+            >>> ofx.update_last_trxn(trxn2)
+            >>> ofx.check_date_order(trxn3)
+            >>> ofx.dates_ascending
+            1
+            >>> ofx.dates_descending
+            0
+            >>> ofx.update_last_trxn(trxn3)
+            >>> ofx.check_date_order(trxn4)
+            >>> ofx.dates_ascending
+            1
+            >>> ofx.dates_descending
+            1
+        """
+        if trxn['date'] > self.last_trxn['date']:
+            # Dates are consistent with ascending transaction order
+            self.dates_ascending += 1
+        elif trxn['date'] < self.last_trxn['date']:
+            # Dates are consistent with descending transaction order
+            self.dates_descending += 1
+
+    def check_balance_order(self, trxn):
+        """See if balances are consistent with ascending/descending order
+
+        Args:
+            trxn (dict): the transaction
+
+        Examples:
+            >>> ofx = OFX()
+            >>> trxn1 = { 'amount': 10, 'balance': 100 }
+            >>> trxn2 = { 'amount': 10, 'balance': 100 }
+            >>> trxn3 = { 'amount': 10, 'balance': 110 }
+            >>> trxn4 = { 'amount': 10, 'balance': 100 }
+            >>> trxn5 = { 'amount': -10, 'balance': 90 }
+            >>> ofx.update_last_trxn(trxn1)
+            >>> ofx.check_balance_order(trxn2)
+            >>> ofx.balances_ascending
+            0
+            >>> ofx.balances_descending
+            0
+            >>> ofx.update_last_trxn(trxn2)
+            >>> ofx.check_balance_order(trxn3)
+            >>> ofx.balances_ascending
+            1
+            >>> ofx.balances_descending
+            0
+            >>> ofx.update_last_trxn(trxn3)
+            >>> ofx.check_balance_order(trxn4)
+            >>> ofx.balances_ascending
+            1
+            >>> ofx.balances_descending
+            1
+            >>> ofx.update_last_trxn(trxn4)
+            >>> ofx.check_balance_order(trxn5)
+            >>> ofx.balances_ascending
+            2
+            >>> ofx.balances_descending
+            2
+        """
+        # Note: Both of these could be true for a given transaction pair
+        if self.last_trxn["balance"] + trxn['amount'] == \
+                trxn['balance']:
+            # Balances appear consistent with ascending transaction order
+            self.balances_ascending += 1
+        if trxn.get("balance") + self.last_trxn['amount'] == \
+                self.last_trxn['balance']:
+            # Balances appear consistent with descending transaction order
+            self.balances_descending += 1
+
+    def update_last_trxn(self, trxn):
+        """Ending balance will be here if transactions are in ascending order"""
+        self.last_trxn = trxn
 
     def gen_groups(self, records, chunksize=None):
         """Generate the OFX groups"""
