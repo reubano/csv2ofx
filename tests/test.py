@@ -152,6 +152,16 @@ if __name__ == "__main__":
             "outbank.csv",
             "outbank.ofx",
         ),
+        (
+            ["-o", "-m schwabchecking", "-e 20220905", SERVER_DATE],
+            "schwab-checking.csv",
+            "schwab-checking.ofx",
+        ),
+        (
+            ["-o", "-M", "-m schwabchecking", "-e 20220905", SERVER_DATE],
+            "schwab-checking.csv",
+            "schwab-checking-msmoney.ofx",
+        ),
     ]
 
     main(csv2ofx, gen_test(PRE_TESTS))
