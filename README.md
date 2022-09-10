@@ -80,21 +80,23 @@ usage: csv2ofx [options] <source> <dest>
 description: csv2ofx converts a csv file to ofx and qif
 
 positional arguments:
-  source                the source csv file (defaults to stdin)
-  dest                  the output file (defaults to stdout)
+  source                the source csv file (default: stdin)
+  dest                  the output file (default: stdout)
 
 optional arguments:
   -h, --help            show this help message and exit
   -a TYPE, --account TYPE
                         default account type 'CHECKING' for OFX and 'Bank' for QIF.
-  -e DATE, --end DATE   end date
+  -e DATE, --end DATE   end date (default: today)
+  -B BALANCE, --ending-balance BALANCE
+                        ending balance (default: None)
   -l LANGUAGE, --language LANGUAGE
-                        the language
+                        the language (default: ENG)
   -s DATE, --start DATE
                         the start date
   -y, --dayfirst        interpret the first value in ambiguous dates (e.g. 01/05/09) as the day
-  -m MAPPING, --mapping MAPPING
-                        the account mapping
+  -m MAPPING_NAME, --mapping MAPPING_NAME
+                        the account mapping (default: default)
   -x FILE_PATH, --custom FILE_PATH
                         path to a custom mapping file
   -c FIELD_NAME, --collapse FIELD_NAME
@@ -102,16 +104,17 @@ optional arguments:
   -C ROWS, --chunksize ROWS
                         number of rows to process at a time (default: 2 ** 14)
   -r ROWS, --first-row ROWS
-                        number of initial rows to skip (default: 0)
-  -r ROWS, --last-row ROWS
-                        the final rows to process, negative values count from the end (default: inf)
+                        the first row to process (zero based)
+  -R ROWS, --last-row ROWS
+                        the last row to process (zero based, negative values count from the end)
   -O COLS, --first-col COLS
-                        number of initial cols to skip (default: 0)
+                        the first column to process (zero based)
   -L, --list-mappings   list the available mappings
   -V, --version         show version and exit
   -q, --qif             enables 'QIF' output instead of 'OFX'
+  -M, --ms-money        enables MS Money compatible 'OFX' output
   -o, --overwrite       overwrite destination file if it exists
-  -D SERVER_DATE, --server-date SERVER_DATE
+  -D DATE, --server-date DATE
                         OFX server date (default: source file mtime)
   -E ENCODING, --encoding ENCODING
                         File encoding (default: utf-8)
