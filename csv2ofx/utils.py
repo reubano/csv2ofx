@@ -110,7 +110,18 @@ def get_action(category, transfer=False, def_action="ShrsIn"):
 
 
 def convert_amount(content):
-    """Convert number to a decimal amount"""
+    """Convert number to a decimal amount
+
+    Examples:
+        >>> convert_amount('$1,000')
+        Decimal('1000.00')
+        >>> convert_amount('$1,000.00')
+        Decimal('1000.00')
+        >>> convert_amount('$1000,00')
+        Decimal('1000.00')
+        >>> convert_amount('$1.000,00')
+        Decimal('1000.00')
+    """
     return to_decimal(content, **get_separators(content))
 
 

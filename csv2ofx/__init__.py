@@ -37,11 +37,10 @@ __package_name__ = "csv2ofx"
 __author__ = "Reuben Cummings"
 __description__ = "converts a csv file of transactions to an ofx or qif file"
 __email__ = "reubano@gmail.com"
-__version__ = "0.29.0"
+__version__ = "0.30.0"
 __license__ = "MIT"
 __copyright__ = "Copyright 2015 Reuben Cummings"
 
-DEF_DATE_FMT = "%m/%d/%Y"
 
 # pylint: disable=invalid-name
 md5 = lambda content: hashlib.md5(content.encode("utf-8")).hexdigest()
@@ -60,6 +59,9 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             start (date): Date from which to begin including transactions.
             end (date): Date from which to exclude transactions.
             date_fmt (str): Transaction date format (defaults to '%m/%d/%y').
+            dayfirst (bool): Interpret the first value in ambiguous dates (e.g. 01/05/09)
+                as the day (ignored if `parse_fmt` is present).
+            filter (func): Keep transactions for which function returns true
 
         Examples:
             >>> from csv2ofx.mappings.mint import mapping
@@ -71,7 +73,9 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
         # pylint doesn't like dynamically set attributes...
         self.amount = 0
         self.account = "N/A"
-        self.date_fmt = kwargs.get("date_fmt", DEF_DATE_FMT)
+        self.parse_fmt = kwargs.get("parse_fmt")
+        self.dayfirst = kwargs.get("dayfirst")
+        self.filter = kwargs.get("filter")
         self.split_account = None
         self.inv_split_account = None
         self.id = None
@@ -81,12 +85,23 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
         if not hasattr(self, "is_split"):
             self.is_split = False
 
+        if not hasattr(self, "has_header"):
+            self.has_header = True
+
         if not callable(self.account):
             account = self.account
             self.account = lambda _: account
 
         self.start = kwargs.get("start") or dt(1970, 1, 1)
         self.end = kwargs.get("end") or dt.now()
+
+    def parse_date(self, trxn):
+        if self.parse_fmt:
+            parsed = dt.strptime(self.get("date", trxn), self.parse_fmt)
+        else:
+            parsed = parse(self.get("date", trxn), dayfirst=self.dayfirst)
+
+        return parsed
 
     def get(self, name, trxn=None, default=None):
         """Gets an attribute which could be either a normal attribute,
@@ -136,7 +151,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
 
     def skip_transaction(self, trxn):
         """Determines whether a transaction should be skipped (isn't in the
-        specified date range)
+        specified date range, etc.)
 
         Args:
             trxn (dict): The transaction.
@@ -154,7 +169,8 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             >>> Content(mapping, start=dt(2013, 1, 1)).skip_transaction(trxn)
             True
         """
-        return not self.end >= parse(self.get("date", trxn)) >= self.start
+        keep = self.end >= self.parse_date(trxn) >= self.start
+        return not (self.filter(trxn) if keep and self.filter else keep)
 
     def convert_amount(self, trxn):
         """Converts a string amount into a number
@@ -171,6 +187,9 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             >>> from csv2ofx.mappings.mint import mapping
             >>>
             >>> trxn = {'Date': '06/12/10', 'Amount': '$1,000'}
+            >>> Content(mapping, start=dt(2010, 1, 1)).convert_amount(trxn)
+            Decimal('1000.00')
+            >>> trxn = {'Date': '06/12/10', 'Amount': '1.000,00€'}
             >>> Content(mapping, start=dt(2010, 1, 1)).convert_amount(trxn)
             Decimal('1000.00')
         """
@@ -246,7 +265,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             x_action = ""
 
         return {
-            "date": parse(date),
+            "date": self.parse_date(trxn),
             "currency": self.get("currency", trxn, "USD"),
             "shares": shares,
             "symbol": symbol,
