@@ -262,7 +262,7 @@ cd csv2ofx
 2. Setup a new [virtualenv](http://www.virtualenv.org/en/latest/index.html)
 
 ```bash
-mkvirtualenv --no-site-packages -i pkutils csv2ofx
+mkvirtualenv -i pkutils csv2ofx
 activate csv2ofx
 python setup.py develop
 pip install -r dev-requirements.txt
