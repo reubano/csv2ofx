@@ -29,6 +29,12 @@ branches:
   except:
     - /^v[0-9]/
 
+# For ubs-ch-fr mapping
+addons:
+  apt:
+    packages:
+      - language-pack-fr
+
 before_install:
   - pip install -U pip
   - pip install wheel

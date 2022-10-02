@@ -148,6 +148,11 @@ if __name__ == "__main__":
             "pcmastercard.ofx",
         ),
         (
+            # N.B. input file obtained by pre-processing with
+            #    bin/csvtrim ubs-ch-fr.csv > ubs-ch-fr_trimmed.csv
+            ["-oq", "-m ubs-ch-fr"], "ubs-ch-fr_trimmed.csv", "ubs-ch-fr.qif"
+        ),
+        (
             ["-o", "-m outbank", "-e 20190301", SERVER_DATE],
             "outbank.csv",
             "outbank.ofx",

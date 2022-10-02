@@ -1,0 +1,4 @@
+Produit;Monn.;Description;Date de valeur;Description 1;Description 2;Description 3;N° de transaction;Débit;Crédit;Solde
+0123 45678901.23A;CHF;Compte personnel UBS;31.03.2019;Solde prix prestations;;;A01234BC01234567;10.00;;11'373.94
+0123 45678901.23A;CHF;Compte personnel UBS;28.02.2019;Virement postal;ASSOCIATION FOO-BAR;BVD DE QUELQUE-PART 1, 1201 GENEVE, CH;3456789ZT1234567;;240.00;11'613.94
+0123 45678901.23A;CHF;Compte personnel UBS;27.04.2019;Ordre e-banking;REMB-CASH;Quuz-baz SàrL, CH - 1203 GENEVE, E-Banking CHF intérieur;9979360TI2115087;200.00;;11'413.94

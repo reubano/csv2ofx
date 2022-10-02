@@ -26,8 +26,10 @@ Usage:
 where
 
   CSV_FILE:  path to an existing file or '-' for stdin
-  FIELDS:    cut-style list of fields to keep. Default to '$dfields'
-  SEPARATOR: a single (escaped) character. Default to '$dseparator'
+  FIELDS:    cut-style list of fields to keep. Default: '$dfields'
+  SEPARATOR: a single (escaped) character. Default: '$dseparator'
+
+(default values are for exports from UBS CH (DE/FR/IT))
 
 e.g.
 

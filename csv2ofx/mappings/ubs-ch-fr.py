@@ -23,10 +23,10 @@ tricky:
 """
 from operator import itemgetter
 
-# Financial numbers are expressed as "2'045.56" -- TO-DO switch to Babel?
+# Financial numbers are expressed as "2'045.56" in de/fr/it_CH (utf8 has some
+# glitches, so we go for the default one)
 import locale
-
-locale.setlocale(locale.LC_ALL, "fr_CH.UTF-8")
+locale.setlocale(locale.LC_NUMERIC, 'fr_CH')
 
 __author__ = 'Marco "sphakka" Poleggi'
 
@@ -38,13 +38,18 @@ def fixdate(ds):
     return ".".join((dmy[1], dmy[0], dmy[2]))
 
 
-def map_desc(tr):
-    description = tr["Description 2"] or tr["Description 1"]
-    return description + (": " + tr["Description 3"] if tr["Description 3"] else "")
+def map_descr(tr):
+    descr = tr["Description 2"] or tr["Description 1"]
+    return descr + (": " + tr["Description 3"] if tr["Description 3"] else "")
+
+
+def map_class(tr):
+    clss = tr["Description 1"]
+    return clss + (": " + tr["Description 2"] if tr["Description 2"] else "")
 
 
 def map_payee(tr):
-    return tr["Description 3"] if tr.get("Débit") != "" else tr["Description 2"]
+    return tr["Description 3"] if tr.get("Débit") else tr["Description 2"]
 
 
 mapping = {
@@ -60,12 +65,12 @@ mapping = {
     "amount": lambda tr: locale.atof(tr["Débit"] or tr["Crédit"]),
     # debits show _your_ notes in "Desc 2", whereas credits report the
     # _payee_. Thus a better "class" value comes from "Desc 1" + "Desc 2"
-    "class": lambda tr: tr["Description 1"] + (": " + tr["Description 2"] or ""),
+    "class": map_class,
     "notes": itemgetter("Description 2"),
     # switch day/month (maybe file a bug: always inverted when ambiguous like
     # '01.02.2018')
     "date": lambda tr: fixdate(tr["Date de valeur"]),
-    "desc": map_desc,
+    "desc": map_descr,
     "payee": map_payee,
     "check_num": itemgetter("N° de transaction"),
     "balance": lambda tr: locale.atof(tr["Solde"]),
