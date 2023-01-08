@@ -10,6 +10,13 @@ examples/.ipynb_checkpoints/*
 # C extensions
 *.so
 
+# venv
+bin/
+pyvenv.cfg
+
+# man
+man/
+
 # Packages
 *.egg
 *.egg-info
