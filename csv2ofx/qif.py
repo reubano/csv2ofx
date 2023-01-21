@@ -188,7 +188,7 @@ class QIF(Content):
             True
         """
         date_fmt = kwargs.get("date_fmt", self.date_fmt)
-        kwargs.update({"time_stamp": kwargs["date"].strftime("%m/%d/%Y")})
+        kwargs.update({"time_stamp": kwargs["date"].strftime(date_fmt)})
         is_investment = kwargs.get("is_investment")
         is_transaction = not is_investment
 
