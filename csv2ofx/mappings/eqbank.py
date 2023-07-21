@@ -8,7 +8,7 @@ mapping = {
     "account": lambda tr: "EQ",
     "date": itemgetter("Date"),
     "desc": itemgetter("Description"),
-    "type": lambda tr: "DEBIT" if tr.get("Out") else "CREDIT",
-    "amount": lambda tr: tr.get("In") or tr.get("Out"),
+    "type": lambda tr: "DEBIT" if tr.get("Transfer").startswith("-") else "CREDIT",
+    "amount": lambda tr: tr.get("Transfer"),
     "balance": itemgetter("Balance"),
 }
