@@ -221,6 +221,7 @@ attribute | description | default field | default value | example
 attribute | description | default value | example
 ----------|-------------|---------------|--------
 `has_header`|does the csv file have a header row|True
+`custom_header`|header row to use (e.g. if not provided in csv)|None|["Account","Date","Amount"]
 `is_split`|does the csv file contain split (double entry) transactions|False
 `currency`|the currency ISO code|USD|GBP
 `delimiter`|the csv field delimiter|,|;
