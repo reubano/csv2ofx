@@ -158,6 +158,51 @@ if __name__ == "__main__":
             "ingesp.csv",
             "ingesp.ofx",
         ),
+        (
+            ["-o", "-m schwabchecking", "-e 20220905", SERVER_DATE],
+            "schwab-checking.csv",
+            "schwab-checking.ofx",
+        ),
+        (
+            ["-o", "-M", "-m schwabchecking", "-e 20220905", SERVER_DATE],
+            "schwab-checking.csv",
+            "schwab-checking-msmoney.ofx",
+        ),
+        (
+            ["-o", "-m schwabchecking", "-e 20220905", SERVER_DATE],
+            "schwab-checking-baltest-case1.csv",
+            "schwab-checking-baltest-case1.ofx",
+        ),
+        (
+            ["-o", "-m schwabchecking", "-e 20220905", SERVER_DATE],
+            "schwab-checking-baltest-case2.csv",
+            "schwab-checking-baltest-case2.ofx",
+        ),
+        (
+            ["-o", "-m schwabchecking", "-e 20220905", SERVER_DATE],
+            "schwab-checking-baltest-case3.csv",
+            "schwab-checking-baltest-case3.ofx",
+        ),
+        (
+            ["-o", "-m schwabchecking", "-e 20220905", SERVER_DATE],
+            "schwab-checking-baltest-case4.csv",
+            "schwab-checking-baltest-case4.ofx",
+        ),
+        (
+            ["-o", "-m schwabchecking", "-e 20220905", SERVER_DATE],
+            "schwab-checking-baltest-case5.csv",
+            "schwab-checking-baltest-case5.ofx",
+        ),
+        (
+            ["-o", "-m schwabchecking", "-e 20220905", SERVER_DATE],
+            "schwab-checking-baltest-case6.csv",
+            "schwab-checking-baltest-case6.ofx",
+        ),
+        (
+            ["-o", "-m schwabchecking", "-e 20220905", SERVER_DATE],
+            "schwab-checking-baltest-case7.csv",
+            "schwab-checking-baltest-case7.ofx",
+        ),
         (["-o", "-m amazon", "-e 20230604", SERVER_DATE], "amazon.csv", "amazon.ofx",),
     ]
 

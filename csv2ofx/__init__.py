@@ -46,6 +46,11 @@ __copyright__ = "Copyright 2015 Reuben Cummings"
 md5 = lambda content: hashlib.md5(content.encode("utf-8")).hexdigest()
 
 
+class BalanceError(Exception):
+    """Raised if no ending balance when MS Money compatible output requested"""
+    pass
+
+
 class Content(object):  # pylint: disable=too-many-instance-attributes
     """A transaction holding object"""
 
@@ -76,6 +81,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
         self.parse_fmt = kwargs.get("parse_fmt")
         self.dayfirst = kwargs.get("dayfirst")
         self.filter = kwargs.get("filter")
+        self.ms_money = kwargs.get("ms_money")
         self.split_account = None
         self.inv_split_account = None
         self.id = None
@@ -226,7 +232,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             ...     'split_account': 'Checking', 'type': 'DEBIT',
             ...     'category': '', 'amount': Decimal('-1000.00'),
             ...     'memo': 'description notes', 'inv_split_account': None,
-            ...     'x_action': ''}
+            ...     'x_action': '', 'balance': None}
             True
         """
         account = self.get("account", trxn)
@@ -251,6 +257,9 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
         symbol = self.get("symbol", trxn, "")
         price = Decimal(self.get("price", trxn, 0))
         invest = shares or (symbol and symbol != "N/A") or "invest" in category
+        balance = self.get("balance", trxn)
+        if balance is not None:
+            balance = utils.convert_amount(balance)
 
         if invest:
             amount = abs(amount)
@@ -288,6 +297,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             "id": self.get("id", trxn, check_num) or md5(details),
             "check_num": check_num,
             "type": _type,
+            "balance": balance,
         }
 
     def gen_trxns(self, groups, collapse=False):

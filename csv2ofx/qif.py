@@ -98,7 +98,8 @@ class QIF(Content):
             ...     'date': dt(2010, 6, 12, 0, 0), 'category': '',
             ...     'bank_id': 'e268443e43d93dab7ebef303bbe9642f',
             ...     'price': Decimal('0'), 'symbol': '', 'check_num': None,
-            ...     'inv_split_account': None, 'x_action': '', 'type': 'DEBIT'}
+            ...     'inv_split_account': None, 'x_action': '', 'type': 'DEBIT',
+            ...     'balance': None}
             True
         """
         data = super(QIF, self).transaction_data(tr)

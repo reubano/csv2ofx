@@ -6,6 +6,7 @@
 .idea/
 example*.log
 examples/.ipynb_checkpoints/*
+.*.sw*
 
 # C extensions
 *.so

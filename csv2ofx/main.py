@@ -41,7 +41,7 @@ from builtins import *
 from dateutil.parser import parse
 from meza.io import read_csv, IterStringIO, write
 
-from . import utils
+from . import BalanceError, utils
 from .ofx import OFX
 from .qif import QIF
 
@@ -76,6 +76,13 @@ parser.add_argument(
     metavar="DATE",
     help="end date (default: today)",
     default=str(dt.now()),
+)
+parser.add_argument(
+    "-B",
+    "--ending-balance",
+    metavar="BALANCE",
+    type=float,
+    help="ending balance (default: None)",
 )
 parser.add_argument(
     "-l", "--language", help="the language (default: ENG)", default="ENG"
@@ -158,6 +165,13 @@ parser.add_argument(
     default=False,
 )
 parser.add_argument(
+    "-M",
+    "--ms-money",
+    help="enables MS Money compatible 'OFX' output",
+    action="store_true",
+    default=False,
+)
+parser.add_argument(
     "-o",
     "--overwrite",
     action="store_true",
@@ -216,6 +230,7 @@ def run():  # noqa: C901
         "def_type": args.account_type or "Bank" if args.qif else "CHECKING",
         "start": parse(args.start, dayfirst=args.dayfirst) if args.start else None,
         "end": parse(args.end, dayfirst=args.dayfirst) if args.end else None,
+        "ms_money": args.ms_money,
     }
 
     cont = QIF(mapping, **okwargs) if args.qif else OFX(mapping, **okwargs)
@@ -248,7 +263,7 @@ def run():  # noqa: C901
             server_date = dt.fromtimestamp(mtime)
 
         header = cont.header(date=server_date, language=args.language)
-        footer = cont.footer(date=server_date)
+        footer = cont.footer(date=server_date, balance=args.ending_balance)
         filtered = filter(None, [header, body, footer])
         content = it.chain.from_iterable(filtered)
         kwargs = {
@@ -277,6 +292,8 @@ def run():  # noqa: C901
         # csv2ofx called with no arguments or broken mapping
         msg = "Possible mapping problem: %s. " % str(err)
         parser.print_help()
+    except BalanceError as err:
+        msg = "%s.  Try again with `--ending-balance` option." % err
     except Exception:  # pylint: disable=broad-except
         msg = 1
         traceback.print_exc()
