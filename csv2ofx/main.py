@@ -238,6 +238,7 @@ def run():  # noqa: C901
 
     ckwargs = {
         "has_header": cont.has_header,
+        "custom_header": getattr(cont, "custom_header", None),
         "delimiter": mapping.get("delimiter", ","),
         "first_row": mapping.get("first_row", args.first_row),
         "last_row": mapping.get("last_row", args.last_row),
