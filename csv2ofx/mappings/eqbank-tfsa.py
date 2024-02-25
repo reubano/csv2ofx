@@ -5,10 +5,10 @@ mapping = {
     "bank": "EQ Bank",
     "currency": "CAD",
     "delimiter": ",",
-    "account": lambda tr: "EQ",
+    "account": lambda tr: "EQ-Invest",
     "date": itemgetter("Date"),
     "desc": itemgetter("Description"),
-    "type": lambda tr: "DEBIT" if tr.get("Transfer").startswith("-") else "CREDIT",
-    "amount": lambda tr: tr.get("Transfer"),
+    "type": lambda tr: "DEBIT" if tr.get("Amount").startswith("-") else "CREDIT",
+    "amount": lambda tr: tr.get("Amount"),
     "balance": itemgetter("Balance"),
 }
