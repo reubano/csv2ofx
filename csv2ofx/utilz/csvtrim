@@ -8,12 +8,39 @@
 ################################################################################
 [ "$DEBUG" ] && set -x
 set -o pipefail
+shopt -s expand_aliases
 
 __author__='Marco "sphakka" Poleggi'
+__version__='0.1.1'
 
 myself=$(basename $0)
+
+# defaults
 dfields='4,6,9,12-16,19-21'
-dseparator=';'
+dfs=';'
+dtrmtln=3
+
+# alternatives to use for quoted fields with rogue fs characters
+declare -A fs_replacements=(
+    [;]=','
+    [:]=','
+    [,]=';'
+)
+
+alias log_error='echo >&2 "[error] ${FUNCNAME}>"'
+alias log_info='echo >&2 "[info] ${FUNCNAME}>"'
+alias log_warn='echo >&2 "[warn] ${FUNCNAME}>"'
+
+tmp_file1=$(mktemp --tmpdir=/tmp -t "${myself}-XXXXXX") || {
+    log_error "Can't create tmp file"
+    exit 1
+}
+
+tmp_file2=$(mktemp --tmpdir=/tmp -t "${myself}-XXXXXX") || {
+    log_error "Can't create file"
+    exit 1
+}
+
 
 ################################################################################
 
@@ -21,13 +48,13 @@ usage() {
     echo >&2 "
 Usage:
 
-  $myself CSV_FILE [FIELDS [SEPARATOR]]
+  $myself CSV_FILE [FIELDS [FS]]
 
 where
 
-  CSV_FILE:  path to an existing file or '-' for stdin
-  FIELDS:    cut-style list of fields to keep. Default: '$dfields'
-  SEPARATOR: a single (escaped) character. Default: '$dseparator'
+  CSV_FILE  path to an existing file or '-' for stdin
+  FIELDS    cut-style list of fields to keep. Default: '$dfields'
+  FS        a single (escaped) character as field separator. Default: '$dfs'
 
 (default values are for exports from UBS CH (DE/FR/IT))
 
@@ -39,41 +66,112 @@ e.g.
   exit 1
 }
 
-trap '[ $? -ne 0 ] && usage' EXIT
+function cleanup() {
+    [ $? -ne 0 ] && usage
+    [[ "$DEBUG" ]] && log_info "tmp file kept: tmp_file1=$tmp_file1, tmp_file2=$tmp_file2" \
+            || rm -f $tmp_file1 $tmp_file2
+}
+
+
+# trap '[ $? -ne 0 ] && usage' EXIT
+trap cleanup EXIT SIGINT SIGTERM
 
 input_csv=${1:?'arg #1 missing: input CSV file'}
 fields=${2:-$dfields}
-separator=${3:-$dseparator}
+fs=${3:-$dfs}
+trmtln=${3:-$dtrmtln}
 
 
-function _trim () {
-    local dlmtrc=${1:?'arg #1 missing: delimiter character'}
+# Count the number of field separator in a string
+function count_fs() {
+    local string=${1:?'arg #1 missing: input string'}
+    local fs=${2:?'arg #2 missing: field separator'}
+
+    fsn=$(echo "${string}" | sed -nr "s/${fs}/\n/g p" | wc -l) || {
+        log_error "sed filter failed"
+        return  1
+    }
+    echo $((fsn - 1))
+}
+
+
+function trim () {
+    local fs=${1:?'arg #1 missing: field delimiter character'}
     local fields=${2:?'arg #2 missing: cut-style fields to keep'}
     local incsvf=${3:?'arg #3 missing: input CSV file'}
-    local trmtln=${4:-'3'} # number of trailing lines to trim
+    local trmtln=${4:?'arg #4 missing: number of trailing lines to trim'}
 
     local head_opts=
 
     if [ "$trmtln" ]; then
         [[ "$trmtln" =~ ^[[:digit:]]+$ ]] || {
-            echo >&2 "[error] ${trmtln}: number of traling lines to trim is not an integer"
+            log_error "${trmtln}: number of traling lines to trim is not an integer"
             return  1
         }
         head_opts="-n-${trmtln}"
     fi
 
+    # escape any separator characters that might appear in quoted fields (yep,
+    # that's legal for CSV files) --
+    # <https://unix.stackexchange.com/questions/48672/only-remove-commas-embedded-within-quotes-in-a-comma-delimited-file>.
+    # Quotes are remove as well.
+    local quotes="\"'"
+    local fs_repl=${fs_replacements[${fs}]} || {
+        log_error "[bug] no replacement configured for fs '${fs}'. Please correct the 'fs_replacements' array"
+        return  1
+    }
+    sed -r ":a;
+            s/([${quotes}])([^${quotes}${fs}]*)${fs}(.*?)([${quotes}])/\1\2${fs_repl}\3\4/;
+            ta;
+            s/[${quotes}]//g" $incsvf > $tmp_file1 || {
+        log_error "can't treat quoted field(s)"
+        return  1
+    }
+
+    # normalize field number where possible -- remove trailing fs, append
+    # fs. The correct number of fields is inferred by the first (supposedly
+    # the header) line.
+    local header=$(head -n1 $tmp_file1 | sed -r "s/${fs}*$//g")
+    log_info "header (possibly fixed): ${header}"
+    fsn=$(count_fs "${header}" $fs) || {
+        log_error "can't compute the header's field number"
+        return  1
+    }
+    log_info "header FS count: ${fsn}"
+
+    echo $header > $tmp_file2
+
+    tail -n+2 $tmp_file1 | while read line; do
+        local lfs=$(count_fs "${line}" $fs)
+        local fsd=$(( $lfs - $fsn ))
+        # ~abs
+        local afsd=${fsd#-}
+        # repeat extra fs
+        local xfs=$(printf "${fs}%.0s" $(eval "echo {1..${afsd}}"))
+        if [[  $fsd -lt 0 ]]; then
+            fsd=${fsd#-}
+            line+=$xfs
+            log_info "'${line}': fixed, +${fsd} FS"
+        elif [[  $fsd -gt 0 ]]; then
+            # trim at the tail
+            line=${line%${xfs}}
+            log_info "'${line}': fixed, -${fsd} FS"
+        fi
+        echo $line >> $tmp_file2
+    done
+
     # trnxs detailed as "Solde prix prestations" are split with a
     # "Sous-montant" value, but empty "Débit; Crédit; Solde" columns (the
     # trailing three). To avoid breaking csv2ofx, these must be filtered
-    # out... The kludge is to skip rows ending with 3 consecutive delimiter chars
-    head $head_opts $incsvf | cut -d$dlmtrc -f$fields | \
-        sed -nr "/${dlmtrc}${dlmtrc}${dlmtrc}\s*$/ !p" || {
-            echo >&2 "[error] ${incsvf}: can't filter input file"
+    # out... The kludge is to skip rows ending with an empty field
+    head $head_opts $tmp_file2 | cut -d$fs -f$fields | \
+        sed -nr "/${fs}\s*$/ !p" || {
+            log_error "can't filter input file"
             return  1
         }
 }
 
-_trim $separator $fields $input_csv || {
-    echo >&2 "[error] ${input_csv}: trimming failed..."
+trim $fs $fields $input_csv $trmtln || {
+    log_error "${input_csv}: trimming failed..."
     exit 1
 }
