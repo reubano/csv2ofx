@@ -6,7 +6,7 @@
 #
 # TO-DO: integrate in csv2ofx?
 ################################################################################
-[ "$DEBUG" ] && set -x
+[[ "$CSVTRIM_DEBUG" ]] && set -x
 set -o pipefail
 shopt -s expand_aliases
 
@@ -16,9 +16,9 @@ __version__='0.1.1'
 myself=$(basename $0)
 
 # defaults
-dfields='4,6,9,12-16,19-21'
-dfs=';'
-dtrmtln=3
+dfields=${CSVTRIM_FIELDS:-'4,6,9,12-16,19-21'}
+dfs=${CSVTRIM_DFS:-';'}
+dtrmtln=${CSVTRIM_DTRMTLN-3}
 
 # alternatives to use for quoted fields with rogue fs characters
 declare -A fs_replacements=(
@@ -42,19 +42,46 @@ tmp_file2=$(mktemp --tmpdir=/tmp -t "${myself}-XXXXXX") || {
 }
 
 
+_test_data=$(cat <<'EOF'
+header;with;four;fields;;
+too;many;fields;here;;;
+too;'many; also';there;;;
+"too,few; fields";here
+line;is;a;split
+split;1
+split;2;;;
+this;line;is;OK
+and;this too;is;right
+EOF
+)
+
+[[ $CSVTRIM_SELFTEST ]] && {
+    unset CSVTRIM_SELFTEST
+    cmd="$0 - 1- ; 0"
+    log_info "Self-testing with command '${cmd}'"
+    echo "${_test_data}" | exec $cmd && {
+        log_info "Self-test OK :-)"
+        exit 0
+    }
+    log_info "Self-test KO :-("
+    exit 1
+}
+
+
 ################################################################################
 
 usage() {
     echo >&2 "
 Usage:
 
-  $myself CSV_FILE [FIELDS [FS]]
+  $myself CSV_FILE [FIELDS [FS [TRIM_NLINES]]]
 
 where
 
-  CSV_FILE  path to an existing file or '-' for stdin
-  FIELDS    cut-style list of fields to keep. Default: '$dfields'
-  FS        a single (escaped) character as field separator. Default: '$dfs'
+  CSV_FILE      path to an existing file or '-' for stdin
+  FIELDS        cut-style list of fields to keep. Default: '$dfields'
+  FS            a single (escaped) character as field separator. Default: '$dfs'
+  TRIM_NLINES   discard N trailing lines
 
 (default values are for exports from UBS CH (DE/FR/IT))
 
@@ -68,7 +95,8 @@ e.g.
 
 function cleanup() {
     [ $? -ne 0 ] && usage
-    [[ "$DEBUG" ]] && log_info "tmp file kept: tmp_file1=$tmp_file1, tmp_file2=$tmp_file2" \
+    [[ "$DEBUG" ]] && \
+        log_info "tmp file kept: tmp_file1=$tmp_file1, tmp_file2=$tmp_file2" \
             || rm -f $tmp_file1 $tmp_file2
 }
 
@@ -79,7 +107,7 @@ trap cleanup EXIT SIGINT SIGTERM
 input_csv=${1:?'arg #1 missing: input CSV file'}
 fields=${2:-$dfields}
 fs=${3:-$dfs}
-trmtln=${3:-$dtrmtln}
+trmtln=${4:-$dtrmtln}
 
 
 # Count the number of field separator in a string
