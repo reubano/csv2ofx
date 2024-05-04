@@ -204,6 +204,12 @@ if __name__ == "__main__":
             "schwab-checking-baltest-case7.ofx",
         ),
         (["-o", "-m amazon", "-e 20230604", SERVER_DATE], "amazon.csv", "amazon.ofx",),
+        
+        (
+            ["-o", "-m payoneer", "-e 20220905", SERVER_DATE],
+            "payoneer.csv",
+            "payoneer.ofx",
+        ),
     ]
 
     # for Amazon import; excludes transaction 3/3
