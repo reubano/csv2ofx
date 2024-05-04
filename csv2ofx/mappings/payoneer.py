@@ -2,6 +2,7 @@ import os
 from operator import itemgetter
 from datetime import datetime
 
+
 def is_credit(row):
     try:
         return (row.get("Debit Amount") or None) is None
@@ -15,6 +16,7 @@ def get_amount(row):
 
     return f'-{row.get("Debit Amount")}'
 
+
 def payoneer_filter(transaction):
     try:
         float(transaction.get("Credit Amount") or transaction.get("Debit Amount"))
@@ -27,6 +29,7 @@ def get_date(row):
     date_str = f'{row.get("Transaction Date")} {row.get("Transaction Time")}'
 
     return datetime.strptime(date_str, "%m/%d/%Y %H:%M:%S").strftime("%Y%m%d%H%M%S")
+
 
 mapping = {
     "has_header": True,
