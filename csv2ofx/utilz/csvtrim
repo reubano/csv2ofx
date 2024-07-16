@@ -16,7 +16,7 @@ __version__='0.1.1'
 myself=$(basename $0)
 
 # defaults
-dfields=${CSVTRIM_FIELDS:-'4,6,9,12-16,19-21'}
+dfields=${CSVTRIM_FIELDS:-'4,6,9,11,13-16,19-21'}
 dfs=${CSVTRIM_DFS:-';'}
 dtrim_trail=${CSVTRIM_DTRIM_TRAIL-3}
 dsort_key1=${CSVTRIM_DSORT_KEY1-4}
@@ -43,7 +43,8 @@ declare -A cols_in_ubs_fr=(
     [4]='Produit'
     [6]='Monn.'
     [9]='Description'
-    [12]='Date de valeur'
+    [11]='Date de comptabilisation'
+    # [12]='Date de valeur'
     [13]='Description 1'
     [14]='Description 2'
     [15]='Description 3'
@@ -57,7 +58,7 @@ declare -A cols_out_ubs_fr=(
     [1]='Produit'
     [2]='Monn.'
     [3]='Description'
-    [4]='Date de valeur'
+    [4]='Date de comptabilisation'
     [5]='Description 1'
     [6]='Description 2'
     [7]='Description 3'
