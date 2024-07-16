@@ -6,7 +6,7 @@
 #
 # TO-DO: integrate in csv2ofx?
 ################################################################################
-[[ "$CSVTRIM_DEBUG" ]] && set -x
+[[ "$CSVTRIM_TRACE" ]] && set -x
 set -o pipefail
 shopt -s expand_aliases
 
@@ -18,7 +18,17 @@ myself=$(basename $0)
 # defaults
 dfields=${CSVTRIM_FIELDS:-'4,6,9,12-16,19-21'}
 dfs=${CSVTRIM_DFS:-';'}
-dtrmtln=${CSVTRIM_DTRMTLN-3}
+dtrim_trail=${CSVTRIM_DTRIM_TRAIL-3}
+dsort_key1=${CSVTRIM_DSORT_KEY1-4}
+dsort_key2=${CSVTRIM_DSORT_KEY2-8}
+
+# option vars
+fields=${dfields}
+fs=${dfs}
+trim_trail=${dtrim_trail}
+sort_key1=${dsort_key1}
+sort_key2=${dsort_key2}
+
 
 # alternatives to use for quoted fields with rogue fs characters
 declare -A fs_replacements=(
@@ -27,9 +37,47 @@ declare -A fs_replacements=(
     [,]=';'
 )
 
+# CSV columns' index-label crossref for UBS-FR -- just informational for
+# now. Sorting is indeed made on numerical keys.
+declare -A cols_in_ubs_fr=(
+    [4]='Produit'
+    [6]='Monn.'
+    [9]='Description'
+    [12]='Date de valeur'
+    [13]='Description 1'
+    [14]='Description 2'
+    [15]='Description 3'
+    [16]='N° de transaction'
+    [19]='Débit'
+    [20]='Crédit'
+    [21]='Solde'
+)
+
+declare -A cols_out_ubs_fr=(
+    [1]='Produit'
+    [2]='Monn.'
+    [3]='Description'
+    [4]='Date de valeur'
+    [5]='Description 1'
+    [6]='Description 2'
+    [7]='Description 3'
+    [8]='N° de transaction'
+    [9]='Débit'
+    [10]='Crédit'
+    [11]='Solde'
+)
+# Primary and secondary ouput sorting keys indices
+sort_key1=$dsort_key1
+sort_key2=$dsort_key2
+
 alias log_error='echo >&2 "[error] ${FUNCNAME}>"'
 alias log_info='echo >&2 "[info] ${FUNCNAME}>"'
 alias log_warn='echo >&2 "[warn] ${FUNCNAME}>"'
+if [[ $CSVTRIM_DEBUG ]]; then
+    alias log_debug='echo >&2 "[debug] ${FUNCNAME}>"'
+else
+    alias log_debug=':'
+fi
 
 tmp_file1=$(mktemp --tmpdir=/tmp -t "${myself}-XXXXXX") || {
     log_error "Can't create tmp file"
@@ -42,72 +90,82 @@ tmp_file2=$(mktemp --tmpdir=/tmp -t "${myself}-XXXXXX") || {
 }
 
 
+# 6 columns. Use CSVTRIM_DSORT_KEY1=1 CSVTRIM_DSORT_KEY2=2 for self-testing
 _test_data=$(cat <<'EOF'
-header;with;four;fields;;
-too;many;fields;here;;;
-too;'many; also';there;;;
-"too,few; fields";here
-line;is;a;split
-split;1
-split;2;;;
-this;line;is;OK
-and;this too;is;right
+date;trxnid;header;with;six;fields;;
+02.03.2024;txn-07;will stay;with;3 fields;less;;;
+01.02.2024;txn-01;will;"stay; also";with 1;field less;
+01.02.2024;txn-03;"too,few; fields";here
+01.02.2024;txn-02;this split;will stay;;1'234.5
+01.02.2024;txn-02;comment is removed;;;
+01.02.2024;txn-02;split-1 is removed
+01.02.2024;txn-02;split-2 is removed;;;
+04.03.2024;txn-05;this line;is;really;OK
+07.01.2024;txn-04;this too short by one;removed; as a split
+08.02.2024;txn-06;thousand separator; is not a quotation mark;1'234.5;6'789.0
 EOF
 )
 
-[[ $CSVTRIM_SELFTEST ]] && {
-    unset CSVTRIM_SELFTEST
-    cmd="$0 - 1- ; 0"
-    log_info "Self-testing with command '${cmd}'"
-    echo "${_test_data}" | exec $cmd && {
-        log_info "Self-test OK :-)"
-        exit 0
-    }
-    log_info "Self-test KO :-("
-    exit 1
-}
+_test_results=$(cat <<'EOF'
+date;trxnid;header;with;six;fields
+01.02.2024;txn-01;will;stay, also;with 1;field less
+01.02.2024;txn-02;this split;will stay;;1'234.5
+08.02.2024;txn-06;thousand separator; is not a quotation mark;1'234.5;6'789.0
+02.03.2024;txn-07;will stay;with;3 fields;less
+04.03.2024;txn-05;this line;is;really;OK
+EOF
+)
 
 
 ################################################################################
 
 usage() {
-    echo >&2 "
+    cat >&2 <<EOF
 Usage:
 
-  $myself CSV_FILE [FIELDS [FS [TRIM_NLINES]]]
+    ${myself} [OPTIONS] CSV_FILE
 
-where
+where:
 
-  CSV_FILE      path to an existing file or '-' for stdin
-  FIELDS        cut-style list of fields to keep. Default: '$dfields'
-  FS            a single (escaped) character as field separator. Default: '$dfs'
-  TRIM_NLINES   discard N trailing lines
+    CSV_FILE      path to the input CSV file or '-' for stdin
 
-(default values are for exports from UBS CH (DE/FR/IT))
+Options:
 
-e.g.
+(defaults are in parentheses and are valid for exports from UBS CH DE/FR/IT)
 
-  $myself hairy_export.csv 1,3,5-8 \;
-  cat hairy_export.csv | $myself - 1,3,5-8 \;"
+    -h  print this help
+    -f  cut-style list of fields to keep ('${dfields}')
+    -s  a single (escaped) character as field separator ('${dfs}')
+    -t  discard N trailing lines ('${trim_trail}')
+    -1  primary output sort key ('${dsort_key1}')
+    -2  secondary output sort key ('${dsort_key2}')
 
-  exit 1
+
+Examples:
+
+    $myself -f1,3,5-8 -s\; hairy_export.csv
+    cat hairy_export.csv | $myself -f1,3,5-8 -s\; -
+
+
+Selftest:
+
+    CSVTRIM_SELFTEST=1 csvtrim ...
+
+
+Debug:
+
+    CSVTRIM_DEBUG=1 [CSVTRIM_TRACE=1] csvtrim ...
+
+EOF
 }
 
 function cleanup() {
-    [ $? -ne 0 ] && usage
-    [[ "$DEBUG" ]] && \
-        log_info "tmp file kept: tmp_file1=$tmp_file1, tmp_file2=$tmp_file2" \
+    [[ "${CSVTRIM_DEBUG}" ]] && \
+        log_info "Tmp files kept: tmp_file1='${tmp_file1}', tmp_file2='${tmp_file2}'" \
             || rm -f $tmp_file1 $tmp_file2
 }
 
-
-# trap '[ $? -ne 0 ] && usage' EXIT
 trap cleanup EXIT SIGINT SIGTERM
-
-input_csv=${1:?'arg #1 missing: input CSV file'}
-fields=${2:-$dfields}
-fs=${3:-$dfs}
-trmtln=${4:-$dtrmtln}
 
 
 # Count the number of field separator in a string
@@ -116,7 +174,7 @@ function count_fs() {
     local fs=${2:?'arg #2 missing: field separator'}
 
     fsn=$(echo "${string}" | sed -nr "s/${fs}/\n/g p" | wc -l) || {
-        log_error "sed filter failed"
+        log_error "Sed filter failed"
         return  1
     }
     echo $((fsn - 1))
@@ -127,32 +185,35 @@ function trim () {
     local fs=${1:?'arg #1 missing: field delimiter character'}
     local fields=${2:?'arg #2 missing: cut-style fields to keep'}
     local incsvf=${3:?'arg #3 missing: input CSV file'}
-    local trmtln=${4:?'arg #4 missing: number of trailing lines to trim'}
+    local trim_trail=${4:?'arg #4 missing: number of trailing lines to trim'}
 
     local head_opts=
 
-    if [ "$trmtln" ]; then
-        [[ "$trmtln" =~ ^[[:digit:]]+$ ]] || {
-            log_error "${trmtln}: number of traling lines to trim is not an integer"
+    if [ "$trim_trail" ]; then
+        [[ "$trim_trail" =~ ^[[:digit:]]+$ ]] || {
+            log_error "${trim_trail}: number of traling lines to trim is not an integer"
             return  1
         }
-        head_opts="-n-${trmtln}"
+        head_opts="-n-${trim_trail}"
     fi
 
     # escape any separator characters that might appear in quoted fields (yep,
     # that's legal for CSV files) --
     # <https://unix.stackexchange.com/questions/48672/only-remove-commas-embedded-within-quotes-in-a-comma-delimited-file>.
-    # Quotes are remove as well.
-    local quotes="\"'"
+    # Double quotes are removed as well. Single quotes must stay becasue
+    # adjacent financial-style numerals such as 1'234.5;6'789.0 would make a
+    # fake quoted string '234.5;6'.
+    local quotes="\""
     local fs_repl=${fs_replacements[${fs}]} || {
-        log_error "[bug] no replacement configured for fs '${fs}'. Please correct the 'fs_replacements' array"
+        log_error "[BUG] no replacement configured for fs '${fs}'. Please correct the 'fs_replacements' array"
         return  1
     }
-    sed -r ":a;
+    head $head_opts $incsvf | \
+        sed -r ":a;
             s/([${quotes}])([^${quotes}${fs}]*)${fs}(.*?)([${quotes}])/\1\2${fs_repl}\3\4/;
             ta;
-            s/[${quotes}]//g" $incsvf > $tmp_file1 || {
-        log_error "can't treat quoted field(s)"
+            s/[${quotes}]//g" > $tmp_file1 || {
+        log_error "Can't treat quoted field(s)"
         return  1
     }
 
@@ -160,46 +221,116 @@ function trim () {
     # fs. The correct number of fields is inferred by the first (supposedly
     # the header) line.
     local header=$(head -n1 $tmp_file1 | sed -r "s/${fs}*$//g")
-    log_info "header (possibly fixed): ${header}"
+    log_info "Header (possibly fixed): '${header}'"
     fsn=$(count_fs "${header}" $fs) || {
         log_error "can't compute the header's field number"
         return  1
     }
-    log_info "header FS count: ${fsn}"
+    log_info "FS count: ${fsn} => we have $(($fsn + 1)) fields"
 
     echo $header > $tmp_file2
 
+    local ln=2
     tail -n+2 $tmp_file1 | while read line; do
         local lfs=$(count_fs "${line}" $fs)
         local fsd=$(( $lfs - $fsn ))
-        # ~abs
+        # ~abs()
         local afsd=${fsd#-}
         # repeat extra fs
         local xfs=$(printf "${fs}%.0s" $(eval "echo {1..${afsd}}"))
         if [[  $fsd -lt 0 ]]; then
+            # mostly useless as it would create a (fake?) split and get
+            # removed lateer, but we keep the code because in the future we
+            # might introduce an explicit remove split option
             fsd=${fsd#-}
             line+=$xfs
-            log_info "'${line}': fixed, +${fsd} FS"
+            log_info "Line ${ln}: fixed, +${fsd} FS: ${line}"
         elif [[  $fsd -gt 0 ]]; then
             # trim at the tail
             line=${line%${xfs}}
-            log_info "'${line}': fixed, -${fsd} FS"
+            log_info "Line ${ln}: fixed, -${fsd} FS: ${line}"
         fi
-        echo $line >> $tmp_file2
-    done
 
-    # trnxs detailed as "Solde prix prestations" are split with a
-    # "Sous-montant" value, but empty "Débit; Crédit; Solde" columns (the
-    # trailing three). To avoid breaking csv2ofx, these must be filtered
-    # out... The kludge is to skip rows ending with an empty field
-    head $head_opts $tmp_file2 | cut -d$fs -f$fields | \
-        sed -nr "/${fs}\s*$/ !p" || {
-            log_error "can't filter input file"
-            return  1
-        }
+        # Consecutive lines bearing the same "N. de transaction" (field #16) are
+        # splits with following lines bearing a "Sous-montant" (field #18) but
+        # empty "Débit; Crédit; Solde" fields (the trailing three, #19-21). To
+        # avoid breaking csv2ofx, these must be filtered out... The kludge is to
+        # skip rows ending with an empty field
+        if [[ "$line" =~ ${fs}[[:blank:]]*$ ]]; then
+            log_info "Line ${ln}: split ignored: ${line}"
+        else
+            echo $line >> $tmp_file2
+        fi
+        ((ln++))
+    done
+    log_info "Normalize OK"
+
+    # Sort: key1 is a date like 'dd.mm.yyyy'. To sort correctly, we use the
+    # reverse order (ISO-like) year, month, day.
+    cut -d${fs} -f${fields} $tmp_file2 | \
+        sort -t';' \
+             -k${sort_key1}.7n,${sort_key1}.10n \
+             -k${sort_key1}.4n,${sort_key1}.5n \
+             -k${sort_key1}.1n,${sort_key1}.2n \
+             -k${sort_key2} || {
+        log_error "Can't trim columns (#${fields}) or sort"
+        return  1
+    }
+    log_info "Trim OK"
 }
 
-trim $fs $fields $input_csv $trmtln || {
-    log_error "${input_csv}: trimming failed..."
+################################################################################
+# main
+################################################################################
+
+while getopts "f:hs:t:1:2:" opt; do
+    case "$opt" in
+        h) usage; exit 0 ;;
+        f) fields=${OPTARG} ;;
+        s) fs=${OPTARG} ;;
+        t) trim_trail=${OPTARG} ;;
+        1) sort_key1=${OPTARG} ;;
+        2) sort_key2=${OPTARG} ;;
+        -) break ;;
+        *) usage; exit 1 ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+
+[[ $CSVTRIM_SELFTEST ]] && {
+    unset CSVTRIM_SELFTEST
+    cmd="$0 -f 1- -s ; -t 0 -1 1 -2 2 -"
+    log_info "Self-testing with command '${cmd}'"
+    result=$(echo "${_test_data}" | exec $cmd) || {
+        log_error "Can't run self-test"
+        exit 1
+    }
+    [[ "$result" == "$_test_results" ]] || {
+        log_error "Self-test KO :-("
+        exit 1
+    }
+    log_info "Self-test OK :-)"
+    exit 0
+}
+
+input_csv=$1
+
+if [[ "${input_csv}" ]]; then
+    [[ "${input_csv}" == '-' || -r "${input_csv}" ]] || {
+        log_error "${input_csv}: input CSV file unreadable"
+        usage
+        exit 1
+    }
+else
+    log_error "Input CSV file missing."
+    usage
+    exit 1
+fi
+
+log_debug "fields=${fields}"
+
+trim $fs $fields $input_csv $trim_trail || {
+    log_error "${input_csv}: processing failed..."
     exit 1
 }
