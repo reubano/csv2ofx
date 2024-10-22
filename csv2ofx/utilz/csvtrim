@@ -11,7 +11,7 @@ set -o pipefail
 shopt -s expand_aliases
 
 __author__='Marco "sphakka" Poleggi'
-__version__='0.1.1'
+__version__='0.1.2'
 
 myself=$(basename $0)
 
@@ -80,16 +80,12 @@ else
     alias log_debug=':'
 fi
 
-tmp_file1=$(mktemp --tmpdir=/tmp -t "${myself}-XXXXXX") || {
-    log_error "Can't create tmp file"
-    exit 1
-}
-
-tmp_file2=$(mktemp --tmpdir=/tmp -t "${myself}-XXXXXX") || {
-    log_error "Can't create file"
-    exit 1
-}
-
+for i in {1..3}; do
+    declare tmp_file${i}=$(mktemp --tmpdir=/tmp -t "${myself}-XXXXXX") || {
+        log_error "Can't create tmp file #${i}"
+        exit 1
+    }
+done
 
 # 6 columns. Use CSVTRIM_DSORT_KEY1=1 CSVTRIM_DSORT_KEY2=2 for self-testing
 _test_data=$(cat <<'EOF'
@@ -161,9 +157,9 @@ EOF
 }
 
 function cleanup() {
-    [[ "${CSVTRIM_DEBUG}" ]] && \
-        log_info "Tmp files kept: tmp_file1='${tmp_file1}', tmp_file2='${tmp_file2}'" \
-            || rm -f $tmp_file1 $tmp_file2
+    [[ "${CSVTRIM_DEBUG}" ]] &&
+        log_debug "Tmp files kept: tmp_file1=${tmp_file1}, tmp_file2=${tmp_file2}, tmp_file3=${tmp_file3}" || \
+            rm -f $tmp_file3 $tmp_file1 $tmp_file2
 }
 
 trap cleanup EXIT SIGINT SIGTERM
@@ -192,7 +188,7 @@ function trim () {
 
     if [ "$trim_trail" ]; then
         [[ "$trim_trail" =~ ^[[:digit:]]+$ ]] || {
-            log_error "${trim_trail}: number of traling lines to trim is not an integer"
+            log_error "${trim_trail}: number of trailing lines to trim is not an integer"
             return  1
         }
         head_opts="-n-${trim_trail}"
@@ -201,7 +197,7 @@ function trim () {
     # escape any separator characters that might appear in quoted fields (yep,
     # that's legal for CSV files) --
     # <https://unix.stackexchange.com/questions/48672/only-remove-commas-embedded-within-quotes-in-a-comma-delimited-file>.
-    # Double quotes are removed as well. Single quotes must stay becasue
+    # Double quotes are removed as well. Single quotes must stay because
     # adjacent financial-style numerals such as 1'234.5;6'789.0 would make a
     # fake quoted string '234.5;6'.
     local quotes="\""
@@ -323,6 +319,10 @@ if [[ "${input_csv}" ]]; then
         usage
         exit 1
     }
+    cat $input_csv > $tmp_file3 || {
+        log_error "${input_csv}: can't write to tmp file"
+        exit 1
+    }
 else
     log_error "Input CSV file missing."
     usage
@@ -331,7 +331,12 @@ fi
 
 log_debug "fields=${fields}"
 
-trim $fs $fields $input_csv $trim_trail || {
+grep -q $'\r$' $tmp_file3 && {
+    log_error "${input_csv}: input file has DOS-style EOL. Please, fix it and rerun"
+    exit 1
+}
+
+trim $fs $fields $tmp_file3 $trim_trail || {
     log_error "${input_csv}: processing failed..."
     exit 1
 }
