@@ -1,7 +1,6 @@
 # csv2ofx
 
 [![GHA](https://github.com/PROJECT_PATH/actions/workflows/main.yml/badge.svg)](https://github.com/PROJECT_PATH/actions?query=workflow%3A%22tests%22)
-[![travis](https://img.shields.io/travis/reubano/csv2ofx/master.svg)](https://app.travis-ci.com/github/reubano/csv2ofx)
 [![versions](https://img.shields.io/pypi/pyversions/csv2ofx.svg)](https://pypi.python.org/pypi/csv2ofx)
 [![pypi](https://img.shields.io/pypi/v/csv2ofx.svg)](https://pypi.python.org/pypi/csv2ofx)
 
