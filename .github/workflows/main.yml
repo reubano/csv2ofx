@@ -80,32 +80,11 @@ jobs:
       - name: Run
         run: tox
 
-  collateral:
-    strategy:
-      fail-fast: false
-      matrix:
-        job:
-        - docs
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.x
-      - name: Install tox
-        run: python -m pip install tox
-      - name: Eval ${{ matrix.job }}
-        run: tox -e ${{ matrix.job }}
-
   check:  # This job does nothing and is only used for the branch protection
     if: always()
 
     needs:
     - test
-    - collateral
 
     runs-on: ubuntu-latest
 
