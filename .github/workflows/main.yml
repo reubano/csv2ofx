@@ -40,7 +40,8 @@ jobs:
         platform:
         - ubuntu-latest
         - macos-latest
-        - windows-latest
+        # disabled due to #131
+        # - windows-latest
         include:
         - python: "3.10"
           platform: ubuntu-latest
