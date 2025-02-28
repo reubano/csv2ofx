@@ -22,8 +22,7 @@ import itertools as it
 import traceback
 
 from sys import stdin, stdout, exit
-from importlib import import_module
-from imp import find_module, load_module
+from importlib import import_module, util
 from pkgutil import iter_modules
 from operator import itemgetter
 from os import path as p
@@ -219,8 +218,9 @@ def run():  # noqa: C901
 
     if args.custom:
         name = p.splitext(p.split(args.custom)[1])[0]
-        found = find_module(name, [p.dirname(p.abspath(args.custom))])
-        module = load_module(name, *found)
+        spec = util.spec_from_file_location(name, args.custom)
+        module = util.module_from_spec(spec)
+        spec.loader.exec_module(module)
     else:
         module = import_module("csv2ofx.mappings.%s" % args.mapping)
 
