@@ -65,6 +65,11 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y libxml2-dev libxslt-dev
+      - name: Install runtime dependencies
+        if: matrix.platform == 'ubuntu-latest':
+          run: |
+          sudo apt update
+          sudo apt install -y language-pack-fr
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
