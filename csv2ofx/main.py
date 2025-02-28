@@ -16,6 +16,7 @@ Examples:
 Attributes:
     ENCODING (str): Default file encoding.
 """
+
 import time
 import itertools as it
 import traceback
@@ -111,8 +112,7 @@ parser.add_argument(
     "--collapse",
     metavar="FIELD_NAME",
     help=(
-        "field used to combine transactions within a split for double entry "
-        "statements"
+        "field used to combine transactions within a split for double entry statements"
     ),
 )
 parser.add_argument(
