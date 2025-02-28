@@ -70,6 +70,8 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y language-pack-fr
+          sudo apt install -y locales
+          sudo dpkg-reconfigure locales
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
