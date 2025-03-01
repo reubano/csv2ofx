@@ -1,3 +1,6 @@
 [build-system]
 requires = ["setuptools>=42.0.2", "pkutils>=3.0.0,<4.0.0"]
 build-backend = "setuptools.build_meta"
+
+[project.urls]
+Source = "https://github.com/reubano/csv2ofx"

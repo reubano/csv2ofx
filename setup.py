@@ -36,8 +36,6 @@ setup(
     long_description_content_type="text/markdown",
     author=module.__author__,
     author_email=module.__email__,
-    url=pkutils.get_url(project, user),
-    download_url=pkutils.get_dl_url(project, user, version),
     packages=find_packages(exclude=["docs", "tests"]),
     include_package_data=True,
     install_requires=requirements,
