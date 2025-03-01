@@ -39,10 +39,7 @@ pip-log.txt
 # Unit test / coverage reports
 .coverage
 .tox
-.noseids
-.scripttest
 htmlcov/*
-nosetests.xml
 
 # Translations
 *.mo

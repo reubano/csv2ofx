@@ -9,18 +9,18 @@ tests.test
 Provides scripttests to test csv2ofx CLI functionality.
 """
 
-import sys
+import itertools
 import os
+import shlex
+import subprocess
+import sys
 
 from difflib import unified_diff
 from os import path as p
 from io import StringIO, open
 from timeit import default_timer as timer
-from builtins import *
 
 import pygogo as gogo
-
-from scripttest import TestFileEnvironment
 
 sys.path.append("../csv2ofx")
 
@@ -39,25 +39,26 @@ def filter_output(outlines, debug_stmts=None):
             yield line
 
 
-def main(script, tests, verbose=False, stop=True):
+def flatten_opts(opts):
+    return list(param for group in opts for param in shlex.split(group))
+
+
+def main(tests, verbose=False, stop=True):
     """
     Returns 0 on success, 1 on failure
     """
     failures = 0
     logger = gogo.Gogo(__name__, verbose=verbose).logger
-    short_script = p.basename(script)
-    env = TestFileEnvironment(".scripttest")
 
     start = timer()
     for pos, test in enumerate(tests):
         num = pos + 1
         opts, arguments, expected = test
-        joined_opts = " ".join(opts) if opts else ""
-        joined_args = '"%s"' % '" "'.join(arguments) if arguments else ""
-        command = "%s %s %s" % (script, joined_opts, joined_args)
-        short_command = "%s %s %s" % (short_script, joined_opts, joined_args)
-        result = env.run(command, cwd=PARENT_DIR, expect_stderr=True)
-        output = result.stdout
+        resolved_args = list(itertools.chain(flatten_opts(opts), arguments))
+        command = [sys.executable, "-m", "csv2ofx"] + resolved_args
+        short_command = f"csv2ofx {subprocess.list2cmdline(resolved_args)}"
+        proc = subprocess.run(command, capture_output=True, text=True, encoding='utf-8')
+        output = proc.stdout
 
         if isinstance(expected, bool):
             text = StringIO(output).read()
@@ -98,8 +99,6 @@ def main(script, tests, verbose=False, stop=True):
 
 
 if __name__ == "__main__":
-    # pylint: disable=invalid-name
-    csv2ofx = p.join(PARENT_DIR, "bin", "csv2ofx")
 
     def gen_test(raw):
         """Generate test arguments"""
@@ -203,7 +202,11 @@ if __name__ == "__main__":
             "schwab-checking-baltest-case7.csv",
             "schwab-checking-baltest-case7.ofx",
         ),
-        (["-o", "-m amazon", "-e 20230604", SERVER_DATE], "amazon.csv", "amazon.ofx",),
+        (
+            ["-o", "-m amazon", "-e 20230604", SERVER_DATE],
+            "amazon.csv",
+            "amazon.ofx",
+        ),
         (
             ["-o", "-m payoneer", "-e 20220905", SERVER_DATE],
             "payoneer.csv",
@@ -212,9 +215,9 @@ if __name__ == "__main__":
     ]
 
     # for Amazon import; excludes transaction 3/3
-    os.environ['AMAZON_EXCLUDE_CARDS'] = '9876'
+    os.environ["AMAZON_EXCLUDE_CARDS"] = "9876"
     # clear the purchases account if set
-    os.environ.pop('AMAZON_PURCHASES_ACCOUNT', None)
-    assert 'AMAZON_PURCHASES_ACCOUNT' not in os.environ
+    os.environ.pop("AMAZON_PURCHASES_ACCOUNT", None)
+    assert "AMAZON_PURCHASES_ACCOUNT" not in os.environ
 
-    main(csv2ofx, gen_test(PRE_TESTS))
+    main(gen_test(PRE_TESTS))
