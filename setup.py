@@ -54,10 +54,6 @@ setup(
         "Environment :: Console",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Intended Audience :: Developers",
-        "Operating System :: POSIX :: Linux",
-        "Operating System :: MacOS :: MacOS X",
-        "Operating System :: Microsoft :: Windows",
     ],
-    platforms=["MacOS X", "Windows", "Linux"],
     scripts=[p.join("bin", "csv2ofx")],
 )
