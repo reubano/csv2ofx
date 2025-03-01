@@ -49,10 +49,6 @@ setup(
     },
     install_requires=requirements,
     setup_requires=setup_require,
-    test_suite="nose.collector",
-    tests_require=dev_requirements,
-    license=license,
-    zip_safe=False,
     keywords=[project] + description.split(" "),
     classifiers=[
         pkutils.get_license(license),
