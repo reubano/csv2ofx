@@ -1,6 +1,5 @@
 from operator import itemgetter
 
-
 mapping = {
     "has_header": True,
     "is_split": False,

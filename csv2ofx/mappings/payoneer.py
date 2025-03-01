@@ -1,6 +1,6 @@
 import os
-from operator import itemgetter
 from datetime import datetime
+from operator import itemgetter
 
 
 def is_credit(row):

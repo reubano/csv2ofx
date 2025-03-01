@@ -1,6 +1,6 @@
-from operator import itemgetter
-import json
 import hashlib
+import json
+from operator import itemgetter
 
 
 def find_type(transaction):

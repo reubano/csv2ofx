@@ -7,6 +7,7 @@ csv2ofx.mappings.mintapi
 
 Provides a mapping for transactions obtained via mint.com
 """
+
 from operator import itemgetter
 
 mapping = {

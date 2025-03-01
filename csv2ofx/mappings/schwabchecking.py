@@ -1,8 +1,4 @@
-from __future__ import (
-    absolute_import, division, print_function, unicode_literals)
-
 from operator import itemgetter
-import re
 
 mapping = {
     'has_header': True,

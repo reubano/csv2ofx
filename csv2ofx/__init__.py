@@ -18,23 +18,20 @@ Attributes:
 """
 
 import hashlib
-import itertools as it
-
-from functools import partial
 from datetime import datetime as dt
-from operator import itemgetter
 from decimal import Decimal
+from functools import partial
 
-from builtins import *
-from six.moves import filterfalse
-from meza.process import merge, group
 from dateutil.parser import parse
+from meza.process import group, merge
+from six.moves import filterfalse
 
 from . import utils
 
 
 # pylint: disable=invalid-name
-md5 = lambda content: hashlib.md5(content.encode("utf-8")).hexdigest()
+def md5(content):
+    return hashlib.md5(content.encode("utf-8")).hexdigest()
 
 
 class BalanceError(Exception):
@@ -298,7 +295,10 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
             if self.is_split and collapse:
                 # group transactions by `collapse` field and sum the amounts
                 byaccount = group(transactions, collapse)
-                oprtn = lambda values: sum(map(utils.convert_amount, values))
+
+                def oprtn(values):
+                    return sum(map(utils.convert_amount, values))
+
                 merger = partial(merge, pred=self.amount, op=oprtn)
                 trxns = [merger(dicts) for _, dicts in byaccount]
             else:
@@ -327,6 +327,8 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
                 main_pos = 0
 
             # pylint: disable=cell-var-from-loop
-            keyfunc = lambda enum: enum[0] != main_pos
+            def keyfunc(enum):
+                return enum[0] != main_pos
+
             sorted_trxns = sorted(enumerate(filtered_trxns), key=keyfunc)
             yield (grp, main_pos, sorted_trxns)

@@ -17,9 +17,9 @@ Examples:
 Attributes:
     ENCODING (str): Default file encoding.
 """
+
 from datetime import datetime as dt
 
-from builtins import *
 from meza.fntools import chunk, xmlize
 from meza.process import group
 
@@ -246,19 +246,15 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
             # world. In the example above, a <DTPOSTED>20000505120000 would
             # always display as 5/5/00 anywhere the world except for the
             # center of the Pacific Ocean."
-            kwargs.update(
-                {
-                    "start_date": self.start.strftime("%Y%m%d120000"),
-                    "end_date": self.end.strftime("%Y%m%d120000"),
-                }
-            )
+            kwargs.update({
+                "start_date": self.start.strftime("%Y%m%d120000"),
+                "end_date": self.end.strftime("%Y%m%d120000"),
+            })
         else:
-            kwargs.update(
-                {
-                    "start_date": self.start.strftime("%Y%m%d"),
-                    "end_date": self.end.strftime("%Y%m%d"),
-                }
-            )
+            kwargs.update({
+                "start_date": self.start.strftime("%Y%m%d"),
+                "end_date": self.end.strftime("%Y%m%d"),
+            })
 
         content = "\t\t\t<STMTRS>\n"
         content += "\t\t\t\t<CURDEF>%(currency)s</CURDEF>\n" % kwargs
@@ -308,8 +304,9 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
         content += "\t\t\t\t\t\t<TRNAMT>%(amount)0.2f</TRNAMT>\n" % kwargs
         content += "\t\t\t\t\t\t<FITID>%(id)s</FITID>\n" % kwargs
 
-        if (self.ms_money and kwargs.get("check_num")) or \
-           (not self.ms_money and kwargs.get("check_num") is not None):
+        if (self.ms_money and kwargs.get("check_num")) or (
+            not self.ms_money and kwargs.get("check_num") is not None
+        ):
             extra = "\t\t\t\t\t\t<CHECKNUM>%(check_num)s</CHECKNUM>\n"
             content += extra % kwargs
 
@@ -356,20 +353,20 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
         # 6. If more balances are consistent with descending order, use the
         #    first transaction.
         # 7. Don't get ending balance from transactions.
-        if self.latest_date_count == 1:                                 # (1)
+        if self.latest_date_count == 1:  # (1)
             endbaltrxn = self.latest_trxn
-        elif self.dates_ascending and self.dates_descending:            # (2)
+        elif self.dates_ascending and self.dates_descending:  # (2)
             reason = "transactions have both ascending and descending dates"
             endbaltrxn = None
-        elif self.dates_ascending:                                      # (3)
+        elif self.dates_ascending:  # (3)
             endbaltrxn = self.last_trxn
-        elif self.dates_descending:                                     # (4)
+        elif self.dates_descending:  # (4)
             endbaltrxn = self.first_trxn
-        elif self.balances_ascending > self.balances_descending:        # (5)
+        elif self.balances_ascending > self.balances_descending:  # (5)
             endbaltrxn = self.last_trxn
-        elif self.balances_descending > self.balances_ascending:        # (6)
+        elif self.balances_descending > self.balances_ascending:  # (6)
             endbaltrxn = self.first_trxn
-        else:                                                           # (7)
+        else:  # (7)
             reason = "not enough information to determine ending balance"
             endbaltrxn = None
 
@@ -726,12 +723,10 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
             2
         """
         # Note: Both of these could be true for a given transaction pair
-        if self.last_trxn["balance"] + trxn['amount'] == \
-                trxn['balance']:
+        if self.last_trxn["balance"] + trxn['amount'] == trxn['balance']:
             # Balances appear consistent with ascending transaction order
             self.balances_ascending += 1
-        if trxn.get("balance") + self.last_trxn['amount'] == \
-                self.last_trxn['balance']:
+        if trxn.get("balance") + self.last_trxn['amount'] == self.last_trxn['balance']:
             # Balances appear consistent with descending transaction order
             self.balances_descending += 1
 

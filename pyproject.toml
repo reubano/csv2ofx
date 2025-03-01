@@ -24,7 +24,11 @@ classifiers = [
 	"Topic :: Software Development :: Libraries :: Python Modules",
 	"Intended Audience :: Developers",
 ]
-dynamic = ["dependencies"]
+dependencies = [
+	"python-dateutil>=2.7.2,<3.0.0",
+	"requests>=2.18.4,<3.0.0",
+	"meza>=0.47.0,<0.48.0",
+]
 
 [project.urls]
 Source = "https://github.com/reubano/csv2ofx"
@@ -32,8 +36,13 @@ Source = "https://github.com/reubano/csv2ofx"
 [project.scripts]
 csv2ofx = "csv2ofx.main:run"
 
-[tool.setuptools.dynamic]
-dependencies = {file = "requirements.txt"}
+[project.optional-dependencies]
+test = [
+	"pygogo>=0.13.2,<2.0.0",
+	"pytest",
+	"pytest-enabler",
+	"pytest-ruff",
+]
 
 [tool.setuptools]
 packages = ["csv2ofx"]
