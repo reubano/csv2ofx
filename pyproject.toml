@@ -31,6 +31,12 @@ Source = "https://github.com/reubano/csv2ofx"
 [project.scripts]
 csv2ofx = "csv2ofx.main:run"
 
+[project.optional-dependencies]
+test = [
+	"pygogo>=0.13.2,<2.0.0",
+	"pytest",
+]
+
 [tool.setuptools.dynamic]
 version = {attr = "csv2ofx.__version__"}
 dependencies = {file = "requirements.txt"}
