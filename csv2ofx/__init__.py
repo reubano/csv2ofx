@@ -32,15 +32,6 @@ from dateutil.parser import parse
 
 from . import utils
 
-__title__ = "csv2ofx"
-__package_name__ = "csv2ofx"
-__author__ = "Reuben Cummings"
-__description__ = "converts a csv file of transactions to an ofx or qif file"
-__email__ = "reubano@gmail.com"
-__version__ = "0.32.0"
-__license__ = "MIT"
-__copyright__ = "Copyright 2015 Reuben Cummings"
-
 
 # pylint: disable=invalid-name
 md5 = lambda content: hashlib.md5(content.encode("utf-8")).hexdigest()

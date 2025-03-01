@@ -4,6 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "csv2ofx"
+version = "0.32.0"
 description = "converts a csv file of transactions to an ofx or qif file"
 readme = "README.md"
 authors = [
@@ -23,7 +24,7 @@ classifiers = [
 	"Topic :: Software Development :: Libraries :: Python Modules",
 	"Intended Audience :: Developers",
 ]
-dynamic = ["version", "dependencies"]
+dynamic = ["dependencies"]
 
 [project.urls]
 Source = "https://github.com/reubano/csv2ofx"
@@ -32,7 +33,6 @@ Source = "https://github.com/reubano/csv2ofx"
 csv2ofx = "csv2ofx.main:run"
 
 [tool.setuptools.dynamic]
-version = {attr = "csv2ofx.__version__"}
 dependencies = {file = "requirements.txt"}
 
 [tool.setuptools]
