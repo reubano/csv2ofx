@@ -40,13 +40,6 @@ setup(
     download_url=pkutils.get_dl_url(project, user, version),
     packages=find_packages(exclude=["docs", "tests"]),
     include_package_data=True,
-    package_data={
-        "data": ["data/*"],
-        "helpers": ["helpers/*"],
-        "tests": ["tests/*"],
-        "docs": ["docs/*"],
-        "examples": ["examples/*"],
-    },
     install_requires=requirements,
     setup_requires=setup_require,
     keywords=[project] + description.split(" "),
