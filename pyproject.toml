@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "csv2ofx"
-version = "0.32.0"
+version = "0.33.0"
 description = "converts a csv file of transactions to an ofx or qif file"
 readme = "README.md"
 authors = [
