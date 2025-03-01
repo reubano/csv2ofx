@@ -28,15 +28,6 @@ from six.moves import filterfalse
 
 from . import utils
 
-__title__ = "csv2ofx"
-__package_name__ = "csv2ofx"
-__author__ = "Reuben Cummings"
-__description__ = "converts a csv file of transactions to an ofx or qif file"
-__email__ = "reubano@gmail.com"
-__version__ = "0.32.0"
-__license__ = "MIT"
-__copyright__ = "Copyright 2015 Reuben Cummings"
-
 
 # pylint: disable=invalid-name
 def md5(content):
