@@ -34,13 +34,14 @@ try:
 except NameError:
     FileNotFoundError = IOError
 
+import builtins
+
 from dateutil.parser import parse
 from meza.io import IterStringIO, read_csv, write
 
 from . import BalanceError, utils
 from .ofx import OFX
 from .qif import QIF
-import builtins
 
 parser = ArgumentParser(  # pylint: disable=invalid-name
     description="description: csv2ofx converts a csv file to ofx and qif",
@@ -230,7 +231,9 @@ def run():  # noqa: C901
     }
 
     cont = QIF(mapping, **okwargs) if args.qif else OFX(mapping, **okwargs)
-    source = builtins.open(args.source, encoding=args.encoding) if args.source else stdin
+    source = (
+        builtins.open(args.source, encoding=args.encoding) if args.source else stdin
+    )
 
     ckwargs = {
         "has_header": cont.has_header,
@@ -272,7 +275,9 @@ def run():  # noqa: C901
         source.close()
         exit(err)
 
-    dest = builtins.open(args.dest, "w", encoding=args.encoding) if args.dest else stdout
+    dest = (
+        builtins.open(args.dest, "w", encoding=args.encoding) if args.dest else stdout
+    )
 
     try:
         res = write(dest, IterStringIO(content), **kwargs)

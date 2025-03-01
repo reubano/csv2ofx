@@ -8,6 +8,7 @@ tests.test
 Provides scripttests to test csv2ofx CLI functionality.
 """
 
+import builtins
 import itertools
 import os
 import shlex
@@ -19,7 +20,6 @@ from os import path as p
 from timeit import default_timer as timer
 
 import pygogo as gogo
-import builtins
 
 sys.path.append("../csv2ofx")
 
