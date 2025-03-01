@@ -9,8 +9,10 @@ tests.test
 Provides scripttests to test csv2ofx CLI functionality.
 """
 
+import itertools
 import os
 import shlex
+import subprocess
 import sys
 
 from difflib import unified_diff
@@ -20,8 +22,6 @@ from timeit import default_timer as timer
 from builtins import *
 
 import pygogo as gogo
-
-from scripttest import TestFileEnvironment
 
 sys.path.append("../csv2ofx")
 
@@ -50,21 +50,16 @@ def main(tests, verbose=False, stop=True):
     """
     failures = 0
     logger = gogo.Gogo(__name__, verbose=verbose).logger
-    env = TestFileEnvironment(".scripttest")
 
     start = timer()
     for pos, test in enumerate(tests):
         num = pos + 1
         opts, arguments, expected = test
-        joined_opts = " ".join(opts) if opts else ""
-        joined_args = '"%s"' % '" "'.join(arguments) if arguments else ""
-        breakpoint()
-        command = (
-            [sys.executable, "-m", "csv2ofx.main"] + flatten_opts(opts) + arguments
-        )
-        short_command = "csv2ofx %s %s" % (joined_opts, joined_args)
-        result = env.run(command, cwd=PARENT_DIR, expect_stderr=True)
-        output = result.stdout
+        resolved_args = list(itertools.chain(flatten_opts(opts), arguments))
+        command = [sys.executable, "-m", "csv2ofx.main"] + resolved_args
+        short_command = f"csv2ofx {subprocess.list2cmdline(resolved_args)}"
+        proc = subprocess.run(command, capture_output=True, text=True)
+        output = proc.stdout
 
         if isinstance(expected, bool):
             text = StringIO(output).read()
