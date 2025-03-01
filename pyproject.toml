@@ -29,6 +29,7 @@ dependencies = [
 	"requests>=2.18.4,<3.0.0",
 	"meza>=0.47.0,<0.48.0",
 ]
+requires-python = ">=3.9"
 
 [project.urls]
 Source = "https://github.com/reubano/csv2ofx"
