@@ -7,9 +7,10 @@ csv2ofx.mappings.mintapi
 
 Provides a mapping for transactions obtained via mint.com
 """
-from operator import itemgetter
-from csv2ofx.utils import convert_amount
 
+from operator import itemgetter
+
+from csv2ofx.utils import convert_amount
 
 mapping = {
     "is_split": False,

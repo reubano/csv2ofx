@@ -17,32 +17,30 @@ Attributes:
     ENCODING (str): Default file encoding.
 """
 
-from builtins import *
-from meza.fntools import get_separators
-from meza.convert import to_decimal
 from collections import OrderedDict
+
+from meza.convert import to_decimal
+from meza.fntools import get_separators
 
 # NOTE: Because we are testing for substrings, the order we iterate
 # over this dictionary matters (so place strings like "reinvest"
 # above substrings like "invest")
-ACTION_TYPES = OrderedDict(
-    [
-        ("ShrsIn", ("deposit",)),
-        ("ShrsOut", ("withdraw",)),
-        ("ReinvDiv", ("reinvest",)),
+ACTION_TYPES = OrderedDict([
+    ("ShrsIn", ("deposit",)),
+    ("ShrsOut", ("withdraw",)),
+    ("ReinvDiv", ("reinvest",)),
+    (
+        "Buy",
         (
-            "Buy",
-            (
-                "buy",
-                "invest",
-            ),
+            "buy",
+            "invest",
         ),
-        ("Div", ("dividend",)),
-        ("Int", ("interest",)),
-        ("Sell", ("sell",)),
-        ("StkSplit", ("split",)),
-    ]
-)
+    ),
+    ("Div", ("dividend",)),
+    ("Int", ("interest",)),
+    ("Sell", ("sell",)),
+    ("StkSplit", ("split",)),
+])
 
 TRANSFERABLE = {"Buy", "Div", "Int", "Sell"}
 
@@ -144,7 +142,10 @@ def get_max_split(splits, keyfunc):
         >>> get_max_split(splits, itemgetter('amount')) == (0, {'amount': 350})
         True
     """
-    maxfunc = lambda enum: abs(keyfunc(enum[1]))
+
+    def maxfunc(enum):
+        return abs(keyfunc(enum[1]))
+
     return max(enumerate(splits), key=maxfunc)
 
 

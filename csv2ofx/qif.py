@@ -17,7 +17,7 @@ Examples:
 Attributes:
     ENCODING (str): Default file encoding.
 """
-from builtins import *
+
 from meza.fntools import chunk
 from meza.process import group
 
@@ -188,7 +188,7 @@ class QIF(Content):
             >>> trxn == result.replace('\\n', '').replace('\\t', '')
             True
         """
-        date_fmt = kwargs.get("date_fmt", self.date_fmt)
+        kwargs.get("date_fmt", self.date_fmt)
         kwargs.update({"time_stamp": kwargs["date"].strftime("%m/%d/%Y")})
         is_investment = kwargs.get("is_investment")
         is_transaction = not is_investment

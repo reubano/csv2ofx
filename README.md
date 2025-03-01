@@ -3,6 +3,7 @@
 [![GHA](https://github.com/PROJECT_PATH/actions/workflows/main.yml/badge.svg)](https://github.com/PROJECT_PATH/actions?query=workflow%3A%22tests%22)
 [![versions](https://img.shields.io/pypi/pyversions/csv2ofx.svg)](https://pypi.python.org/pypi/csv2ofx)
 [![pypi](https://img.shields.io/pypi/v/csv2ofx.svg)](https://pypi.python.org/pypi/csv2ofx)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 ## INTRODUCTION
 

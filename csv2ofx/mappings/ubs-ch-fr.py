@@ -21,11 +21,12 @@ tricky:
 * The payee is not explicitly provided: it can be in columns "Description 2/3"
 
 """
-from operator import itemgetter
 
 # Financial numbers are expressed as "2'045.56" in de/fr/it_CH (utf8 has some
 # glitches, so we go for the default one)
 import locale
+from operator import itemgetter
+
 locale.setlocale(locale.LC_NUMERIC, 'fr_CH')
 
 __author__ = 'Marco "sphakka" Poleggi'

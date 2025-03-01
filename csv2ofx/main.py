@@ -17,34 +17,31 @@ Attributes:
     ENCODING (str): Default file encoding.
 """
 
-import time
 import itertools as it
+import time
 import traceback
-
-from sys import stdin, stdout, exit
+from argparse import ArgumentParser, RawTextHelpFormatter
+from datetime import datetime as dt
 from importlib import import_module, util
-from pkgutil import iter_modules
+from io import open
+from math import inf
 from operator import itemgetter
 from os import path as p
-from io import open
-from datetime import datetime as dt
-from argparse import RawTextHelpFormatter, ArgumentParser
+from pkgutil import iter_modules
 from pprint import pprint
-from math import inf
+from sys import exit, stdin, stdout
 
 try:
     FileNotFoundError
 except NameError:
     FileNotFoundError = IOError
 
-from builtins import *
 from dateutil.parser import parse
-from meza.io import read_csv, IterStringIO, write
+from meza.io import IterStringIO, read_csv, write
 
 from . import BalanceError, utils
 from .ofx import OFX
 from .qif import QIF
-
 
 parser = ArgumentParser(  # pylint: disable=invalid-name
     description="description: csv2ofx converts a csv file to ofx and qif",
