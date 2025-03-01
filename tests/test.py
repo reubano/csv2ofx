@@ -19,7 +19,6 @@ from difflib import unified_diff
 from os import path as p
 from io import StringIO, open
 from timeit import default_timer as timer
-from builtins import *
 
 import pygogo as gogo
 
