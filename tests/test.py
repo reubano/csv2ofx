@@ -14,10 +14,9 @@ import os
 import shlex
 import subprocess
 import sys
-
 from difflib import unified_diff
-from os import path as p
 from io import StringIO, open
+from os import path as p
 from timeit import default_timer as timer
 
 import pygogo as gogo

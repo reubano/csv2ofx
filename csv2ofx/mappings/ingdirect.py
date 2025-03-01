@@ -8,6 +8,7 @@ csv2ofx.mappings.ingdirect
 Provides a mapping for transactions obtained via ING Direct
 (Australian bank)
 """
+
 from operator import itemgetter
 
 mapping = {

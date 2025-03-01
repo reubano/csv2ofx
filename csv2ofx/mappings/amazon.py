@@ -16,10 +16,9 @@ Honors some environment variables:
    account. If unspecified, defaults to "100000001".
 """
 
-import os
 import functools
+import os
 from operator import itemgetter
-
 
 All = ['']
 """

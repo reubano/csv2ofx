@@ -8,9 +8,10 @@ csv2ofx.mappings.ingdirect
 Provides a mapping for transactions obtained via ING Direct
 (Spanish bank)
 """
-from operator import itemgetter
-import json
+
 import hashlib
+import json
+from operator import itemgetter
 
 
 def find_type(transaction):
@@ -27,10 +28,18 @@ def gen_transaction_id(transaction):
 
 def get_payee(transaction):
     cadena = transaction.get('desc')
-    subcadenas = ['Abono por campaña', 'Devolución Tarjeta', 
-               'Nomina recibida', 'Traspaso recibido', 'Pago en', 
-               'Recibo', 'Reintegro efectivo', 'Transferencia Bizum emitida', 
-               'Transferencia emitida a', 'Transferencia recibida de']
+    subcadenas = [
+        'Abono por campaña',
+        'Devolución Tarjeta',
+        'Nomina recibida',
+        'Traspaso recibido',
+        'Pago en',
+        'Recibo',
+        'Reintegro efectivo',
+        'Transferencia Bizum emitida',
+        'Transferencia emitida a',
+        'Transferencia recibida de',
+    ]
     for subcadena in subcadenas:
         if subcadena in cadena:
             payee = cadena.replace(subcadena, '')
@@ -42,10 +51,18 @@ def get_payee(transaction):
 
 def get_transaction_type(transaction):
     cadena = transaction.get('desc')
-    subcadenas = ['Abono por campaña', 'Devolución Tarjeta', 
-               'Nomina recibida', 'Traspaso recibido', 'Pago en', 
-               'Recibo', 'Reintegro efectivo', 'Transferencia Bizum emitida', 
-               'Transferencia emitida a', 'Transferencia recibida de']
+    subcadenas = [
+        'Abono por campaña',
+        'Devolución Tarjeta',
+        'Nomina recibida',
+        'Traspaso recibido',
+        'Pago en',
+        'Recibo',
+        'Reintegro efectivo',
+        'Transferencia Bizum emitida',
+        'Transferencia emitida a',
+        'Transferencia recibida de',
+    ]
     for subcadena in subcadenas:
         if subcadena in cadena:
             notes = subcadena
@@ -67,4 +84,3 @@ mapping = {
     "class": itemgetter("class"),
     "id": gen_transaction_id,
 }
-
