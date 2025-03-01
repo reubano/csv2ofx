@@ -23,7 +23,12 @@ classifiers = [
 	"Topic :: Software Development :: Libraries :: Python Modules",
 	"Intended Audience :: Developers",
 ]
-dynamic = ["version", "dependencies"]
+dependencies = [
+	"python-dateutil>=2.7.2,<3.0.0",
+	"requests>=2.18.4,<3.0.0",
+	"meza>=0.47.0,<0.48.0",
+]
+dynamic = ["version"]
 
 [project.urls]
 Source = "https://github.com/reubano/csv2ofx"
@@ -33,7 +38,6 @@ csv2ofx = "csv2ofx.main:run"
 
 [tool.setuptools.dynamic]
 version = {attr = "csv2ofx.__version__"}
-dependencies = {file = "requirements.txt"}
 
 [tool.setuptools]
 packages = ["csv2ofx"]
