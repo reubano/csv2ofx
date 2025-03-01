@@ -44,6 +44,14 @@ def filter_payment(row):
     return include and not exclude
 
 
+def filter_pending(row):
+    return row['date'] != 'pending'
+
+
+def filter(row):
+    return filter_pending(row) and filter_payment(row)
+
+
 mapping = {
     'has_header': True,
     'delimiter': ',',
@@ -56,5 +64,5 @@ mapping = {
     'id': itemgetter('order id'),
     'type': 'DEBIT',
     'last_row': -1,
-    'filter': filter_payment,
+    'filter': filter,
 }
