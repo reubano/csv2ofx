@@ -58,7 +58,7 @@ def main(tests, verbose=False, stop=True):
         resolved_args = list(itertools.chain(flatten_opts(opts), arguments))
         command = [sys.executable, "-m", "csv2ofx.main"] + resolved_args
         short_command = f"csv2ofx {subprocess.list2cmdline(resolved_args)}"
-        proc = subprocess.run(command, capture_output=True, text=True)
+        proc = subprocess.run(command, capture_output=True, text=True, encoding='utf-8')
         output = proc.stdout
 
         if isinstance(expected, bool):
