@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # vim: sw=4:ts=4:expandtab
 
 """
@@ -15,11 +14,12 @@ import shlex
 import subprocess
 import sys
 from difflib import unified_diff
-from io import StringIO, open
+from io import StringIO
 from os import path as p
 from timeit import default_timer as timer
 
 import pygogo as gogo
+import builtins
 
 sys.path.append("../csv2ofx")
 
@@ -66,7 +66,7 @@ def main(tests, verbose=False, stop=True):
         elif p.isfile(expected):
             outlines = StringIO(output).readlines()
 
-            with open(expected, encoding="utf-8") as f:
+            with builtins.open(expected, encoding="utf-8") as f:
                 checklines = f.readlines()
         else:
             outlines = StringIO(output).readlines()
@@ -79,7 +79,7 @@ def main(tests, verbose=False, stop=True):
         if diffs:
             failures += 1
             msg = "ERROR! Output from test #%i:\n  %s\n" % (num, short_command)
-            msg += "doesn't match:\n  %s\n" % expected
+            msg += f"doesn't match:\n  {expected}\n"
             msg += diffs if diffs else ""
         else:
             logger.debug(output)
@@ -91,7 +91,7 @@ def main(tests, verbose=False, stop=True):
             break
 
     time = timer() - start
-    logger.info("%s" % "-" * 70)
+    logger.info("{}".format("-") * 70)
     end = "FAILED (failures=%i)" % failures if failures else "OK"
     logger.info("Ran %i scripttests in %0.3fs\n\n%s", num, time, end)
     sys.exit(failures)

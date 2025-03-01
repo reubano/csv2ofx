@@ -1,4 +1,3 @@
-# coding: utf-8
 
 from operator import itemgetter
 
@@ -9,12 +8,12 @@ from operator import itemgetter
 def date_func(trxn):
     # Chop up the ISO date and put it in ridiculous M/D/Y order
     tag = trxn["Datum"].split("-")
-    return "{}/{}/{}".format(tag[1], tag[2], tag[0])
+    return f"{tag[1]}/{tag[2]}/{tag[0]}"
 
 
 def desc_func(trxn):
-    end = " ".join(trxn["Omschrijving-{}".format(n)] for n in range(1, 4))
-    return "{0} - {1}".format(trxn["Naam tegenpartij"], end)
+    end = " ".join(trxn[f"Omschrijving-{n}"] for n in range(1, 4))
+    return "{} - {}".format(trxn["Naam tegenpartij"], end)
 
 
 mapping = {

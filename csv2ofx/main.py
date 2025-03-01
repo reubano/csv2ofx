@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # vim: sw=4:ts=4:expandtab
 
 """
@@ -23,7 +22,6 @@ import traceback
 from argparse import ArgumentParser, RawTextHelpFormatter
 from datetime import datetime as dt
 from importlib import import_module, util
-from io import open
 from math import inf
 from operator import itemgetter
 from os import path as p
@@ -42,6 +40,7 @@ from meza.io import IterStringIO, read_csv, write
 from . import BalanceError, utils
 from .ofx import OFX
 from .qif import QIF
+import builtins
 
 parser = ArgumentParser(  # pylint: disable=invalid-name
     description="description: csv2ofx converts a csv file to ofx and qif",
@@ -206,7 +205,7 @@ def run():  # noqa: C901
     if args.version:
         from . import __version__ as version
 
-        print("v%s" % version)
+        print(f"v{version}")
         exit(0)
 
     if args.list_mappings:
@@ -219,7 +218,7 @@ def run():  # noqa: C901
         module = util.module_from_spec(spec)
         spec.loader.exec_module(module)
     else:
-        module = import_module("csv2ofx.mappings.%s" % args.mapping)
+        module = import_module(f"csv2ofx.mappings.{args.mapping}")
 
     mapping = module.mapping
 
@@ -231,7 +230,7 @@ def run():  # noqa: C901
     }
 
     cont = QIF(mapping, **okwargs) if args.qif else OFX(mapping, **okwargs)
-    source = open(args.source, encoding=args.encoding) if args.source else stdin
+    source = builtins.open(args.source, encoding=args.encoding) if args.source else stdin
 
     ckwargs = {
         "has_header": cont.has_header,
@@ -273,14 +272,14 @@ def run():  # noqa: C901
         source.close()
         exit(err)
 
-    dest = open(args.dest, "w", encoding=args.encoding) if args.dest else stdout
+    dest = builtins.open(args.dest, "w", encoding=args.encoding) if args.dest else stdout
 
     try:
         res = write(dest, IterStringIO(content), **kwargs)
     except KeyError as err:
-        msg = "Field %s is missing from file. Check `mapping` option." % err
+        msg = f"Field {err} is missing from file. Check `mapping` option."
     except TypeError as err:
-        msg = "No data to write. %s. " % str(err)
+        msg = f"No data to write. {str(err)}. "
 
         if args.collapse:
             msg += "Check `start` and `end` options."
@@ -288,10 +287,10 @@ def run():  # noqa: C901
             msg += "Try again with `-c` option."
     except ValueError as err:
         # csv2ofx called with no arguments or broken mapping
-        msg = "Possible mapping problem: %s. " % str(err)
+        msg = f"Possible mapping problem: {str(err)}. "
         parser.print_help()
     except BalanceError as err:
-        msg = "%s.  Try again with `--ending-balance` option." % err
+        msg = f"{err}.  Try again with `--ending-balance` option."
     except Exception:  # pylint: disable=broad-except
         msg = 1
         traceback.print_exc()

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # vim: sw=4:ts=4:expandtab
 # pylint: disable=no-self-use
 
@@ -46,7 +45,7 @@ class OFX(Content):
             <csv2ofx.ofx.OFX object at 0x...>
         """
         # TODO: Add timezone info  # pylint: disable=fixme
-        super(OFX, self).__init__(mapping, **kwargs)
+        super().__init__(mapping, **kwargs)
         self.resp_type = "INTRATRNRS" if self.split_account else "STMTTRNRS"
         self.def_type = kwargs.get("def_type")
         self.prev_group = None
@@ -125,12 +124,12 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
         content += "\t\t\t\t<CODE>0</CODE>\n"
         content += "\t\t\t\t<SEVERITY>INFO</SEVERITY>\n"
         content += "\t\t\t</STATUS>\n"
-        content += "\t\t\t<DTSERVER>%s</DTSERVER>\n" % time_stamp
-        content += "\t\t\t<LANGUAGE>%(language)s</LANGUAGE>\n" % kwargs
+        content += f"\t\t\t<DTSERVER>{time_stamp}</DTSERVER>\n"
+        content += "\t\t\t<LANGUAGE>{language}</LANGUAGE>\n".format(**kwargs)
         content += "\t\t</SONRS>\n"
         content += "\t</SIGNONMSGSRSV1>\n"
         content += "\t<BANKMSGSRSV1>\n"
-        content += "\t\t<%s>\n" % self.resp_type
+        content += f"\t\t<{self.resp_type}>\n"
         if self.ms_money:
             content += "\t\t\t<TRNUID>1</TRNUID>\n"
         else:
@@ -177,13 +176,13 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
             ...     'balance': None}
             True
         """
-        data = super(OFX, self).transaction_data(trxn)
+        data = super().transaction_data(trxn)
         args = [self.account_types, self.def_type]
         split = data["split_account"]
         sa_type = utils.get_account_type(split, *args) if split else None
         memo = data.get("memo")
         _class = data.get("class")
-        memo = "%s %s" % (memo, _class) if memo and _class else memo or _class
+        memo = f"{memo} {_class}" if memo and _class else memo or _class
         payee = data.get("payee")
         date = data.get("date")
         if self.ms_money:
@@ -257,15 +256,15 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
             })
 
         content = "\t\t\t<STMTRS>\n"
-        content += "\t\t\t\t<CURDEF>%(currency)s</CURDEF>\n" % kwargs
+        content += "\t\t\t\t<CURDEF>{currency}</CURDEF>\n".format(**kwargs)
         content += "\t\t\t\t<BANKACCTFROM>\n"
-        content += "\t\t\t\t\t<BANKID>%(bank_id)s</BANKID>\n" % kwargs
-        content += "\t\t\t\t\t<ACCTID>%(account_id)s</ACCTID>\n" % kwargs
-        content += "\t\t\t\t\t<ACCTTYPE>%(account_type)s</ACCTTYPE>\n" % kwargs
+        content += "\t\t\t\t\t<BANKID>{bank_id}</BANKID>\n".format(**kwargs)
+        content += "\t\t\t\t\t<ACCTID>{account_id}</ACCTID>\n".format(**kwargs)
+        content += "\t\t\t\t\t<ACCTTYPE>{account_type}</ACCTTYPE>\n".format(**kwargs)
         content += "\t\t\t\t</BANKACCTFROM>\n"
         content += "\t\t\t\t<BANKTRANLIST>\n"
-        content += "\t\t\t\t\t<DTSTART>%(start_date)s</DTSTART>\n" % kwargs
-        content += "\t\t\t\t\t<DTEND>%(end_date)s</DTEND>\n" % kwargs
+        content += "\t\t\t\t\t<DTSTART>{start_date}</DTSTART>\n".format(**kwargs)
+        content += "\t\t\t\t\t<DTEND>{end_date}</DTEND>\n".format(**kwargs)
         return content
 
     def transaction(self, **kwargs):
@@ -299,10 +298,10 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
         time_stamp = kwargs["date"].strftime("%Y%m%d%H%M%S")  # yyyymmddhhmmss
 
         content = "\t\t\t\t\t<STMTTRN>\n"
-        content += "\t\t\t\t\t\t<TRNTYPE>%(type)s</TRNTYPE>\n" % kwargs
-        content += "\t\t\t\t\t\t<DTPOSTED>%s</DTPOSTED>\n" % time_stamp
-        content += "\t\t\t\t\t\t<TRNAMT>%(amount)0.2f</TRNAMT>\n" % kwargs
-        content += "\t\t\t\t\t\t<FITID>%(id)s</FITID>\n" % kwargs
+        content += "\t\t\t\t\t\t<TRNTYPE>{type}</TRNTYPE>\n".format(**kwargs)
+        content += f"\t\t\t\t\t\t<DTPOSTED>{time_stamp}</DTPOSTED>\n"
+        content += "\t\t\t\t\t\t<TRNAMT>{amount:0.2f}</TRNAMT>\n".format(**kwargs)
+        content += "\t\t\t\t\t\t<FITID>{id}</FITID>\n".format(**kwargs)
 
         if (self.ms_money and kwargs.get("check_num")) or (
             not self.ms_money and kwargs.get("check_num") is not None
@@ -311,10 +310,10 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
             content += extra % kwargs
 
         if kwargs.get("payee") is not None:
-            content += "\t\t\t\t\t\t<NAME>%(payee)s</NAME>\n" % kwargs
+            content += "\t\t\t\t\t\t<NAME>{payee}</NAME>\n".format(**kwargs)
 
         if kwargs.get("memo"):
-            content += "\t\t\t\t\t\t<MEMO>%(memo)s</MEMO>\n" % kwargs
+            content += "\t\t\t\t\t\t<MEMO>{memo}</MEMO>\n".format(**kwargs)
 
         content += "\t\t\t\t\t</STMTTRN>\n"
         return content
@@ -378,12 +377,12 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
 
         if balamt is not None:
             content += "\t\t\t\t<LEDGERBAL>\n"
-            content += "\t\t\t\t\t<BALAMT>%0.2f</BALAMT>\n" % balamt
-            content += "\t\t\t\t\t<DTASOF>%s</DTASOF>\n" % time_stamp
+            content += f"\t\t\t\t\t<BALAMT>{balamt:0.2f}</BALAMT>\n"
+            content += f"\t\t\t\t\t<DTASOF>{time_stamp}</DTASOF>\n"
             content += "\t\t\t\t</LEDGERBAL>\n"
         elif self.ms_money:
             # MS Money import fails if <LEDGERBAL> is missing
-            raise BalanceError("Ending balance not specified and %s" % reason)
+            raise BalanceError(f"Ending balance not specified and {reason}")
 
         content += "\t\t\t</STMTRS>\n"
         return content
@@ -420,14 +419,14 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
             True
         """
         content = "\t\t\t<INTRARS>\n"
-        content += "\t\t\t\t<CURDEF>%(currency)s</CURDEF>\n" % kwargs
-        content += "\t\t\t\t<SRVRTID>%(id)s</SRVRTID>\n" % kwargs
+        content += "\t\t\t\t<CURDEF>{currency}</CURDEF>\n".format(**kwargs)
+        content += "\t\t\t\t<SRVRTID>{id}</SRVRTID>\n".format(**kwargs)
         content += "\t\t\t\t<XFERINFO>\n"
-        content += "\t\t\t\t\t<TRNAMT>%(amount)0.2f</TRNAMT>\n" % kwargs
+        content += "\t\t\t\t\t<TRNAMT>{amount:0.2f}</TRNAMT>\n".format(**kwargs)
         content += "\t\t\t\t\t<BANKACCTFROM>\n"
-        content += "\t\t\t\t\t\t<BANKID>%(bank_id)s</BANKID>\n" % kwargs
-        content += "\t\t\t\t\t\t<ACCTID>%(account_id)s</ACCTID>\n" % kwargs
-        content += "\t\t\t\t\t\t<ACCTTYPE>%(account_type)s" % kwargs
+        content += "\t\t\t\t\t\t<BANKID>{bank_id}</BANKID>\n".format(**kwargs)
+        content += "\t\t\t\t\t\t<ACCTID>{account_id}</ACCTID>\n".format(**kwargs)
+        content += "\t\t\t\t\t\t<ACCTTYPE>{account_type}".format(**kwargs)
         content += "</ACCTTYPE>\n"
         content += "\t\t\t\t\t</BANKACCTFROM>\n"
         return content
@@ -479,19 +478,19 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
             True
         """
         content = "\t\t\t\t\t<BANKACCTTO>\n"
-        content += "\t\t\t\t\t\t<BANKID>%(bank_id)s</BANKID>\n" % kwargs
+        content += "\t\t\t\t\t\t<BANKID>{bank_id}</BANKID>\n".format(**kwargs)
 
         if kwargs.get("split_account"):
-            content += "\t\t\t\t\t\t<ACCTID>%(split_account_id)s" % kwargs
+            content += "\t\t\t\t\t\t<ACCTID>{split_account_id}".format(**kwargs)
         else:
-            content += "\t\t\t\t\t\t<ACCTID>%(account_id)s" % kwargs
+            content += "\t\t\t\t\t\t<ACCTID>{account_id}".format(**kwargs)
 
         content += "</ACCTID>\n"
 
         if kwargs.get("split_account"):
-            content += "\t\t\t\t\t\t<ACCTTYPE>%(split_account_type)s" % kwargs
+            content += "\t\t\t\t\t\t<ACCTTYPE>{split_account_type}".format(**kwargs)
         else:
-            content += "\t\t\t\t\t\t<ACCTTYPE>%(account_type)s" % kwargs
+            content += "\t\t\t\t\t\t<ACCTTYPE>{account_type}".format(**kwargs)
 
         content += "</ACCTTYPE>\n"
         content += "\t\t\t\t\t</BANKACCTTO>\n"
@@ -515,7 +514,7 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
         """
         time_stamp = date.strftime("%Y%m%d%H%M%S")  # yyyymmddhhmmss
         content = "\t\t\t\t</XFERINFO>\n"
-        content += "\t\t\t\t<DTPOSTED>%s</DTPOSTED>\n" % time_stamp
+        content += f"\t\t\t\t<DTPOSTED>{time_stamp}</DTPOSTED>\n"
         content += "\t\t\t</INTRARS>\n"
         return content
 
@@ -544,7 +543,7 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
         else:
             content = ""
 
-        content += "\t\t</%s>\n\t</BANKMSGSRSV1>\n</OFX>\n" % self.resp_type
+        content += f"\t\t</{self.resp_type}>\n\t</BANKMSGSRSV1>\n</OFX>\n"
         yield content
 
     def gen_body(self, data):  # noqa: C901
@@ -554,7 +553,7 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
 
             if self.is_split and datum["len"] > 2:
                 # OFX doesn't support more than 2 splits
-                raise TypeError("Group %s has too many splits.\n" % grp)
+                raise TypeError(f"Group {grp} has too many splits.\n")
 
             trxn_data = self.transaction_data(datum["trxn"])
             split_like = self.is_split or self.split_account
@@ -740,5 +739,4 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
             cleansed = [{k: next(xmlize([v])) for k, v in c.items()} for c in chnk]
             keyfunc = self.id if self.is_split else self.account
 
-            for gee in group(cleansed, keyfunc):
-                yield gee
+            yield from group(cleansed, keyfunc)

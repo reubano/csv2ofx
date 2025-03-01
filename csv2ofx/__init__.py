@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # vim: sw=4:ts=4:expandtab
 
 """
@@ -40,7 +39,7 @@ class BalanceError(Exception):
     pass
 
 
-class Content(object):  # pylint: disable=too-many-instance-attributes
+class Content:  # pylint: disable=too-many-instance-attributes
     """A transaction holding object"""
 
     def __init__(self, mapping=None, **kwargs):
@@ -238,7 +237,7 @@ class Content(object):  # pylint: disable=too-many-instance-attributes
         payee = self.get("payee", trxn)
         desc = self.get("desc", trxn)
         notes = self.get("notes", trxn)
-        memo = "%s %s" % (desc, notes) if desc and notes else desc or notes
+        memo = f"{desc} {notes}" if desc and notes else desc or notes
         check_num = self.get("check_num", trxn)
         details = "".join(filter(None, [date, raw_amount, payee, memo]))
         category = self.get("category", trxn, "")

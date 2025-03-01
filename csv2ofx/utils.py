@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # vim: sw=4:ts=4:expandtab
 
 """
@@ -102,7 +101,7 @@ def get_action(category, transfer=False, def_action="ShrsIn"):
             break
 
     if transfer and _type in TRANSFERABLE:
-        return "%sX" % _type
+        return f"{_type}X"
     else:
         return _type
 
