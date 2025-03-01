@@ -23,6 +23,7 @@ extend-select = [
 	"UP043", # unnecessary-default-type-args
 
 	# local
+	"U",
 ]
 ignore = [
 	# upstream

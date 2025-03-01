@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # vim: sw=4:ts=4:expandtab
 
 """
@@ -9,13 +8,14 @@ tests.test
 Provides scripttests to test csv2ofx CLI functionality.
 """
 
+import builtins
 import itertools
 import os
 import shlex
 import subprocess
 import sys
 from difflib import unified_diff
-from io import StringIO, open
+from io import StringIO
 from os import path as p
 from timeit import default_timer as timer
 
@@ -66,7 +66,7 @@ def main(tests, verbose=False, stop=True):
         elif p.isfile(expected):
             outlines = StringIO(output).readlines()
 
-            with open(expected, encoding="utf-8") as f:
+            with builtins.open(expected, encoding="utf-8") as f:
                 checklines = f.readlines()
         else:
             outlines = StringIO(output).readlines()
@@ -78,12 +78,12 @@ def main(tests, verbose=False, stop=True):
 
         if diffs:
             failures += 1
-            msg = "ERROR! Output from test #%i:\n  %s\n" % (num, short_command)
-            msg += "doesn't match:\n  %s\n" % expected
+            msg = f"ERROR! Output from test #{num}:\n  {short_command}\n"
+            msg += f"doesn't match:\n  {expected}\n"
             msg += diffs if diffs else ""
         else:
             logger.debug(output)
-            msg = "Scripttest #%i: %s ... ok" % (num, short_command)
+            msg = f"Scripttest #{num}: {short_command} ... ok"
 
         logger.info(msg)
 
@@ -91,9 +91,9 @@ def main(tests, verbose=False, stop=True):
             break
 
     time = timer() - start
-    logger.info("%s" % "-" * 70)
-    end = "FAILED (failures=%i)" % failures if failures else "OK"
-    logger.info("Ran %i scripttests in %0.3fs\n\n%s", num, time, end)
+    logger.info("{}".format("-") * 70)
+    end = f"FAILED (failures={failures})" if failures else "OK"
+    logger.info(f"Ran {num} scripttests in {time:.3f}s\n\n{end}")
     sys.exit(failures)
 
 

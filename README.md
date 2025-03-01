@@ -7,17 +7,17 @@
 
 ## INTRODUCTION
 
-[csv2ofx](http://github.com/reubano/csv2ofx) is a [Python library](#library-examples) and [command line interface program](#cli-examples) that converts CSV files to OFX and QIF files for importing into GnuCash or similar financial accounting programs. csv2ofx has built in support for importing csv files from mint, yoodlee, and xero.
+[csv2ofx](http://github.com/reubano/csv2ofx) is a [Python library](#library-examples) and [command line interface program](#cli-examples) that converts CSV files to OFX and QIF files for importing into GnuCash or Moneydance or similar financial accounting programs. csv2ofx has built in support for importing csv files from mint, yoodlee, and xero.
 
 ## Requirements
 
-csv2ofx has been tested and is known to work on Python 3.7, 3.8, and 3.9; and PyPy3.7.
+csv2ofx is pure Python and is [tested](https://github.com/PROJECT_PATH/actions?query=workflow%3A%22tests%22) on a number of Pythons and platforms.
 
 ## INSTALLATION
 
-(You are using a [virtualenv](http://www.virtualenv.org/en/latest/index.html), right?)
+  pip install csv2ofx
 
-  sudo pip install csv2ofx
+(recommended in a [virtualenv](https://virtualenv.pypa.io/en/latest/))
 
 ## Usage
 
@@ -84,40 +84,34 @@ positional arguments:
   source                the source csv file (default: stdin)
   dest                  the output file (default: stdout)
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  -a TYPE, --account TYPE
-                        default account type 'CHECKING' for OFX and 'Bank' for QIF.
-  -e DATE, --end DATE   end date (default: today)
-  -B BALANCE, --ending-balance BALANCE
+  -a, --account TYPE    default account type 'CHECKING' for OFX and 'Bank' for QIF.
+  -e, --end DATE        end date (default: today)
+  -B, --ending-balance BALANCE
                         ending balance (default: None)
-  -l LANGUAGE, --language LANGUAGE
+  -l, --language LANGUAGE
                         the language (default: ENG)
-  -s DATE, --start DATE
-                        the start date
+  -s, --start DATE      the start date
   -y, --dayfirst        interpret the first value in ambiguous dates (e.g. 01/05/09) as the day
-  -m MAPPING_NAME, --mapping MAPPING_NAME
+  -m, --mapping MAPPING_NAME
                         the account mapping (default: default)
-  -x FILE_PATH, --custom FILE_PATH
+  -x, --custom FILE_PATH
                         path to a custom mapping file
-  -c FIELD_NAME, --collapse FIELD_NAME
+  -c, --collapse FIELD_NAME
                         field used to combine transactions within a split for double entry statements
-  -C ROWS, --chunksize ROWS
-                        number of rows to process at a time (default: 2 ** 14)
-  -r ROWS, --first-row ROWS
-                        the first row to process (zero based)
-  -R ROWS, --last-row ROWS
-                        the last row to process (zero based, negative values count from the end)
-  -O COLS, --first-col COLS
-                        the first column to process (zero based)
+  -C, --chunksize ROWS  number of rows to process at a time (default: 2 ** 14)
+  -r, --first-row ROWS  the first row to process (zero based)
+  -R, --last-row ROWS   the last row to process (zero based, negative values count from the end)
+  -O, --first-col COLS  the first column to process (zero based)
   -L, --list-mappings   list the available mappings
   -V, --version         show version and exit
   -q, --qif             enables 'QIF' output instead of 'OFX'
   -M, --ms-money        enables MS Money compatible 'OFX' output
   -o, --overwrite       overwrite destination file if it exists
-  -D DATE, --server-date DATE
+  -D, --server-date DATE
                         OFX server date (default: source file mtime)
-  -E ENCODING, --encoding ENCODING
+  -E, --encoding ENCODING
                         File encoding (default: utf-8)
   -d, --debug           display the options and arguments passed to the parser
   -v, --verbose         verbose output
@@ -162,7 +156,7 @@ shipped `utilz/csvtrim` shell script. F.i., with mapping `ubs-ch-fr`:
 
 ### Code modification
 
-If you would like to import csv files with field names different from the default, you can modify the mapping file or create your own. New mappings must be placed in the `csv2ofx/mappings` folder (otherwise you must use the ). The mapping object consists of a dictionary whose keys are OFX/QIF attributes and whose values are functions which should return the corresponding value from a record (csv row). The mapping function will take in a record, e.g.,
+To import csv files with field names different from the default, either modify the mapping file or create your own. New mappings must be placed in the `csv2ofx/mappings` folder. The mapping object consists of a dictionary whose keys are OFX/QIF attributes and whose values are functions that should return the corresponding value from a record (csv row). The mapping function will take in a record, e.g.,
 
 ```python
 {'Account': 'savings 2', 'Date': '1/3/15', 'Amount': 5000}
@@ -236,42 +230,38 @@ attribute | description | default value | example
 
 ## Scripts
 
-csv2ofx comes with a built in task manager `manage.py`.
+### Running tests
 
-### Setup
-
-  pip install -r dev-requirements.txt
-
-### Examples
-
-*Run python linter and nose tests*
-
-```bash
-manage lint
-manage test
-```
+  tox
 
 ## Contributing
 
-Please mimic the coding style/conventions used in this repo. If you add new classes or functions, please add the appropriate doc blocks with examples. Also, make sure the python linter and nose tests pass.
+Please mimic the coding style/conventions used in this repo. When adding new classes or functions, please add the appropriate doc blocks with examples.
 
 Ready to contribute? Here's how:
 
 1. Fork and clone.
 
 ```bash
-git clone git@github.com:<your_username>/csv2ofx.git
+git clone https://github.com/reubano/csv2ofx
 cd csv2ofx
 ```
 
-2. Setup a new [virtualenv](http://www.virtualenv.org/en/latest/index.html)
+2. Run tox.
+
+Either install [tox](https://tox.wiki) or install [pipx](https://pipx.pypa.io) and use it to `pipx run tox`:
 
 ```bash
-mkvirtualenv -i pkutils csv2ofx
-activate csv2ofx
-python setup.py develop
-pip install -r dev-requirements.txt
+tox
 ```
+
+Tox will run the tests and other checks (linter) in different Python environments. It will create Python environments in `.tox/*` (e.g. `.tox/py313`) and install csv2ofx there. To run in just the main python environment:
+
+```bash
+tox -e py
+```
+
+Feel free to activate one of those environments or create a separate one.
 
 3. Create a branch for local development
 
@@ -279,7 +269,7 @@ pip install -r dev-requirements.txt
 git checkout -b name-of-your-bugfix-or-feature
 ```
 
-4. Make your changes, run linter and tests (see above), and submit a pull request through the GitHub website.
+4. Make your changes, run tests (see above), and submit a pull request through the GitHub website.
 
 ### Adding Mappings
 
@@ -288,7 +278,7 @@ How to contribute a mapping:
 1. Add the mapping in `csv2ofx/mappings/`
 2. Add a simple example CSV file in `data/test/`.
 3. Add the OFX or QIF file that results from the mapping and example CSV file in `data/converted/`.
-4. Add a `csv2ofx` call for your mapping to the tests in `tests/test.py`, in `PRE_TESTS`. If you added an OFX (not QIF) converted file, pay attention to the `-e` (end date) and `-D` (server date) arguments in the test- otherwise tests may pass on your workstation and fail on the build server.
+4. Add a `csv2ofx` call for your mapping to the tests in `tests/test.py`, in `PRE_TESTS`. When adding an OFX (not QIF) converted file, pay attention to the `-e` (end date) and `-D` (server date) arguments in the test- otherwise tests may pass locally but fail on the build server.
 5. Ensure your test succeeds (see above).
 
 ## License

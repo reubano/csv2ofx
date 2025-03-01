@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 # vim: sw=4:ts=4:expandtab
 # pylint: disable=no-self-use
 
@@ -48,7 +47,7 @@ class QIF(Content):
         """
         self.date_fmt = date_fmt
 
-        super(QIF, self).__init__(mapping, date_fmt=date_fmt, **kwargs)
+        super().__init__(mapping, date_fmt=date_fmt, **kwargs)
         self.def_type = kwargs.get("def_type")
         self.prev_account = None
         self.prev_group = None
@@ -102,13 +101,13 @@ class QIF(Content):
             ...     'balance': None}
             True
         """
-        data = super(QIF, self).transaction_data(tr)
+        data = super().transaction_data(tr)
         args = [self.account_types, self.def_type]
         memo = data.get("memo")
         _class = data.get("class")
 
         if memo and _class:
-            split_memo = "%s %s" % (memo, _class)
+            split_memo = f"{memo} {_class}"
         else:
             split_memo = memo or _class
 
@@ -141,7 +140,7 @@ class QIF(Content):
             >>> start == result.replace('\\n', '').replace('\\t', '')
             True
         """
-        return "!Account\nN%(account)s\nT%(account_type)s\n^\n" % kwargs
+        return "!Account\nN{account}\nT{account_type}\n^\n".format(**kwargs)
 
     def transaction_start(self, account_type=None, **kwargs):
         """Gets QIF format transaction start content
@@ -158,7 +157,7 @@ class QIF(Content):
             >>> '!Type:Bank' == result.replace('\\n', '').replace('\\t', '')
             True
         """
-        return "!Type:%s\n" % account_type
+        return f"!Type:{account_type}\n"
 
     def transaction(self, **kwargs):
         """Gets QIF format transaction content
@@ -197,32 +196,32 @@ class QIF(Content):
             kwargs.update({"amount": kwargs["amount"] * -1})
 
         if is_transaction and kwargs.get("check_num"):
-            content = "N%(check_num)s\n" % kwargs
+            content = "N{check_num}\n".format(**kwargs)
         else:
             content = ""
 
-        content += "D%(time_stamp)s\n" % kwargs
+        content += "D{time_stamp}\n".format(**kwargs)
 
         if is_investment:
             if kwargs.get("inv_split_account"):
-                content += "N%(x_action)s\n" % kwargs
+                content += "N{x_action}\n".format(**kwargs)
             else:
-                content += "N%(action)s\n" % kwargs
+                content += "N{action}\n".format(**kwargs)
 
-            content += "Y%(symbol)s\n" % kwargs
-            content += "I%(price)s\n" % kwargs
-            content += "Q%(shares)s\n" % kwargs
+            content += "Y{symbol}\n".format(**kwargs)
+            content += "I{price}\n".format(**kwargs)
+            content += "Q{shares}\n".format(**kwargs)
             content += "Cc\n"
         else:
-            content += "P%(payee)s\n" % kwargs if kwargs.get("payee") else ""
-            content += "L%(class)s\n" % kwargs if kwargs.get("class") else ""
+            content += "P{payee}\n".format(**kwargs) if kwargs.get("payee") else ""
+            content += "L{class}\n".format(**kwargs) if kwargs.get("class") else ""
 
-        content += "M%(memo)s\n" % kwargs if kwargs.get("memo") else ""
+        content += "M{memo}\n".format(**kwargs) if kwargs.get("memo") else ""
 
         if is_investment and kwargs.get("commission"):
-            content += "O%(commission)s\n" % kwargs
+            content += "O{commission}\n".format(**kwargs)
 
-        content += "T%(amount)0.2f\n" % kwargs
+        content += "T{amount:0.2f}\n".format(**kwargs)
         return content
 
     def split_content(self, **kwargs):
@@ -259,20 +258,20 @@ class QIF(Content):
         is_transaction = not is_investment
 
         if is_investment and kwargs.get("inv_split_account"):
-            content = "L%(inv_split_account)s\n" % kwargs
+            content = "L{inv_split_account}\n".format(**kwargs)
         elif is_investment and self.is_split:
-            content = "L%(account)s\n" % kwargs
+            content = "L{account}\n".format(**kwargs)
         elif is_transaction and kwargs.get("split_account"):
-            content = "S%(split_account)s\n" % kwargs
+            content = "S{split_account}\n".format(**kwargs)
         elif is_transaction:
-            content = "S%(account)s\n" % kwargs
+            content = "S{account}\n".format(**kwargs)
         else:
             content = ""
 
         if content and kwargs.get("split_memo"):
-            content += "E%(split_memo)s\n" % kwargs
+            content += "E{split_memo}\n".format(**kwargs)
 
-        content += "$%(amount)0.2f\n" % kwargs if content else ""
+        content += "${amount:0.2f}\n".format(**kwargs) if content else ""
         return content
 
     def transaction_end(self):
@@ -333,5 +332,4 @@ class QIF(Content):
         for chnk in chunk(records, chunksize):
             keyfunc = self.id if self.is_split else self.account
 
-            for gee in group(chnk, keyfunc):
-                yield gee
+            yield from group(chnk, keyfunc)

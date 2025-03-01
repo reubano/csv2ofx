@@ -26,13 +26,13 @@ A special value matching all cards.
 """
 
 
-@functools.lru_cache()
+@functools.lru_cache
 def exclude_cards():
     setting = os.environ.get('AMAZON_EXCLUDE_CARDS', None)
     return setting.split(',') if setting else []
 
 
-@functools.lru_cache()
+@functools.lru_cache
 def include_cards():
     setting = os.environ.get('AMAZON_INCLUDE_CARDS', None)
     return setting.split(',') if setting else All
