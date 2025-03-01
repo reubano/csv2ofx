@@ -188,7 +188,7 @@ mapping = {
     'amount': lambda r: r['Amount'] * 2,
     'first_row': 1,
     'last_row': 10,
-    'filter': lambda r: r['Amount'] > 10,
+    'filter': lambda r: float(r['Amount']) > 10,
 }
 ```
 
@@ -231,7 +231,7 @@ attribute | description | default value | example
 `first_row`|the first row to process (zero based)|0|2
 `last_row`|the last row to process (zero based, negative values count from the end)|inf|-2
 `first_col`|the first column to process (zero based)|0|2
-`filter`|keep transactions for which function returns true||lambda tr: tr['amount'] > 10
+`filter`|keep transactions for which function returns true||lambda tr: float(tr['amount']) > 10
 
 ## Scripts
 
