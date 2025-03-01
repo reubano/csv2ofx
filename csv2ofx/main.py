@@ -292,7 +292,7 @@ def run():  # noqa: C901
             msg += "Try again with `-c` option."
     except ValueError as err:
         # csv2ofx called with no arguments or broken mapping
-        msg = f"Possible mapping problem: {str(err)}. "
+        msg = f"Possible mapping problem: {str(err)}."
         parser.print_help()
     except BalanceError as err:
         msg = f"{err}.  Try again with `--ending-balance` option."
