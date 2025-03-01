@@ -78,12 +78,12 @@ def main(tests, verbose=False, stop=True):
 
         if diffs:
             failures += 1
-            msg = "ERROR! Output from test #%i:\n  %s\n" % (num, short_command)
+            msg = f"ERROR! Output from test #{num}:\n  {short_command}\n"
             msg += f"doesn't match:\n  {expected}\n"
             msg += diffs if diffs else ""
         else:
             logger.debug(output)
-            msg = "Scripttest #%i: %s ... ok" % (num, short_command)
+            msg = f"Scripttest #{num}: {short_command} ... ok"
 
         logger.info(msg)
 
@@ -92,8 +92,8 @@ def main(tests, verbose=False, stop=True):
 
     time = timer() - start
     logger.info("{}".format("-") * 70)
-    end = "FAILED (failures=%i)" % failures if failures else "OK"
-    logger.info("Ran %i scripttests in %0.3fs\n\n%s", num, time, end)
+    end = f"FAILED (failures={failures})" if failures else "OK"
+    logger.info(f"Ran {num} scripttests in {time:.3f}s\n\n{end}")
     sys.exit(failures)
 
 
