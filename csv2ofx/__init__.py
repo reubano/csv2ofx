@@ -20,10 +20,10 @@ import hashlib
 from datetime import datetime as dt
 from decimal import Decimal
 from functools import partial
+from itertools import filterfalse
 
 from dateutil.parser import parse
 from meza.process import group, merge
-from six.moves import filterfalse
 
 from . import utils
 
