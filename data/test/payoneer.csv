@@ -1,0 +1,3 @@
+Transaction Date,Transaction Time,Time Zone,Transaction ID,Description,Credit Amount,Debit Amount,Currency,Transfer Amount,Transfer Amount Currency,Status,Running Balance,Additional Description,Store Name,Source,Target,Reference ID
+05/03/2021,12:31:46,UTC,123,Transaction description,,100,USD,,,Completed,200,Payoneer additional description,,payer,payee,
+05/03/2021,12:08:31,UTC,1234,Transaction description,120,,USD,,,Completed,300,Payoneer additional description,,payer,payee,
