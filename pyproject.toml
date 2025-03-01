@@ -45,4 +45,4 @@ test = [
 ]
 
 [tool.setuptools]
-packages = ["csv2ofx"]
+packages = ["csv2ofx", "csv2ofx.mappings"]
