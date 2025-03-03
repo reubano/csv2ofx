@@ -166,8 +166,8 @@ class Content:  # pylint: disable=too-many-instance-attributes
         return all(
             filter_(trxn)
             for filter_ in (
-                self.in_range,
                 self.filter,
+                self.in_range,
             )
         )
 
