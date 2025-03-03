@@ -163,8 +163,16 @@ class Content:  # pylint: disable=too-many-instance-attributes
             >>> Content(mapping, start=dt(2013, 1, 1)).include(trxn)
             False
         """
-        keep = self.end >= self.parse_date(trxn) >= self.start
-        return keep and self.filter(trxn)
+        return all(
+            filter_(trxn)
+            for filter_ in (
+                self.in_range,
+                self.filter,
+            )
+        )
+
+    def in_range(self, trxn):
+        return self.start <= self.parse_date(trxn) <= self.end
 
     def convert_amount(self, trxn):
         """Converts a string amount into a number
