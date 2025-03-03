@@ -20,7 +20,6 @@ import hashlib
 from datetime import datetime as dt
 from decimal import Decimal
 from functools import partial
-from itertools import filterfalse
 
 from dateutil.parser import parse
 from meza.process import group, merge
@@ -143,9 +142,10 @@ class Content:  # pylint: disable=too-many-instance-attributes
 
         return value
 
-    def skip_transaction(self, trxn):
-        """Determines whether a transaction should be skipped (isn't in the
-        specified date range, etc.)
+    def include(self, trxn):
+        """Determines whether a transaction should be included.
+
+        Included if within the specified date range and any custom filter.
 
         Args:
             trxn (dict): The transaction.
@@ -158,13 +158,13 @@ class Content:  # pylint: disable=too-many-instance-attributes
             >>> from datetime import datetime as dt
             >>>
             >>> trxn = {'Date': '06/12/10', 'Amount': 1000.00}
-            >>> Content(mapping, start=dt(2010, 1, 1)).skip_transaction(trxn)
-            False
-            >>> Content(mapping, start=dt(2013, 1, 1)).skip_transaction(trxn)
+            >>> Content(mapping, start=dt(2010, 1, 1)).include(trxn)
             True
+            >>> Content(mapping, start=dt(2013, 1, 1)).include(trxn)
+            False
         """
         keep = self.end >= self.parse_date(trxn) >= self.start
-        return not (self.filter(trxn) if keep and self.filter else keep)
+        return self.filter(trxn) if keep and self.filter else keep
 
     def convert_amount(self, trxn):
         """Converts a string amount into a number
@@ -310,13 +310,13 @@ class Content:  # pylint: disable=too-many-instance-attributes
         for grp, trxns in groups:
             _args = [trxns, self.convert_amount]
 
-            # if it's split, transaction skipping is all or none
-            if self.is_split and self.skip_transaction(trxns[0]):
+            # if it's split, transaction inclusion is all or none
+            if self.is_split and not self.include(trxns[0]):
                 continue
             elif self.is_split and not utils.verify_splits(*_args):
                 raise Exception("Splits do not sum to zero.")
             elif not self.is_split:
-                filtered_trxns = filterfalse(self.skip_transaction, trxns)
+                filtered_trxns = filter(self.include, trxns)
             else:
                 filtered_trxns = trxns
 
