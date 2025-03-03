@@ -59,14 +59,10 @@ def main(tests, verbose=False, stop=True):
         proc = subprocess.run(command, capture_output=True, text=True, encoding='utf-8')
         output = proc.stdout
 
-        if p.isfile(expected):
-            outlines = StringIO(output).readlines()
+        outlines = StringIO(output).readlines()
 
-            with builtins.open(expected, encoding="utf-8") as f:
-                checklines = f.readlines()
-        else:
-            outlines = StringIO(output).readlines()
-            checklines = StringIO(expected).readlines()
+        with builtins.open(expected, encoding="utf-8") as f:
+            checklines = f.readlines()
 
         args = [checklines, list(filter_output(outlines))]
         kwargs = {"fromfile": "expected", "tofile": "got"}
