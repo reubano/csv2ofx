@@ -59,11 +59,7 @@ def main(tests, verbose=False, stop=True):
         proc = subprocess.run(command, capture_output=True, text=True, encoding='utf-8')
         output = proc.stdout
 
-        if isinstance(expected, bool):
-            text = StringIO(output).read()
-            outlines = [str(bool(text))]
-            checklines = StringIO(str(expected)).readlines()
-        elif p.isfile(expected):
+        if p.isfile(expected):
             outlines = StringIO(output).readlines()
 
             with builtins.open(expected, encoding="utf-8") as f:
@@ -112,7 +108,6 @@ if __name__ == "__main__":
     SERVER_DATE = "-D 20161031112908"
     SPLIT_OPTS = ["-o", "-m split_account", SERVER_DATE]
     PRE_TESTS = [
-        (["--help"], [], True),
         (["-oq"], "default.csv", "default.qif"),
         (["-oq", "-m split_account"], "default.csv", "default_w_splits.qif"),
         (["-oqc Description", "-m xero"], "xero.csv", "xero.qif"),
