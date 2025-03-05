@@ -255,13 +255,9 @@ Either install [tox](https://tox.wiki) or install [pipx](https://pipx.pypa.io) a
 tox
 ```
 
-Tox will run the tests and other checks (linter) in different Python environments. It will create Python environments in `.tox/*` (e.g. `.tox/py313`) and install csv2ofx there. To run in just the main python environment:
+Tox will run the tests and other checks (linter) in different Python environments. It will create a Python environment in `.tox/py` and install csv2ofx there.
 
-```bash
-tox -e py
-```
-
-Feel free to activate one of those environments or create a separate one.
+Feel free to activate that environment or create a separate one.
 
 3. Create a branch for local development
 
