@@ -274,7 +274,7 @@ How to contribute a mapping:
 1. Add the mapping in `csv2ofx/mappings/`
 2. Add a simple example CSV file in `data/test/`.
 3. Add the OFX or QIF file that results from the mapping and example CSV file in `data/converted/`.
-4. Add a `csv2ofx` call for your mapping to the tests in `tests/test.py`, in `PRE_TESTS`. When adding an OFX (not QIF) converted file, pay attention to the `-e` (end date) and `-D` (server date) arguments in the test- otherwise tests may pass locally but fail on the build server.
+4. Add a `csv2ofx` call for your mapping to the tests in `tests/test_cli.py`, in `samples`. When adding an OFX (not QIF) converted file, pay attention to the `-e` (end date) and `-D` (server date) arguments in the test. Otherwise, tests may pass locally but fail on the build server.
 5. Ensure the test succeeds (see above).
 
 ## License

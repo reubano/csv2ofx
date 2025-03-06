@@ -39,7 +39,6 @@ csv2ofx = "csv2ofx.main:run"
 
 [project.optional-dependencies]
 test = [
-	"pygogo>=0.13.2,<2.0.0",
 	"pytest",
 	"pytest-enabler",
 	"pytest-ruff",
