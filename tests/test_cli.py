@@ -6,6 +6,7 @@ import time
 
 import freezegun
 import pytest
+from pytest_lazy_fixtures import lf
 
 import csv2ofx.main
 
@@ -100,7 +101,7 @@ samples = [
     ),
     (
         ["-o", "-m amazon", "-e 20230604"],
-        "amazon.csv",
+        lf("amazon_inputs"),
         "amazon.ofx",
     ),
     (
@@ -116,12 +117,13 @@ samples = [
 ]
 
 
-@pytest.fixture(autouse=True)
-def amazon_env(monkeypatch):
+@pytest.fixture
+def amazon_inputs(monkeypatch):
     # for Amazon import; excludes transaction 3/3
     monkeypatch.setenv("AMAZON_EXCLUDE_CARDS", "9876")
     # clear the purchases account if set
     monkeypatch.delenv("AMAZON_PURCHASES_ACCOUNT", raising=False)
+    return "amazon.csv"
 
 
 data = pathlib.Path('data')
