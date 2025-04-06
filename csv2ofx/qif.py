@@ -191,8 +191,8 @@ class QIF(Content):
             >>> '2012-01-01' in result
             True
         """
-        kwargs.get("date_fmt", self.date_fmt)
-        kwargs.update({"time_stamp": kwargs["date"].strftime("%m/%d/%Y")})
+        date_fmt = kwargs.get("date_fmt", self.date_fmt)
+        kwargs.update({"time_stamp": kwargs["date"].strftime(date_fmt)})
         is_investment = kwargs.get("is_investment")
         is_transaction = not is_investment
 
