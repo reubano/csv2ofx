@@ -17,6 +17,7 @@ Attributes:
 """
 
 import itertools as it
+import sys
 import time
 import traceback
 from argparse import ArgumentParser, RawTextHelpFormatter
@@ -27,7 +28,6 @@ from operator import itemgetter
 from os import path as p
 from pkgutil import iter_modules
 from pprint import pprint
-from sys import exit, stdin, stdout
 
 try:
     FileNotFoundError
@@ -200,17 +200,17 @@ def run(args=None):  # noqa: C901
     args = parser.parse_args(args)
     if args.debug:
         pprint(dict(args._get_kwargs()))  # pylint: disable=W0212
-        exit(0)
+        sys.exit(0)
 
     if args.version:
         from . import __version__ as version
 
         print(f"v{version}")
-        exit(0)
+        sys.exit(0)
 
     if args.list_mappings:
         print(", ".join(MODULES))
-        exit(0)
+        sys.exit(0)
 
     if args.custom:
         name = p.splitext(p.split(args.custom)[1])[0]
@@ -231,7 +231,7 @@ def run(args=None):  # noqa: C901
 
     cont = QIF(mapping, **okwargs) if args.qif else OFX(mapping, **okwargs)
     source = (
-        builtins.open(args.source, encoding=args.encoding) if args.source else stdin
+        builtins.open(args.source, encoding=args.encoding) if args.source else sys.stdin
     )
 
     ckwargs = {
@@ -272,10 +272,12 @@ def run(args=None):  # noqa: C901
         }
     except Exception as err:  # pylint: disable=broad-except
         source.close()
-        exit(err)
+        sys.exit(err)
 
     dest = (
-        builtins.open(args.dest, "w", encoding=args.encoding) if args.dest else stdout
+        builtins.open(args.dest, "w", encoding=args.encoding)
+        if args.dest
+        else sys.stdout
     )
 
     try:
@@ -301,7 +303,7 @@ def run(args=None):  # noqa: C901
     else:
         msg = 0 if res else "No data to write. Check `start` and `end` options."
     finally:
-        exit(msg)
+        sys.exit(msg)
         source.close() if args.source else None
         dest.close() if args.dest else None
 
