@@ -17,6 +17,8 @@ Attributes:
 """
 
 import itertools as it
+import os.path
+import sys
 import time
 import traceback
 from argparse import ArgumentParser, RawTextHelpFormatter
@@ -24,10 +26,8 @@ from datetime import datetime as dt
 from importlib import import_module, util
 from math import inf
 from operator import itemgetter
-from os import path as p
 from pkgutil import iter_modules
 from pprint import pprint
-from sys import exit, stdin, stdout
 
 try:
     FileNotFoundError
@@ -194,27 +194,30 @@ parser.add_argument(
     "-v", "--verbose", help="verbose output", action="store_true", default=False
 )
 
-args = parser.parse_args()  # pylint: disable=C0103
+
+def _time_from_file(path):
+    return os.path.getmtime(path)
 
 
-def run():  # noqa: C901
+def run(args=None):  # noqa: C901
     """Parses the CLI options and runs the main program"""
+    args = parser.parse_args(args)
     if args.debug:
         pprint(dict(args._get_kwargs()))  # pylint: disable=W0212
-        exit(0)
+        sys.exit(0)
 
     if args.version:
         from . import __version__ as version
 
         print(f"v{version}")
-        exit(0)
+        sys.exit(0)
 
     if args.list_mappings:
         print(", ".join(MODULES))
-        exit(0)
+        sys.exit(0)
 
     if args.custom:
-        name = p.splitext(p.split(args.custom)[1])[0]
+        name = os.path.splitext(os.path.split(args.custom)[1])[0]
         spec = util.spec_from_file_location(name, args.custom)
         module = util.module_from_spec(spec)
         spec.loader.exec_module(module)
@@ -232,7 +235,7 @@ def run():  # noqa: C901
 
     cont = QIF(mapping, **okwargs) if args.qif else OFX(mapping, **okwargs)
     source = (
-        builtins.open(args.source, encoding=args.encoding) if args.source else stdin
+        builtins.open(args.source, encoding=args.encoding) if args.source else sys.stdin
     )
 
     ckwargs = {
@@ -256,7 +259,7 @@ def run():  # noqa: C901
             server_date = parse(args.server_date, dayfirst=args.dayfirst)
         else:
             try:
-                mtime = p.getmtime(source.name)
+                mtime = _time_from_file(source.name)
             except (AttributeError, FileNotFoundError):
                 mtime = time.time()
 
@@ -272,11 +275,13 @@ def run():  # noqa: C901
             "encoding": args.encoding,
         }
     except Exception as err:  # pylint: disable=broad-except
-        source.close()
-        exit(err)
+        source.close() if args.source else None
+        sys.exit(err)
 
     dest = (
-        builtins.open(args.dest, "w", encoding=args.encoding) if args.dest else stdout
+        builtins.open(args.dest, "w", encoding=args.encoding)
+        if args.dest
+        else sys.stdout
     )
 
     try:
@@ -302,9 +307,9 @@ def run():  # noqa: C901
     else:
         msg = 0 if res else "No data to write. Check `start` and `end` options."
     finally:
-        exit(msg)
         source.close() if args.source else None
         dest.close() if args.dest else None
+        sys.exit(msg)
 
 
 if __name__ == "__main__":

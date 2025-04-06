@@ -42,6 +42,7 @@ test = [
 	"pytest",
 	"pytest-enabler",
 	"pytest-ruff",
+	"freezegun",
 ]
 
 [tool.setuptools]
