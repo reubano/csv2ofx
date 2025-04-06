@@ -5,9 +5,7 @@ import subprocess
 
 import pytest
 
-MINT_ALT_OPTS = ["-oqs20150613", "-e20150614", "-m mint"]
 SERVER_DATE = "-D 20161031112908"
-SPLIT_OPTS = ["-o", "-m split_account", SERVER_DATE]
 
 samples = [
     (["-oq"], "default.csv", "default.qif"),
@@ -16,9 +14,9 @@ samples = [
     (["-oq", "-m mint"], "mint.csv", "mint.qif"),
     (["-oq", "-m mint_extra"], "mint_extra.csv", "mint_extra.qif"),
     (["-oq", "-m mint_headerless"], "mint_headerless.csv", "mint.qif"),
-    (MINT_ALT_OPTS, "mint.csv", "mint_alt.qif"),
+    (["-oqs20150613", "-e20150614", "-m mint"], "mint.csv", "mint_alt.qif"),
     (["-oe 20150908", SERVER_DATE], "default.csv", "default.ofx"),
-    (SPLIT_OPTS, "default.csv", "default_w_splits.ofx"),
+    (["-o", "-m split_account", SERVER_DATE], "default.csv", "default_w_splits.ofx"),
     (["-o", "-m mint", SERVER_DATE], "mint.csv", "mint.ofx"),
     (["-oq", "-m creditunion"], "creditunion.csv", "creditunion.qif"),
     (
