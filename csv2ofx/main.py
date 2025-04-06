@@ -194,11 +194,10 @@ parser.add_argument(
     "-v", "--verbose", help="verbose output", action="store_true", default=False
 )
 
-args = parser.parse_args()  # pylint: disable=C0103
 
-
-def run():  # noqa: C901
+def run(args=None):  # noqa: C901
     """Parses the CLI options and runs the main program"""
+    args = parser.parse_args(args)
     if args.debug:
         pprint(dict(args._get_kwargs()))  # pylint: disable=W0212
         exit(0)
