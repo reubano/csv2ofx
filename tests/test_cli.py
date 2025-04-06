@@ -5,6 +5,8 @@ import subprocess
 
 import pytest
 
+import csv2ofx.main
+
 SERVER_DATE = "-D 20161031112908"
 
 samples = [
@@ -130,16 +132,16 @@ def flatten_opts(opts):
 
 
 @pytest.mark.parametrize(['opts', 'in_filename', 'out_filename'], samples)
-def test_sample(opts, in_filename, out_filename):
+def test_sample(opts, in_filename, out_filename, capsys):
     arguments = [str(data / 'test' / in_filename)]
     command = list(itertools.chain(['csv2ofx'], flatten_opts(opts), arguments))
-    proc = subprocess.run(
-        command, capture_output=True, text=True, encoding='utf-8', check=True
-    )
-    output = proc.stdout
+    with pytest.raises(SystemExit) as exc:
+        csv2ofx.main.run(command[1:])
+    # Success - exit code 0
+    assert exc.value.code == 0
 
     expected = data.joinpath("converted", out_filename).read_text(encoding='utf-8')
-    assert output == expected, (
+    assert capsys.readouterr().out == expected, (
         f"Unexpected output from {subprocess.list2cmdline(command)}"
     )
 
