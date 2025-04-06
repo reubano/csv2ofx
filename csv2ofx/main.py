@@ -17,6 +17,7 @@ Attributes:
 """
 
 import itertools as it
+import os.path
 import sys
 import time
 import traceback
@@ -25,7 +26,6 @@ from datetime import datetime as dt
 from importlib import import_module, util
 from math import inf
 from operator import itemgetter
-from os import path as p
 from pkgutil import iter_modules
 from pprint import pprint
 
@@ -196,7 +196,7 @@ parser.add_argument(
 
 
 def _time_from_file(path):
-    return p.getmtime(path)
+    return os.path.getmtime(path)
 
 
 def run(args=None):  # noqa: C901
@@ -217,7 +217,7 @@ def run(args=None):  # noqa: C901
         sys.exit(0)
 
     if args.custom:
-        name = p.splitext(p.split(args.custom)[1])[0]
+        name = os.path.splitext(os.path.split(args.custom)[1])[0]
         spec = util.spec_from_file_location(name, args.custom)
         module = util.module_from_spec(spec)
         spec.loader.exec_module(module)
