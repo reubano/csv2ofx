@@ -186,6 +186,10 @@ class QIF(Content):
             >>> result = QIF().transaction(**kwargs)
             >>> trxn == result.replace('\\n', '').replace('\\t', '')
             True
+
+            >>> result = QIF().transaction(date_fmt="%Y-%m-%d", **kwargs)
+            >>> '2012-01-01' in result
+            True
         """
         kwargs.get("date_fmt", self.date_fmt)
         kwargs.update({"time_stamp": kwargs["date"].strftime("%m/%d/%Y")})
