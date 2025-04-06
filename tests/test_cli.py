@@ -106,6 +106,11 @@ samples = [
         "payoneer.csv",
         "payoneer.ofx",
     ),
+    (
+        ['-m', 'n26', SERVER_DATE],
+        'n26.csv',
+        'n26.ofx',
+    ),
 ]
 
 

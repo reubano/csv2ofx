@@ -23,7 +23,7 @@ mapping = {
     "delimiter": ",",
     "account": "N26 checking",
     "type": find_type,
-    "date": itemgetter("Date"),
+    "date": itemgetter("Booking Date"),
     "amount": itemgetter("Amount (EUR)"),
     "payee": itemgetter("Payee"),
     "notes": itemgetter("Payment reference"),

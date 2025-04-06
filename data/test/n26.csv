@@ -1,0 +1,3 @@
+"Booking Date","Value Date","Partner Name","Partner Iban",Type,"Payment Reference","Account Name","Amount (EUR)","Original Amount","Original Currency","Exchange Rate"
+2020-03-07,,"Compte courant",DE27100110000000000000,"Credit Transfer",,"Coffre fort",328.00,,,
+2020-03-07,,"Compte courant",DE27100110000000000000,"Debit Transfer",,"Coffre fort",-328.00,,,
