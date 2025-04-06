@@ -6,7 +6,5 @@ is_GitHub_Linux = bool(
 )
 
 collect_ignore = [
-    "csv2ofx/main.py",  # if imported, fails on parse_args
-] + [
     "csv2ofx/mappings/ubs-ch-fr.py",
 ] * is_GitHub_Linux
