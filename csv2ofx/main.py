@@ -195,6 +195,10 @@ parser.add_argument(
 )
 
 
+def _time_from_file(path):
+    return p.getmtime(path)
+
+
 def run(args=None):  # noqa: C901
     """Parses the CLI options and runs the main program"""
     args = parser.parse_args(args)
@@ -255,7 +259,7 @@ def run(args=None):  # noqa: C901
             server_date = parse(args.server_date, dayfirst=args.dayfirst)
         else:
             try:
-                mtime = p.getmtime(source.name)
+                mtime = _time_from_file(source.name)
             except (AttributeError, FileNotFoundError):
                 mtime = time.time()
 
