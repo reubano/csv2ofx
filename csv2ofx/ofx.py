@@ -17,7 +17,7 @@ Attributes:
     ENCODING (str): Default file encoding.
 """
 
-from datetime import datetime as dt
+import datetime
 
 from meza.fntools import chunk, xmlize
 from meza.process import group
@@ -75,7 +75,7 @@ class OFX(Content):
             (str): the OFX content
 
         Examples:
-            >>> kwargs = {'date': dt(2012, 1, 15)}
+            >>> kwargs = {'date': datetime.datetime(2012, 1, 15)}
             >>> header = 'DATA:OFXSGMLENCODING:UTF-8<OFX><SIGNONMSGSRSV1>\
 <SONRS><STATUS><CODE>0</CODE><SEVERITY>INFO</SEVERITY></STATUS><DTSERVER>\
 20120115000000</DTSERVER><LANGUAGE>ENG</LANGUAGE></SONRS></SIGNONMSGSRSV1>\
@@ -101,7 +101,9 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
         kwargs.setdefault("language", "ENG")
 
         # yyyymmddhhmmss
-        time_stamp = kwargs.get("date", dt.now()).strftime("%Y%m%d%H%M%S")
+        time_stamp = kwargs.get("date", datetime.datetime.now()).strftime(
+            "%Y%m%d%H%M%S"
+        )
 
         content = ""
         if self.ms_money:
@@ -150,7 +152,6 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
             (dict): the OFX transaction data
 
         Examples:
-            >>> import datetime
             >>> from csv2ofx.mappings.mint import mapping
             >>> from decimal import Decimal
             >>> trxn = {
@@ -169,7 +170,7 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
             ...     'memo': 'description notes',
             ...     'id': 'ee86450a47899254e2faa82dca3c2cf2',
             ...     'split_account': 'Checking', 'action': '', 'payee': 'payee',
-            ...     'date': dt(2010, 6, 12, 0, 0), 'category': '',
+            ...     'date': datetime.datetime(2010, 6, 12, 0, 0), 'category': '',
             ...     'bank_id': 'e268443e43d93dab7ebef303bbe9642f',
             ...     'price': Decimal('0'), 'symbol': '', 'check_num': None,
             ...     'inv_split_account': None, 'x_action': '', 'type': 'DEBIT',
@@ -226,7 +227,7 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
             (str): the OFX content
 
         Examples:
-            >>> kwargs = {'start': dt(2012, 1, 1), 'end': dt(2012, 2, 1)}
+            >>> kwargs = {'start': datetime.datetime(2012, 1, 1), 'end': datetime.datetime(2012, 2, 1)}
             >>> akwargs = {'currency': 'USD', 'bank_id': 1, 'account_id': 1, \
 'account_type': 'CHECKING'}
             >>> start = '<STMTRS><CURDEF>USD</CURDEF><BANKACCTFROM><BANKID>1\
@@ -286,7 +287,7 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
             (str): the OFX content
 
         Examples:
-            >>> kwargs = {'date': dt(2012, 1, 15), 'type': 'DEBIT', \
+            >>> kwargs = {'date': datetime.datetime(2012, 1, 15), 'type': 'DEBIT', \
 'amount': 100, 'id': 1, 'check_num': 1, 'payee': 'payee', 'memo': 'memo'}
             >>> trxn = '<STMTTRN><TRNTYPE>DEBIT</TRNTYPE><DTPOSTED>\
 20120115000000</DTPOSTED><TRNAMT>100.00</TRNAMT><FITID>1</FITID><CHECKNUM>1\
@@ -329,7 +330,7 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
             (str): the OFX content
 
         Examples:
-            >>> kwargs = {'balance': 150, 'date': dt(2012, 1, 15)}
+            >>> kwargs = {'balance': 150, 'date': datetime.datetime(2012, 1, 15)}
             >>> end = '</BANKTRANLIST><LEDGERBAL><BALAMT>150.00</BALAMT>\
 <DTASOF>20120115000000</DTASOF></LEDGERBAL></STMTRS>'
             >>> result = OFX().account_end(**kwargs)
@@ -408,7 +409,7 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
             (str): the start of an OFX transfer
 
         Examples:
-            >>> kwargs = {'currency': 'USD', 'date': dt(2012, 1, 15), \
+            >>> kwargs = {'currency': 'USD', 'date': datetime.datetime(2012, 1, 15), \
 'bank_id': 1, 'account_id': 1, 'account_type': 'CHECKING', 'amount': 100, \
 'id': 'jbaevf'}
             >>> trxn = '<INTRARS><CURDEF>USD</CURDEF><SRVRTID>jbaevf</SRVRTID>\
@@ -508,7 +509,7 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
 
         Examples:
             >>> end = '</XFERINFO><DTPOSTED>20120115000000</DTPOSTED></INTRARS>'
-            >>> result = OFX().transfer_end(dt(2012, 1, 15))
+            >>> result = OFX().transfer_end(datetime.datetime(2012, 1, 15))
             >>> end == result.replace('\\n', '').replace('\\t', '')
             True
         """
@@ -529,12 +530,12 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
 
         Examples:
             >>> ft = '</BANKTRANLIST></STMTRS></STMTTRNRS></BANKMSGSRSV1></OFX>'
-            >>> result = OFX().footer(date=dt(2012, 1, 15))
+            >>> result = OFX().footer(date=datetime.datetime(2012, 1, 15))
             >>> result = list(result)[0]
             >>> ft == result.replace('\\n', '').replace('\\t', '')
             True
         """
-        kwargs.setdefault("date", dt.now())
+        kwargs.setdefault("date", datetime.datetime.now())
 
         if self.is_split:
             content = self.transfer_end(**kwargs)
@@ -617,21 +618,21 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
 
         Examples:
             >>> ofx = OFX()
-            >>> trxn1 = { 'date': dt(2010, 6, 12, 0, 0) }
-            >>> trxn2 = { 'date': dt(2010, 6, 12, 0, 0) }
-            >>> trxn3 = { 'date': dt(2010, 6, 13, 0, 0) }
+            >>> trxn1 = { 'date': datetime.datetime(2010, 6, 12, 0, 0) }
+            >>> trxn2 = { 'date': datetime.datetime(2010, 6, 12, 0, 0) }
+            >>> trxn3 = { 'date': datetime.datetime(2010, 6, 13, 0, 0) }
             >>> ofx.update_latest_trxn(trxn1)
-            >>> ofx.latest_trxn['date'] == dt(2010, 6, 12, 0, 0)
+            >>> ofx.latest_trxn['date'] == datetime.datetime(2010, 6, 12, 0, 0)
             True
             >>> ofx.latest_date_count
             1
             >>> ofx.update_latest_trxn(trxn2)
-            >>> ofx.latest_trxn['date'] == dt(2010, 6, 12, 0, 0)
+            >>> ofx.latest_trxn['date'] == datetime.datetime(2010, 6, 12, 0, 0)
             True
             >>> ofx.latest_date_count
             2
             >>> ofx.update_latest_trxn(trxn3)
-            >>> ofx.latest_trxn['date'] == dt(2010, 6, 13, 0, 0)
+            >>> ofx.latest_trxn['date'] == datetime.datetime(2010, 6, 13, 0, 0)
             True
             >>> ofx.latest_date_count
             1
@@ -653,10 +654,10 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
 
         Examples:
             >>> ofx = OFX()
-            >>> trxn1 = { 'date': dt(2010, 6, 12, 0, 0) }
-            >>> trxn2 = { 'date': dt(2010, 6, 12, 0, 0) }
-            >>> trxn3 = { 'date': dt(2010, 6, 13, 0, 0) }
-            >>> trxn4 = { 'date': dt(2010, 6, 11, 0, 0) }
+            >>> trxn1 = { 'date': datetime.datetime(2010, 6, 12, 0, 0) }
+            >>> trxn2 = { 'date': datetime.datetime(2010, 6, 12, 0, 0) }
+            >>> trxn3 = { 'date': datetime.datetime(2010, 6, 13, 0, 0) }
+            >>> trxn4 = { 'date': datetime.datetime(2010, 6, 11, 0, 0) }
             >>> ofx.update_last_trxn(trxn1)
             >>> ofx.check_date_order(trxn2)
             >>> ofx.dates_ascending
