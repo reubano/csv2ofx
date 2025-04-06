@@ -60,6 +60,11 @@ def load_package_module(name):
 
 
 def load_custom_module(filepath: str):
+    """
+    >>> mod = load_custom_module("csv2ofx/mappings/amazon.py")
+    >>> mod.__name__
+    'amazon'
+    """
     name = os.path.splitext(os.path.split(filepath)[1])[0]
     spec = util.spec_from_file_location(name, filepath)
     module = util.module_from_spec(spec)
