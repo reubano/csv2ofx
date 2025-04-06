@@ -108,7 +108,7 @@ samples = [
     ),
     (
         ['-m', 'n26', SERVER_DATE],
-        'n26.csv',
+        'n26-fr.csv',
         'n26.ofx',
     ),
 ]
