@@ -55,6 +55,18 @@ MAPPINGS = import_module("csv2ofx.mappings")
 MODULES = tuple(itemgetter(1)(m) for m in iter_modules(MAPPINGS.__path__))
 
 
+def load_package_module(name):
+    return import_module(f"csv2ofx.mappings.{name}")
+
+
+def load_custom_module(filepath: str):
+    name = os.path.splitext(os.path.split(filepath)[1])[0]
+    spec = util.spec_from_file_location(name, filepath)
+    module = util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 parser.add_argument(
     dest="source", nargs="?", help="the source csv file (default: stdin)"
 )
@@ -101,7 +113,11 @@ parser.add_argument(
     choices=MODULES,
 )
 parser.add_argument(
-    "-x", "--custom", metavar="FILE_PATH", help="path to a custom mapping file"
+    "-x",
+    "--custom",
+    metavar="FILE_PATH",
+    help="path to a custom mapping file",
+    type=load_custom_module,
 )
 parser.add_argument(
     "-c",
@@ -216,15 +232,7 @@ def run(args=None):  # noqa: C901
         print(", ".join(MODULES))
         sys.exit(0)
 
-    if args.custom:
-        name = os.path.splitext(os.path.split(args.custom)[1])[0]
-        spec = util.spec_from_file_location(name, args.custom)
-        module = util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-    else:
-        module = import_module(f"csv2ofx.mappings.{args.mapping}")
-
-    mapping = module.mapping
+    mapping = (args.custom or load_package_module(args.mapping)).mapping
 
     okwargs = {
         "def_type": args.account_type or "Bank" if args.qif else "CHECKING",
