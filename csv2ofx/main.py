@@ -18,6 +18,7 @@ Attributes:
 
 import itertools as it
 import os.path
+import pathlib
 import sys
 import time
 import traceback
@@ -65,8 +66,8 @@ def load_custom_module(filepath: str):
     >>> mod.__name__
     'amazon'
     """
-    name = os.path.splitext(os.path.split(filepath)[1])[0]
-    spec = util.spec_from_file_location(name, filepath)
+    path = pathlib.Path(filepath)
+    spec = util.spec_from_file_location(path.stem, path)
     module = util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
