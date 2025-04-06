@@ -271,7 +271,7 @@ def run(args=None):  # noqa: C901
             "encoding": args.encoding,
         }
     except Exception as err:  # pylint: disable=broad-except
-        source.close()
+        source.close() if args.source else None
         sys.exit(err)
 
     dest = (
@@ -303,9 +303,9 @@ def run(args=None):  # noqa: C901
     else:
         msg = 0 if res else "No data to write. Check `start` and `end` options."
     finally:
-        sys.exit(msg)
         source.close() if args.source else None
         dest.close() if args.dest else None
+        sys.exit(msg)
 
 
 if __name__ == "__main__":
