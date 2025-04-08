@@ -1,0 +1,6 @@
+Datum der Transaktion,Transaktions-ID,Art der Transaktion,Referenz,Zahlungsreferenz,Status,Rechnungsbetrag ausgehend,Rechnungsbetrag eingehend,Währung der Karte,Zahlungsbetrag ausgehend,Zahlungsbetrag eingehend,Zahlungswährung,Wechselkurs,Gebühr,Verfügbares Guthaben
+"29.12.24, 13:56",CONPWBBZPL,Ausgehende Banküberweisung,Angelika Theissen DE35500105174283248935,Hier ist dein Geld,Genehmigt,840.12,0.00,EUR,840.12,0.00,EUR,1.00,0.00,890.12
+"26.12.24, 16:30",C9VK7VXVJN,Ausgehende Banküberweisung,Paul Simon Dreher DE64500105175197789342,Gesendet durch SumUp,Genehmigt,500.00,0.00,EUR,500.00,0.00,EUR,1.00,0.00,50.00
+"26.12.24, 16:25",CDJ2XPQY2K,Ausgehende Banküberweisung,Niklas Furst-Walter DE51500105177191661339,Auszahlung eines beliebigen Betrags,Genehmigt,500.00,0.00,EUR,500.00,0.00,EUR,1.00,0.00,550.00
+"15.03.24, 09:19",C9B7E6PMEQ,Eingehende Banküberweisung,Sara Dietrich DE11500105173122451822,Kohle,Genehmigt,0.00,40.00,EUR,0.00,40.00,EUR,1.00,0.00,1050.00
+"20.01.24, 12:15",COWMKB43BJ,Eingehende Banküberweisung,Hans-Peter König DE14500105173896376453,Hallo,Genehmigt,0.00,10.00,EUR,0.00,10.00,EUR,1.00,0.00,1010.00
