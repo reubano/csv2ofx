@@ -69,7 +69,7 @@ mapping = {
     "notes": itemgetter("Description 2"),
     # switch day/month (maybe file a bug: always inverted when ambiguous like
     # '01.02.2018')
-    "date": lambda tr: fixdate(tr["Date de valeur"]),
+    "date": lambda tr: fixdate(tr["Date de comptabilisation"]),
     "desc": map_descr,
     "payee": map_payee,
     "check_num": itemgetter("N° de transaction"),
