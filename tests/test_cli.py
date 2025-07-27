@@ -43,11 +43,13 @@ samples = [
         "pcmastercard.csv",
         "pcmastercard.ofx",
     ),
-    # (
-    #     # N.B. input file obtained by pre-processing with
-    #     #    bin/csvtrim ubs-ch-fr.csv > ubs-ch-fr_trimmed.csv
-    #     ["-oq", "-m ubs-ch-fr"], "ubs-ch-fr_trimmed.csv", "ubs-ch-fr.qif"
-    # ),
+    (
+        # N.B. input file obtained by pre-processing with
+        #    bin/csvtrim ubs-ch-fr.csv > ubs-ch-fr_trimmed.csv
+        ["-oq", "-m ubs-ch-fr"],
+        "ubs-ch-fr_trimmed.csv",
+        "ubs-ch-fr.qif",
+    ),
     (
         ["-o", "-m ingesp", "-e 20221231"],
         "ingesp.csv",
