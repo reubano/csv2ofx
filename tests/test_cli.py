@@ -139,7 +139,7 @@ def test_sample(opts, in_filename, out_filename, capsys, monkeypatch):
     command = list(itertools.chain(['csv2ofx'], flatten_opts(opts), arguments))
     with pytest.raises(SystemExit) as exc:
         csv2ofx.main.run(command[1:])
-        # Success - exit code 0
+    # Success - exit code 0
     assert exc.value.code == 0
 
     expected = data.joinpath("converted", out_filename).read_text(encoding='utf-8')
