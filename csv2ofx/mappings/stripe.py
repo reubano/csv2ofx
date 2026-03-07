@@ -24,8 +24,10 @@ mapping = {
     "date": itemgetter("created"),
     "amount": itemgetter("amount"),
     "currency": itemgetter("currency"),
-    "payee": lambda tr: tr.get("customer_description")
-    if len(tr.get("customer_description")) > 0
-    else tr.get("card_name", ""),
+    "payee": lambda tr: (
+        tr.get("customer_description")
+        if len(tr.get("customer_description")) > 0
+        else tr.get("card_name", "")
+    ),
     "desc": itemgetter("description"),
 }
