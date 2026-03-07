@@ -1,4 +1,5 @@
 import itertools
+import os
 import pathlib
 import shlex
 import subprocess
@@ -158,6 +159,7 @@ def test_help():
 
 @pytest.mark.xfail("sys.version_info < (3, 13)")
 def test_help_in_readme():
-    out = subprocess.check_output(['csv2ofx', '--help'], text=True)
+    env = {**os.environ, "NO_COLOR": "1"}
+    out = subprocess.check_output(['csv2ofx', '--help'], text=True, env=env)
     readme = pathlib.Path('README.md').read_text()
     assert out in readme, "README help is stale, please update."
