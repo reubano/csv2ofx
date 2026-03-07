@@ -48,8 +48,15 @@ def filter_pending(row):
     return row['date'] != 'pending'
 
 
+def filter_cancelled(row):
+    """
+    Cancelled orders have no total.
+    """
+    return bool(row['total'])
+
+
 def filter(row):
-    return filter_pending(row) and filter_payment(row)
+    return filter_pending(row) and filter_payment(row) and filter_cancelled(row)
 
 
 mapping = {
