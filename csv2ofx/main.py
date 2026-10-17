@@ -16,6 +16,7 @@ Attributes:
     ENCODING (str): Default file encoding.
 """
 
+import builtins
 import itertools as it
 import os.path
 import pathlib
@@ -29,13 +30,6 @@ from math import inf
 from operator import itemgetter
 from pkgutil import iter_modules
 from pprint import pprint
-
-try:
-    FileNotFoundError
-except NameError:
-    FileNotFoundError = IOError
-
-import builtins
 
 from dateutil.parser import parse
 from meza.io import IterStringIO, read_csv, write
