@@ -1,4 +1,4 @@
-# vim: sw=4:ts=4:expandtab
+# vim: sw=4:ts=4:expandtab  # noqa: N999 (mapping name is user-facing)
 # pylint: disable=invalid-name
 """
 csv2ofx.mappings.ubs-ch-fr

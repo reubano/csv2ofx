@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # vim: sw=4:ts=4:expandtab
 # pylint: disable=no-self-use
 
@@ -62,7 +61,7 @@ class QIF(Content):
 
     def header(self, **kwargs):  # pylint: disable=unused-argument
         """Get the QIF header"""
-        return None
+        return
 
     def transaction_data(self, tr):
         """gets QIF transaction data

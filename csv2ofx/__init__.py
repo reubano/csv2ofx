@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # vim: sw=4:ts=4:expandtab
 
 """
@@ -34,8 +33,6 @@ def md5(content):
 
 class BalanceError(Exception):
     """Raised if no ending balance when MS Money compatible output requested"""
-
-    pass
 
 
 class Content:  # pylint: disable=too-many-instance-attributes
@@ -322,7 +319,7 @@ class Content:  # pylint: disable=too-many-instance-attributes
             if self.is_split and not self.include(trxns[0]):
                 continue
             elif self.is_split and not utils.verify_splits(*_args):
-                raise Exception("Splits do not sum to zero.")
+                raise Exception("Splits do not sum to zero.")  # noqa: TRY002 (callers expect a plain Exception)
             elif not self.is_split:
                 filtered_trxns = filter(self.include, trxns)
             else:
@@ -335,7 +332,7 @@ class Content:  # pylint: disable=too-many-instance-attributes
 
             # pylint: disable=cell-var-from-loop
             def keyfunc(enum):
-                return enum[0] != main_pos
+                return enum[0] != main_pos  # noqa: B023 (only used within this iteration)
 
             sorted_trxns = sorted(enumerate(filtered_trxns), key=keyfunc)
             yield (grp, main_pos, sorted_trxns)

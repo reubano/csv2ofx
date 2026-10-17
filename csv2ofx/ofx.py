@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # vim: sw=4:ts=4:expandtab
 # pylint: disable=no-self-use
 
@@ -547,7 +546,7 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
         content += f"\t\t</{self.resp_type}>\n\t</BANKMSGSRSV1>\n</OFX>\n"
         yield content
 
-    def gen_body(self, data):  # noqa: C901
+    def gen_body(self, data):
         """Generate the OFX body"""
         for datum in data:
             grp = datum["group"]
@@ -637,10 +636,7 @@ ENCODING:USASCIICHARSET:1252COMPRESSION:NONEOLDFILEUID:NONENEWFILEUID:NONE\
             >>> ofx.latest_date_count
             1
         """
-        if self.latest_trxn is None:
-            self.latest_trxn = trxn
-            self.latest_date_count = 1
-        elif trxn['date'] > self.latest_trxn['date']:
+        if self.latest_trxn is None or trxn['date'] > self.latest_trxn['date']:
             self.latest_trxn = trxn
             self.latest_date_count = 1
         elif trxn['date'] == self.latest_trxn['date']:

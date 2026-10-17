@@ -2,7 +2,7 @@ from operator import itemgetter
 
 mapping = {
     'has_header': True,
-    'filter': lambda tr: True if tr.get('Status') == 'Posted' else False,
+    'filter': lambda tr: tr.get('Status') == 'Posted',
     'is_split': False,
     'bank': 'Charles Schwab Bank, N.A.',
     'bank_id': '121202211',

@@ -171,7 +171,8 @@ mapping = {
     'bank': 'BetterBank',
     'account': itemgetter('Account'),
     'date': itemgetter('Date'),
-    'amount': itemgetter('Amount')}
+    'amount': itemgetter('Amount'),
+}
 ```
 
 But more complex parsing is also possible, e.g.,

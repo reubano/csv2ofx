@@ -243,7 +243,9 @@ def run(args=None):  # noqa: C901
 
     cont = QIF(mapping, **okwargs) if args.qif else OFX(mapping, **okwargs)
     source = (
-        builtins.open(args.source, encoding=args.encoding) if args.source else sys.stdin
+        builtins.open(args.source, encoding=args.encoding)  # noqa: SIM115 (closed in finally)
+        if args.source
+        else sys.stdin
     )
 
     ckwargs = {
@@ -282,12 +284,12 @@ def run(args=None):  # noqa: C901
             "chunksize": args.chunksize,
             "encoding": args.encoding,
         }
-    except Exception as err:  # pylint: disable=broad-except
+    except Exception as err:  # pylint: disable=broad-except  # noqa: BLE001 (CLI reports any error)
         source.close() if args.source else None
         sys.exit(err)
 
     dest = (
-        builtins.open(args.dest, "w", encoding=args.encoding)
+        builtins.open(args.dest, "w", encoding=args.encoding)  # noqa: SIM115 (closed in finally)
         if args.dest
         else sys.stdout
     )
@@ -297,7 +299,7 @@ def run(args=None):  # noqa: C901
     except KeyError as err:
         msg = f"Field {err} is missing from file. Check `mapping` option."
     except TypeError as err:
-        msg = f"No data to write. {str(err)}. "
+        msg = f"No data to write. {err!s}. "
 
         if args.collapse:
             msg += "Check `start` and `end` options."
@@ -305,11 +307,11 @@ def run(args=None):  # noqa: C901
             msg += "Try again with `-c` option."
     except ValueError as err:
         # csv2ofx called with no arguments or broken mapping
-        msg = f"Possible mapping problem: {str(err)}."
+        msg = f"Possible mapping problem: {err!s}."
         parser.print_help()
     except BalanceError as err:
         msg = f"{err}.  Try again with `--ending-balance` option."
-    except Exception:  # pylint: disable=broad-except
+    except Exception:  # pylint: disable=broad-except  # noqa: BLE001 (CLI reports any error)
         msg = 1
         traceback.print_exc()
     else:

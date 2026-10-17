@@ -129,7 +129,7 @@ data = pathlib.Path('data')
 
 
 def flatten_opts(opts):
-    return list(param for group in opts for param in shlex.split(group))
+    return [param for group in opts for param in shlex.split(group)]
 
 
 @pytest.mark.parametrize(['opts', 'in_filename', 'out_filename'], samples)
