@@ -167,6 +167,7 @@ def test_help_in_readme():
 
 @pytest.mark.parametrize("options", [[], ["-c", "Description"]])
 def test_missing_date_reports_mapping_problem(tmp_path, capsys, options):
+    """A CSV without Date reports its mapping problem with and without -c."""
     source = tmp_path / "missing-date.csv"
     source.write_text(
         "Description,Amount,Account\nExample,10,Checking\n", encoding="utf-8"
