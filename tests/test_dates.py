@@ -6,7 +6,7 @@ from csv2ofx import Content
 
 
 @pytest.mark.parametrize("parse_fmt", [None, "%Y-%m-%d"])
-@pytest.mark.parametrize("value", [None, "", "not-a-date", 42])
+@pytest.mark.parametrize("value", [None, "", "not-a-date", 42, "2147483648-01-01"])
 def test_invalid_transaction_date_explains_mapping(value, parse_fmt):
     """Invalid dates, such as None, identify the date mapping to check."""
     content = Content({"date": lambda row: value}, parse_fmt=parse_fmt)

@@ -166,12 +166,17 @@ def test_help_in_readme():
 
 
 @pytest.mark.parametrize("options", [[], ["-c", "Description"]])
-def test_missing_date_reports_mapping_problem(tmp_path, capsys, options):
-    """A CSV without Date reports its mapping problem with and without -c."""
-    source = tmp_path / "missing-date.csv"
-    source.write_text(
-        "Description,Amount,Account\nExample,10,Checking\n", encoding="utf-8"
-    )
+@pytest.mark.parametrize(
+    "csv_data",
+    [
+        "Description,Amount,Account\nExample,10,Checking\n",
+        "Date,Description,Amount,Account\n2147483648-01-01,Example,10,Checking\n",
+    ],
+)
+def test_invalid_date_reports_mapping_problem(tmp_path, capsys, options, csv_data):
+    """Missing and overflowing dates report mapping errors, e.g. year 2147483648."""
+    source = tmp_path / "invalid-date.csv"
+    source.write_text(csv_data, encoding="utf-8")
     with pytest.raises(SystemExit) as exc:
         csv2ofx.main.run([*options, str(source)])
     message = str(exc.value.code)

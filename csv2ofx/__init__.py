@@ -91,7 +91,7 @@ class Content:  # pylint: disable=too-many-instance-attributes
             if self.parse_fmt:
                 return dt.strptime(value, self.parse_fmt)
             return parse(value, dayfirst=self.dayfirst)
-        except (TypeError, ValueError) as err:
+        except (TypeError, ValueError, OverflowError) as err:
             raise ValueError(
                 "Cannot parse transaction date. Check the date mapping "
                 "and parse_fmt option."
