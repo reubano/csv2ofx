@@ -86,12 +86,16 @@ class Content:  # pylint: disable=too-many-instance-attributes
         self.end = kwargs.get("end") or dt.now()
 
     def parse_date(self, trxn):
-        if self.parse_fmt:
-            parsed = dt.strptime(self.get("date", trxn), self.parse_fmt)
-        else:
-            parsed = parse(self.get("date", trxn), dayfirst=self.dayfirst)
-
-        return parsed
+        value = self.get("date", trxn)
+        try:
+            if self.parse_fmt:
+                return dt.strptime(value, self.parse_fmt)
+            return parse(value, dayfirst=self.dayfirst)
+        except (TypeError, ValueError) as err:
+            raise ValueError(
+                "Cannot parse transaction date. Check the date mapping "
+                "and parse_fmt option."
+            ) from err
 
     def get(self, name, trxn=None, default=None):
         """Gets an attribute which could be either a normal attribute,

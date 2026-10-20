@@ -163,3 +163,18 @@ def test_help_in_readme():
     out = subprocess.check_output(['csv2ofx', '--help'], text=True, env=env)
     readme = pathlib.Path('README.md').read_text()
     assert out in readme, "README help is stale, please update."
+
+
+@pytest.mark.parametrize("options", [[], ["-c", "Description"]])
+def test_missing_date_reports_mapping_problem(tmp_path, capsys, options):
+    source = tmp_path / "missing-date.csv"
+    source.write_text(
+        "Description,Amount,Account\nExample,10,Checking\n", encoding="utf-8"
+    )
+    with pytest.raises(SystemExit) as exc:
+        csv2ofx.main.run([*options, str(source)])
+    message = str(exc.value.code)
+    assert "transaction date" in message
+    assert "date mapping" in message
+    assert "Try again with `-c`" not in message
+    assert "Traceback" not in capsys.readouterr().err
