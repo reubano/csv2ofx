@@ -21,12 +21,16 @@ tricky:
 
 """
 
-# Financial numbers are expressed as "2'045.56" in de/fr/it_CH (utf8 has some
-# glitches, so we go for the default one)
+# Financial numbers are expressed as "2'045.56" in de/fr/it_CH
 import locale
 from operator import itemgetter
 
-locale.setlocale(locale.LC_NUMERIC, 'fr_CH')
+locale.setlocale(locale.LC_NUMERIC, 'fr_CH.utf8')
+# Possible bug workaround <https://github.com/python/cpython/issues/141631>
+locale._override_localeconv = {
+    'mon_thousands_sep': "'",
+    'thousands_sep': "'"
+}
 
 __author__ = 'Marco "sphakka" Poleggi'
 
@@ -69,7 +73,7 @@ mapping = {
     "notes": itemgetter("Description 2"),
     # switch day/month (maybe file a bug: always inverted when ambiguous like
     # '01.02.2018')
-    "date": lambda tr: fixdate(tr["Date de valeur"]),
+    "date": lambda tr: fixdate(tr["Date de comptabilisation"]),
     "desc": map_descr,
     "payee": map_payee,
     "check_num": itemgetter("N° de transaction"),
