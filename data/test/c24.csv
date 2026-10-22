@@ -1,0 +1,4 @@
+Transaktionstyp,Buchungsdatum,Karteneinsatz,Betrag,Zahlungsempfänger,IBAN,BIC,Verwendungszweck,Beschreibung,Kontonummer,Kontoname,Kategorie,Unterkategorie,Bargeldabhebung
+Pocket-Umbuchung,05.12.2025,,"-123,45 €",My savings account,,,To be donated,,0987654321,My main account,Umbuchung,Umbuchung
+Pocket-Umbuchung,05.12.2025,,"123,45 €",My main account,,,To be donated,FULL_LEGAL_NAME,1234567890,My savings account,Umbuchung,Umbuchung
+SEPA-Lastschrift,05.01.2026,,"-50,00 €",Ärzte ohne Grenzen,PAYEE_IBAN,PAYEE_BIC,Ihre Spendernummer 1234567 SEPA-Mandat 1234567-001 Vielen Dank für Ihre Spende,"Medecins Sans Frontieres (MSF) - Ärzte ohne Grenzen, Dt. Sektion",1234567890,My savings account,Finanzen & Steuern,Spende
