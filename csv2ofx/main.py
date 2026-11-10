@@ -242,11 +242,14 @@ def run(args=None):  # noqa: C901
     }
 
     cont = QIF(mapping, **okwargs) if args.qif else OFX(mapping, **okwargs)
-    source = (
-        builtins.open(args.source, encoding=args.encoding)  # noqa: SIM115 (closed in finally)
-        if args.source
-        else sys.stdin
-    )
+    try:
+        source = (
+            builtins.open(args.source, encoding=args.encoding)  # noqa: SIM115 (closed in finally)
+            if args.source
+            else sys.stdin
+        )
+    except FileNotFoundError:
+        sys.exit(f"Error: source file not found: {args.source}")
 
     ckwargs = {
         "has_header": cont.has_header,

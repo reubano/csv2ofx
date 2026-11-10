@@ -149,6 +149,20 @@ def test_sample(opts, in_filename, out_filename, capsys, monkeypatch):
     )
 
 
+def test_missing_source_file_exits_cleanly(capsys):
+    """
+    A missing source file reports a clean error (no traceback) and exits
+    nonzero instead of raising FileNotFoundError (main.py run()).
+    """
+    with pytest.raises(SystemExit) as exc:
+        csv2ofx.main.run(["does-not-exist.csv"])
+    # pytest intercepts SystemExit before the interpreter prints it, so
+    # assert on the exit payload itself (reached via stderr end-to-end).
+    assert exc.value.code != 0
+    assert "does-not-exist.csv" in str(exc.value.code)
+    assert "Traceback" not in str(exc.value.code)
+
+
 def test_help():
     """
     Assert help command completes and is present in the README.
