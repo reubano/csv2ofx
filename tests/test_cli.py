@@ -149,6 +149,19 @@ def test_sample(opts, in_filename, out_filename, capsys, monkeypatch):
     )
 
 
+def test_missing_source_file():
+    """
+    A missing source file should exit nonzero with a clean one-line
+    error instead of an unhandled FileNotFoundError traceback
+    (SystemExit carrying the OSError, which the interpreter prints
+    as a single line, rather than the OSError propagating).
+    """
+    with pytest.raises(SystemExit) as exc:
+        csv2ofx.main.run(["does-not-exist.csv"])
+    assert exc.value.code != 0
+    assert "does-not-exist.csv" in str(exc.value.code)
+
+
 def test_help():
     """
     Assert help command completes and is present in the README.

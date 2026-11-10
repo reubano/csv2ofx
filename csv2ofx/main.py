@@ -242,11 +242,14 @@ def run(args=None):  # noqa: C901
     }
 
     cont = QIF(mapping, **okwargs) if args.qif else OFX(mapping, **okwargs)
-    source = (
-        builtins.open(args.source, encoding=args.encoding)  # noqa: SIM115 (closed in finally)
-        if args.source
-        else sys.stdin
-    )
+    try:
+        source = (
+            builtins.open(args.source, encoding=args.encoding)  # noqa: SIM115 (closed in finally)
+            if args.source
+            else sys.stdin
+        )
+    except OSError as err:
+        sys.exit(err)
 
     ckwargs = {
         "has_header": cont.has_header,
